@@ -61,9 +61,14 @@ const GridArtwork = forwardRef<GridArtworkRef, GridArtworkProps>(({ params }, re
     exportGif: async (duration: number, fps: number) => {
       if (!sketchRef.current) return;
       try {
-        await sketchRef.current.saveGif(`grid-arte-${Date.now()}.gif`, duration, {
+        const filename = `grid-arte-${Date.now()}.gif`;
+        
+        // Use p5's saveGif with proper options
+        await sketchRef.current.saveGif(filename, duration, {
           units: 'seconds',
-          silent: true
+          silent: true,
+          delay: Math.round(1000 / fps), // Set frame delay based on FPS
+          download: filename // Explicitly set download filename
         });
       } catch (error) {
         console.error('GIF export error:', error);

@@ -84,10 +84,14 @@ const Artwork = forwardRef<ArtworkRef, ArtworkProps>(({ params }, ref) => {
       if (!sketchRef.current) return;
       
       try {
-        // Use p5's saveGif with silent mode to suppress console logs
-        await sketchRef.current.saveGif(`arte-${Date.now()}.gif`, duration, {
+        const filename = `arte-${Date.now()}.gif`;
+        
+        // Use p5's saveGif with proper options
+        await sketchRef.current.saveGif(filename, duration, {
           units: 'seconds',
-          silent: true
+          silent: true,
+          delay: Math.round(1000 / fps), // Set frame delay based on FPS
+          download: filename // Explicitly set download filename
         });
       } catch (error) {
         console.error('GIF export error:', error);
