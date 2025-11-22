@@ -40,10 +40,12 @@ export async function POST(request: Request) {
     // Handle checkout.updated (fires when customer enters email)
     if (eventType === 'checkout.updated') {
       const customerEmail = payload.data?.customer_email;
+      const status = payload.data?.status;
       
       // Only process if email is present and checkout is confirmed/succeeded
-      if (customerEmail && payload.data?.status === 'confirmed') {
-        console.log('Checkout confirmed - Granting access to email:', customerEmail);
+      // Free products use "succeeded", paid products may use "confirmed"
+      if (customerEmail && (status === 'confirmed' || status === 'succeeded')) {
+        console.log('Checkout completed - Granting access to email:', customerEmail);
         
         await grantEmailAccess(customerEmail);
         
@@ -54,6 +56,8 @@ export async function POST(request: Request) {
           message: 'Access granted',
           email: customerEmail 
         });
+      } else {
+        console.log('Checkout updated but not completed. Status:', status, 'Email:', customerEmail);
       }
     }
 
