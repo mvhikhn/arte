@@ -144,28 +144,11 @@ export default function Home() {
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('payment') === 'success') {
-      // Grant local access
+      // Grant local access (for immediate use on this device)
       grantGifAccess();
       
-      // Also grant email-based access in KV for cross-device support
-      const email = localStorage.getItem('arte_checkout_email');
-      if (email) {
-        fetch('/api/grant-access', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ email }),
-        }).then((response) => {
-          if (response.ok) {
-            console.log('Access granted for email:', email);
-            // Store email for future verification
-            localStorage.setItem('arte_verified_email', email);
-          }
-        }).catch((error) => {
-          console.error('Failed to grant email access:', error);
-        });
-      }
+      // Note: Email is automatically captured and stored by Polar webhook
+      // No need to manually store it here
       
       // Clean URL
       window.history.replaceState({}, '', window.location.pathname);

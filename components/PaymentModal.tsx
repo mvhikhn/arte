@@ -13,43 +13,12 @@ interface PaymentModalProps {
 export function PaymentModal({ isOpen, onClose, onSuccess, darkMode = false }: PaymentModalProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [checkoutUrl, setCheckoutUrl] = useState<string | null>(null);
-  const [email, setEmail] = useState('');
-  const [emailError, setEmailError] = useState('');
 
   useEffect(() => {
     if (isOpen) {
-      // Reset state when modal opens
-      setEmail('');
-      setEmailError('');
-      setCheckoutUrl(null);
+      createCheckoutSession();
     }
   }, [isOpen]);
-
-  const validateEmail = (email: string): boolean => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-  };
-
-  const handleEmailSubmit = async () => {
-    // Validate email
-    if (!email.trim()) {
-      setEmailError('Email is required');
-      return;
-    }
-
-    if (!validateEmail(email)) {
-      setEmailError('Please enter a valid email');
-      return;
-    }
-
-    setEmailError('');
-    
-    // Store email in localStorage for this session
-    localStorage.setItem('arte_checkout_email', email.toLowerCase().trim());
-    
-    // Create checkout session
-    await createCheckoutSession();
-  };
 
   const createCheckoutSession = async () => {
     setIsLoading(true);
@@ -113,7 +82,7 @@ export function PaymentModal({ isOpen, onClose, onSuccess, darkMode = false }: P
                 Get unlimited GIF exports for all your generative artworks. Perfect for sharing your creations on social media!
               </p>
               <p className={`text-[11px] mt-2 ${darkMode ? 'text-zinc-500' : 'text-zinc-500'}`}>
-                You&apos;ll be redirected to complete your payment securely. After payment, you&apos;ll return here with instant access.
+                You&apos;ll be redirected to Polar to complete your payment. Enter your email there to enable cross-device access.
               </p>
             </div>
 
@@ -140,62 +109,17 @@ export function PaymentModal({ isOpen, onClose, onSuccess, darkMode = false }: P
                 </li>
                 <li className="flex items-center gap-2">
                   <span className="text-cyan-500">✓</span>
-                  <span>All 4 artwork types</span>
+                  <span>Works across all devices</span>
                 </li>
               </ul>
             </div>
 
-            {!checkoutUrl ? (
-              <div className="space-y-3">
-                <div>
-                  <label className={`block text-[13px] font-medium mb-2 ${darkMode ? 'text-zinc-300' : 'text-zinc-700'}`}>
-                    Enter your email
-                  </label>
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => {
-                      setEmail(e.target.value);
-                      setEmailError('');
-                    }}
-                    onKeyPress={(e) => {
-                      if (e.key === 'Enter') {
-                        handleEmailSubmit();
-                      }
-                    }}
-                    placeholder="your@email.com"
-                    className={`w-full px-3 py-2 rounded-lg text-[13px] outline-none focus:ring-2 focus:ring-cyan-500 ${
-                      darkMode 
-                        ? 'bg-zinc-800 border border-zinc-600 text-zinc-100 placeholder-zinc-500' 
-                        : 'bg-white border border-zinc-300 text-zinc-900 placeholder-zinc-400'
-                    } ${emailError ? 'border-red-500' : ''}`}
-                  />
-                  {emailError && (
-                    <p className="text-red-500 text-[11px] mt-1">{emailError}</p>
-                  )}
-                  <p className={`text-[11px] mt-1 ${darkMode ? 'text-zinc-500' : 'text-zinc-500'}`}>
-                    We&apos;ll use this to restore your access across devices
-                  </p>
-                </div>
-                <button
-                  onClick={handleEmailSubmit}
-                  disabled={isLoading}
-                  className="w-full px-4 py-3 bg-cyan-500 hover:bg-cyan-600 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg text-[13px] font-medium transition-colors flex items-center justify-center gap-2"
-                >
-                  {isLoading ? (
-                    <>
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      Creating checkout...
-                    </>
-                  ) : (
-                    <>
-                      Continue to Checkout
-                      <ExternalLink className="w-4 h-4" />
-                    </>
-                  )}
-                </button>
+            {isLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="w-6 h-6 animate-spin text-cyan-500" />
+                <span className={`ml-2 text-[13px] ${darkMode ? 'text-zinc-400' : 'text-zinc-600'}`}>Creating checkout...</span>
               </div>
-            ) : (
+            ) : checkoutUrl ? (
               <a
                 href={checkoutUrl}
                 className="w-full px-4 py-3 bg-cyan-500 hover:bg-cyan-600 text-white rounded-lg text-[13px] font-medium transition-colors flex items-center justify-center gap-2"
@@ -203,6 +127,10 @@ export function PaymentModal({ isOpen, onClose, onSuccess, darkMode = false }: P
                 Choose Your Price & Unlock
                 <ExternalLink className="w-4 h-4" />
               </a>
+            ) : (
+              <div className={`text-[13px] text-center py-4 ${darkMode ? 'text-zinc-400' : 'text-zinc-600'}`}>
+                Failed to create checkout. Please try again.
+              </div>
             )}
           </div>
         </div>
@@ -225,7 +153,6 @@ export function PaymentModal({ isOpen, onClose, onSuccess, darkMode = false }: P
             <button
               onClick={() => {
                 onClose();
-                // Parent will show verification modal
                 window.dispatchEvent(new CustomEvent('showEmailVerification'));
               }}
               className="text-cyan-500 hover:underline"
