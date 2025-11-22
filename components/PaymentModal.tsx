@@ -82,7 +82,7 @@ export function PaymentModal({ isOpen, onClose, onSuccess, darkMode = false }: P
                 Get unlimited GIF exports for all your generative artworks. Perfect for sharing your creations on social media!
               </p>
               <p className={`text-[11px] mt-2 ${darkMode ? 'text-zinc-500' : 'text-zinc-500'}`}>
-                You'll be redirected to complete your payment securely. After payment, you'll return here with instant access.
+                You&apos;ll be redirected to complete your payment securely. After payment, you&apos;ll return here with instant access.
               </p>
             </div>
 

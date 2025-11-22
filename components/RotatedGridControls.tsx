@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Slider } from "@/components/ui/slider";
 import { ColorPicker } from "@/components/ui/color-picker";
 import { RotatedGridArtworkParams } from "./RotatedGridArtwork";
-import { ChevronDown, ChevronRight, Download, Image, Shuffle } from "lucide-react";
+import { ChevronDown, ChevronRight, Download, Image as ImageIcon, Shuffle } from "lucide-react";
 
 interface RotatedGridControlsProps {
   params: RotatedGridArtworkParams;
@@ -219,7 +219,7 @@ export default function RotatedGridControls({ params, onParamChange, onColorChan
               onClick={onExportImage}
               className="w-full px-2 py-1.5 bg-zinc-100 hover:bg-zinc-200 rounded flex items-center justify-center gap-1.5 transition-colors"
             >
-              <Image className="w-3.5 h-3.5" />
+              <ImageIcon className="w-3.5 h-3.5" />
               Export Image
             </button>
           </div>

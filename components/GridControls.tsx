@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Slider } from "@/components/ui/slider";
 import { ColorPicker } from "@/components/ui/color-picker";
 import { GridArtworkParams } from "./GridArtwork";
-import { ChevronDown, ChevronRight, Play, Pause, Download, Image, Shuffle } from "lucide-react";
+import { ChevronDown, ChevronRight, Download, Image as ImageIcon, Shuffle, Play, Pause } from "lucide-react";
 
 interface GridControlsProps {
   params: GridArtworkParams;
@@ -235,7 +235,7 @@ export default function GridControls({ params, onParamChange, onColorChange, onE
               onClick={onExportImage}
               className="w-full px-2 py-1.5 bg-zinc-100 hover:bg-zinc-200 rounded flex items-center justify-center gap-1.5 transition-colors"
             >
-              <Image className="w-3.5 h-3.5" />
+              <ImageIcon className="w-3.5 h-3.5" />
               Export Image
             </button>
             <div className="flex items-center gap-1.5">

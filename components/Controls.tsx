@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Slider } from "@/components/ui/slider";
 import { ColorPicker } from "@/components/ui/color-picker";
 import { ArtworkParams } from "./Artwork";
-import { ChevronDown, ChevronRight, Play, Pause, Download, Image, Shuffle } from "lucide-react";
+import { ChevronDown, ChevronRight, Play, Pause, Download, Image as ImageIcon, Shuffle } from "lucide-react";
 
 interface ControlsProps {
   params: ArtworkParams;
@@ -276,7 +276,7 @@ export default function Controls({ params, onParamChange, onColorChange, onExpor
               onClick={onExportImage}
               className={`w-full px-2 py-1.5 rounded flex items-center justify-center gap-1.5 transition-colors ${darkMode ? 'bg-zinc-800 hover:bg-zinc-700 text-zinc-100' : 'bg-zinc-100 hover:bg-zinc-200 text-zinc-900'}`}
             >
-              <Image className="w-3.5 h-3.5" />
+              <ImageIcon className="w-3.5 h-3.5" />
               Export Image
             </button>
             <div className="flex items-center gap-1.5">
