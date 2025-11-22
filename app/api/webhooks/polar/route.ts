@@ -5,22 +5,20 @@ export async function POST(request: Request) {
   try {
     const payload = await request.json();
     
-    console.log('Polar webhook received:', payload);
+    console.log('Polar webhook received:', JSON.stringify(payload, null, 2));
 
-    // Verify this is a checkout.created or order.created event
     const eventType = payload.type || payload.event;
     
-    if (eventType === 'checkout.created' || eventType === 'order.created') {
-      // Extract customer email from the payload
+    // Handle order.created (fires after successful payment)
+    if (eventType === 'order.created') {
       const customerEmail = payload.data?.customer_email || 
                            payload.data?.customer?.email ||
-                           payload.customer_email ||
-                           payload.email;
+                           payload.data?.user?.email ||
+                           payload.customer_email;
 
       if (customerEmail) {
-        console.log('Granting access to email:', customerEmail);
+        console.log('Order created - Granting access to email:', customerEmail);
         
-        // Grant access in Redis
         await grantEmailAccess(customerEmail);
         
         console.log('Access granted successfully to:', customerEmail);
@@ -31,24 +29,46 @@ export async function POST(request: Request) {
           email: customerEmail 
         });
       } else {
-        console.error('No customer email found in webhook payload:', payload);
+        console.error('No customer email in order.created event:', payload);
         return NextResponse.json(
-          { error: 'No customer email in webhook' },
+          { error: 'No customer email in order' },
           { status: 400 }
         );
       }
     }
+    
+    // Handle checkout.updated (fires when customer enters email)
+    if (eventType === 'checkout.updated') {
+      const customerEmail = payload.data?.customer_email;
+      
+      // Only process if email is present and checkout is confirmed/succeeded
+      if (customerEmail && payload.data?.status === 'confirmed') {
+        console.log('Checkout confirmed - Granting access to email:', customerEmail);
+        
+        await grantEmailAccess(customerEmail);
+        
+        console.log('Access granted successfully to:', customerEmail);
+        
+        return NextResponse.json({ 
+          success: true, 
+          message: 'Access granted',
+          email: customerEmail 
+        });
+      }
+    }
 
     // For other event types, just acknowledge receipt
+    console.log('Webhook received but not processed:', eventType);
     return NextResponse.json({ 
       success: true, 
-      message: 'Webhook received' 
+      message: 'Webhook received',
+      eventType 
     });
 
   } catch (error) {
     console.error('Webhook processing error:', error);
     return NextResponse.json(
-      { error: 'Webhook processing failed' },
+      { error: 'Webhook processing failed', message: String(error) },
       { status: 500 }
     );
   }
