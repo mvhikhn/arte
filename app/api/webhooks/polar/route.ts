@@ -11,9 +11,9 @@ export async function POST(request: Request) {
     
     // Handle order.created (fires after successful payment)
     if (eventType === 'order.created') {
-      const customerEmail = payload.data?.customer_email || 
-                           payload.data?.customer?.email ||
+      const customerEmail = payload.data?.customer?.email || 
                            payload.data?.user?.email ||
+                           payload.data?.customer_email ||
                            payload.customer_email;
 
       if (customerEmail) {
@@ -29,7 +29,7 @@ export async function POST(request: Request) {
           email: customerEmail 
         });
       } else {
-        console.error('No customer email in order.created event:', payload);
+        console.error('No customer email in order.created event. Payload:', JSON.stringify(payload, null, 2));
         return NextResponse.json(
           { error: 'No customer email in order' },
           { status: 400 }
