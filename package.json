@@ -13,6 +13,7 @@
     "@polar-sh/sdk": "^0.41.5",
     "@radix-ui/react-label": "^2.1.0",
     "@radix-ui/react-slider": "^1.2.0",
+    "@vercel/kv": "^3.0.0",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
     "lucide-react": "^0.263.1",

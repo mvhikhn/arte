@@ -11,6 +11,7 @@ import MosaicControls from "@/components/MosaicControls";
 import RotatedGridControls from "@/components/RotatedGridControls";
 import { ExportPopup } from "@/components/ExportPopup";
 import { PaymentModal } from "@/components/PaymentModal";
+import { EmailVerificationModal } from "@/components/EmailVerificationModal";
 import { ArrowRight } from "lucide-react";
 import { getRandomColors } from "@/lib/colorPalettes";
 import { hasGifAccess, grantGifAccess } from "@/lib/paymentUtils";
@@ -136,14 +137,36 @@ export default function Home() {
   const rotatedGridArtworkRef = useRef<RotatedGridArtworkRef>(null);
   const [exportStatus, setExportStatus] = useState({ isExporting: false, message: "" });
   const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [showEmailVerification, setShowEmailVerification] = useState(false);
   const [pendingGifExport, setPendingGifExport] = useState<{ duration: number; fps: number } | null>(null);
 
   // Check if returning from successful payment
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('payment') === 'success') {
-      // Grant access
+      // Grant local access
       grantGifAccess();
+      
+      // Also grant email-based access in KV for cross-device support
+      const email = localStorage.getItem('arte_checkout_email');
+      if (email) {
+        fetch('/api/grant-access', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ email }),
+        }).then((response) => {
+          if (response.ok) {
+            console.log('Access granted for email:', email);
+            // Store email for future verification
+            localStorage.setItem('arte_verified_email', email);
+          }
+        }).catch((error) => {
+          console.error('Failed to grant email access:', error);
+        });
+      }
+      
       // Clean URL
       window.history.replaceState({}, '', window.location.pathname);
       // Show success message
@@ -152,6 +175,17 @@ export default function Home() {
         setExportStatus({ isExporting: false, message: "" });
       }, 3000);
     }
+
+    // Listen for email verification modal trigger
+    const handleShowEmailVerification = () => {
+      setShowEmailVerification(true);
+    };
+    
+    window.addEventListener('showEmailVerification', handleShowEmailVerification);
+    
+    return () => {
+      window.removeEventListener('showEmailVerification', handleShowEmailVerification);
+    };
   }, []);
 
   const [flowParams, setFlowParams] = useState<ArtworkParams>(generateRandomFlowParams());
@@ -431,6 +465,15 @@ export default function Home() {
           setPendingGifExport(null);
         }}
         onSuccess={handlePaymentSuccess}
+        darkMode={darkMode}
+      />
+      <EmailVerificationModal
+        isOpen={showEmailVerification}
+        onClose={() => setShowEmailVerification(false)}
+        onSuccess={() => {
+          // Access has been granted, refresh the page or update state
+          window.location.reload();
+        }}
         darkMode={darkMode}
       />
       <main className={`h-screen w-screen overflow-hidden ${darkMode ? 'bg-zinc-900' : 'bg-white'}`}>

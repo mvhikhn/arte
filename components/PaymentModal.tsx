@@ -13,12 +13,43 @@ interface PaymentModalProps {
 export function PaymentModal({ isOpen, onClose, onSuccess, darkMode = false }: PaymentModalProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [checkoutUrl, setCheckoutUrl] = useState<string | null>(null);
+  const [email, setEmail] = useState('');
+  const [emailError, setEmailError] = useState('');
 
   useEffect(() => {
     if (isOpen) {
-      createCheckoutSession();
+      // Reset state when modal opens
+      setEmail('');
+      setEmailError('');
+      setCheckoutUrl(null);
     }
   }, [isOpen]);
+
+  const validateEmail = (email: string): boolean => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  const handleEmailSubmit = async () => {
+    // Validate email
+    if (!email.trim()) {
+      setEmailError('Email is required');
+      return;
+    }
+
+    if (!validateEmail(email)) {
+      setEmailError('Please enter a valid email');
+      return;
+    }
+
+    setEmailError('');
+    
+    // Store email in localStorage for this session
+    localStorage.setItem('arte_checkout_email', email.toLowerCase().trim());
+    
+    // Create checkout session
+    await createCheckoutSession();
+  };
 
   const createCheckoutSession = async () => {
     setIsLoading(true);
@@ -114,12 +145,57 @@ export function PaymentModal({ isOpen, onClose, onSuccess, darkMode = false }: P
               </ul>
             </div>
 
-            {isLoading ? (
-              <div className="flex items-center justify-center py-8">
-                <Loader2 className="w-6 h-6 animate-spin text-cyan-500" />
-                <span className={`ml-2 text-[13px] ${darkMode ? 'text-zinc-400' : 'text-zinc-600'}`}>Creating checkout...</span>
+            {!checkoutUrl ? (
+              <div className="space-y-3">
+                <div>
+                  <label className={`block text-[13px] font-medium mb-2 ${darkMode ? 'text-zinc-300' : 'text-zinc-700'}`}>
+                    Enter your email
+                  </label>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => {
+                      setEmail(e.target.value);
+                      setEmailError('');
+                    }}
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter') {
+                        handleEmailSubmit();
+                      }
+                    }}
+                    placeholder="your@email.com"
+                    className={`w-full px-3 py-2 rounded-lg text-[13px] outline-none focus:ring-2 focus:ring-cyan-500 ${
+                      darkMode 
+                        ? 'bg-zinc-800 border border-zinc-600 text-zinc-100 placeholder-zinc-500' 
+                        : 'bg-white border border-zinc-300 text-zinc-900 placeholder-zinc-400'
+                    } ${emailError ? 'border-red-500' : ''}`}
+                  />
+                  {emailError && (
+                    <p className="text-red-500 text-[11px] mt-1">{emailError}</p>
+                  )}
+                  <p className={`text-[11px] mt-1 ${darkMode ? 'text-zinc-500' : 'text-zinc-500'}`}>
+                    We&apos;ll use this to restore your access across devices
+                  </p>
+                </div>
+                <button
+                  onClick={handleEmailSubmit}
+                  disabled={isLoading}
+                  className="w-full px-4 py-3 bg-cyan-500 hover:bg-cyan-600 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg text-[13px] font-medium transition-colors flex items-center justify-center gap-2"
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Creating checkout...
+                    </>
+                  ) : (
+                    <>
+                      Continue to Checkout
+                      <ExternalLink className="w-4 h-4" />
+                    </>
+                  )}
+                </button>
               </div>
-            ) : checkoutUrl ? (
+            ) : (
               <a
                 href={checkoutUrl}
                 className="w-full px-4 py-3 bg-cyan-500 hover:bg-cyan-600 text-white rounded-lg text-[13px] font-medium transition-colors flex items-center justify-center gap-2"
@@ -127,26 +203,35 @@ export function PaymentModal({ isOpen, onClose, onSuccess, darkMode = false }: P
                 Choose Your Price & Unlock
                 <ExternalLink className="w-4 h-4" />
               </a>
-            ) : (
-              <div className={`text-[13px] text-center py-4 ${darkMode ? 'text-zinc-400' : 'text-zinc-600'}`}>
-                Failed to create checkout. Please try again.
-              </div>
             )}
           </div>
         </div>
 
         {/* Footer */}
         <div className={`px-6 py-3 text-[13px] border-t ${darkMode ? 'border-zinc-700 text-zinc-500' : 'border-zinc-200 text-zinc-500'}`}>
-          <p className="text-center">
+          <p className="text-center mb-2">
             Secure payment powered by{" "}
             <a 
               href="https://polar.sh" 
               target="_blank" 
               rel="noopener noreferrer"
-              className="text-cyan-500 hover:text-cyan-600 transition-colors"
+              className="text-cyan-500 hover:underline"
             >
-              Polar.sh
+              Polar
             </a>
+          </p>
+          <p className="text-center text-[11px]">
+            Already purchased?{" "}
+            <button
+              onClick={() => {
+                onClose();
+                // Parent will show verification modal
+                window.dispatchEvent(new CustomEvent('showEmailVerification'));
+              }}
+              className="text-cyan-500 hover:underline"
+            >
+              Verify your email
+            </button>
           </p>
         </div>
       </div>
