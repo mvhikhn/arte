@@ -5,10 +5,12 @@ import Artwork, { ArtworkParams, ArtworkRef } from "@/components/Artwork";
 import GridArtwork, { GridArtworkParams, GridArtworkRef } from "@/components/GridArtwork";
 import MosaicArtwork, { MosaicArtworkParams, MosaicArtworkRef } from "@/components/MosaicArtwork";
 import RotatedGridArtwork, { RotatedGridArtworkParams, RotatedGridArtworkRef } from "@/components/RotatedGridArtwork";
+import BlueMoodArtwork, { BlueMoodArtworkParams, BlueMoodArtworkRef } from "@/components/BlueMoodArtwork";
 import Controls from "@/components/Controls";
 import GridControls from "@/components/GridControls";
 import MosaicControls from "@/components/MosaicControls";
 import RotatedGridControls from "@/components/RotatedGridControls";
+import BlueMoodControls from "@/components/BlueMoodControls";
 import { ExportPopup } from "@/components/ExportPopup";
 import { PaymentModal } from "@/components/PaymentModal";
 import { EmailVerificationModal } from "@/components/EmailVerificationModal";
@@ -16,7 +18,7 @@ import { ArrowRight } from "lucide-react";
 import { getRandomColors } from "@/lib/colorPalettes";
 import { hasGifAccess, grantGifAccess } from "@/lib/paymentUtils";
 
-type ArtworkType = "flow" | "grid" | "mosaic" | "rotated";
+type ArtworkType = "flow" | "grid" | "mosaic" | "rotated" | "bluemood";
 
 // Helper to generate random value within range
 const randomInRange = (min: number, max: number) => Math.random() * (max - min) + min;
@@ -127,6 +129,43 @@ const generateRandomRotatedGridParams = (): RotatedGridArtworkParams => {
   };
 };
 
+// Generate random initial blue mood params
+const generateRandomBlueMoodParams = (): BlueMoodArtworkParams => {
+  const palette1 = getRandomColors(5);
+  const palette2 = getRandomColors(5);
+  const bgPalette = getRandomColors(3);
+  return {
+    color1_1: palette1.colors[0],
+    color1_2: palette1.colors[1],
+    color1_3: palette1.colors[2],
+    color1_4: palette1.colors[3],
+    color1_5: palette1.colors[4],
+    color2_1: palette2.colors[0],
+    color2_2: palette2.colors[1],
+    color2_3: palette2.colors[2],
+    color2_4: palette2.colors[3],
+    color2_5: palette2.colors[4],
+    colorBg1: bgPalette.colors[0],
+    colorBg2: bgPalette.colors[1],
+    colorBg3: bgPalette.colors[2],
+    ranges: Math.floor(randomInRange(20, 60)),
+    strokeWeight: randomInRange(1, 15),
+    animationSpeed: randomInRange(0.0005, 0.005),
+    waveHeight: randomInRange(0.5, 1.5),
+    waveAmplitude: randomInRange(0.5, 1.5),
+    noiseScale: randomInRange(0.005, 0.02),
+    patternDepth: Math.floor(randomInRange(2, 5)),
+    patternDivisions: Math.floor(randomInRange(4, 8)),
+    shadowBlur: Math.floor(randomInRange(0, 10)),
+    shadowOffset: Math.floor(randomInRange(1, 3)),
+    margin: Math.floor(randomInRange(20, 50)),
+    seed: Date.now(),
+    exportWidth: 1600,
+    exportHeight: 2000,
+    isAnimating: true,
+  };
+};
+
 export default function Home() {
   const [currentArtwork, setCurrentArtwork] = useState<ArtworkType>("flow");
   const [controlsVisible, setControlsVisible] = useState(false);
@@ -135,6 +174,7 @@ export default function Home() {
   const gridArtworkRef = useRef<GridArtworkRef>(null);
   const mosaicArtworkRef = useRef<MosaicArtworkRef>(null);
   const rotatedGridArtworkRef = useRef<RotatedGridArtworkRef>(null);
+  const blueMoodArtworkRef = useRef<BlueMoodArtworkRef>(null);
   const [exportStatus, setExportStatus] = useState({ isExporting: false, message: "" });
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [showEmailVerification, setShowEmailVerification] = useState(false);
@@ -178,6 +218,8 @@ export default function Home() {
   const [mosaicParams, setMosaicParams] = useState<MosaicArtworkParams>(generateRandomMosaicParams());
 
   const [rotatedGridParams, setRotatedGridParams] = useState<RotatedGridArtworkParams>(generateRandomRotatedGridParams());
+
+  const [blueMoodParams, setBlueMoodParams] = useState<BlueMoodArtworkParams>(generateRandomBlueMoodParams());
 
   const handleFlowParamChange = (param: keyof ArtworkParams, value: number) => {
     setFlowParams((prev) => ({
@@ -235,6 +277,20 @@ export default function Home() {
     }));
   };
 
+  const handleBlueMoodParamChange = (param: keyof BlueMoodArtworkParams, value: number) => {
+    setBlueMoodParams((prev) => ({
+      ...prev,
+      [param]: value,
+    }));
+  };
+
+  const handleBlueMoodColorChange = (param: keyof BlueMoodArtworkParams, value: string) => {
+    setBlueMoodParams((prev) => ({
+      ...prev,
+      [param]: value,
+    }));
+  };
+
   const handleExportImage = () => {
     setExportStatus({ isExporting: true, message: "Exporting image..." });
     if (currentArtwork === "flow") {
@@ -243,8 +299,10 @@ export default function Home() {
       gridArtworkRef.current?.exportImage();
     } else if (currentArtwork === "mosaic") {
       mosaicArtworkRef.current?.exportImage();
-    } else {
+    } else if (currentArtwork === "rotated") {
       rotatedGridArtworkRef.current?.exportImage();
+    } else if (currentArtwork === "bluemood") {
+      blueMoodArtworkRef.current?.exportImage();
     }
     setTimeout(() => {
       setExportStatus({ isExporting: false, message: "Image exported!" });
@@ -293,8 +351,13 @@ export default function Home() {
         ...prev,
         isAnimating: !prev.isAnimating,
       }));
-    } else {
+    } else if (currentArtwork === "grid") {
       setGridParams((prev) => ({
+        ...prev,
+        isAnimating: !prev.isAnimating,
+      }));
+    } else if (currentArtwork === "bluemood") {
+      setBlueMoodParams((prev) => ({
         ...prev,
         isAnimating: !prev.isAnimating,
       }));
@@ -425,11 +488,56 @@ export default function Home() {
     }));
   };
 
+  const handleBlueMoodRandomize = () => {
+    const palette1 = getRandomColors(5);
+    const palette2 = getRandomColors(5);
+    const bgPalette = getRandomColors(3);
+
+    setBlueMoodParams({
+      color1_1: palette1.colors[0],
+      color1_2: palette1.colors[1],
+      color1_3: palette1.colors[2],
+      color1_4: palette1.colors[3],
+      color1_5: palette1.colors[4],
+      color2_1: palette2.colors[0],
+      color2_2: palette2.colors[1],
+      color2_3: palette2.colors[2],
+      color2_4: palette2.colors[3],
+      color2_5: palette2.colors[4],
+      colorBg1: bgPalette.colors[0],
+      colorBg2: bgPalette.colors[1],
+      colorBg3: bgPalette.colors[2],
+      ranges: Math.floor(Math.random() * 60) + 20,
+      strokeWeight: Math.random() * 20 + 0.5,
+      animationSpeed: Math.random() * 0.008 + 0.0001,
+      waveHeight: Math.random() * 1.5 + 0.5,
+      waveAmplitude: Math.random() * 1.5 + 0.5,
+      noiseScale: Math.random() * 0.08 + 0.001,
+      patternDepth: Math.floor(Math.random() * 4) + 2,
+      patternDivisions: Math.floor(Math.random() * 8) + 4,
+      shadowBlur: Math.floor(Math.random() * 15),
+      shadowOffset: Math.floor(Math.random() * 8) + 1,
+      margin: Math.floor(Math.random() * 60) + 10,
+      seed: Date.now(),
+      exportWidth: 1600,
+      exportHeight: 2000,
+      isAnimating: blueMoodParams.isAnimating,
+    });
+  };
+
+  const handleBlueMoodRegenerate = () => {
+    setBlueMoodParams((prev) => ({
+      ...prev,
+      seed: Date.now(),
+    }));
+  };
+
   const handleNextArtwork = () => {
     setCurrentArtwork((prev) => {
       if (prev === "flow") return "grid";
       if (prev === "grid") return "mosaic";
       if (prev === "mosaic") return "rotated";
+      if (prev === "rotated") return "bluemood";
       return "flow";
     });
   };
@@ -470,8 +578,10 @@ export default function Home() {
               <GridArtwork ref={gridArtworkRef} params={gridParams} />
             ) : currentArtwork === "mosaic" ? (
               <MosaicArtwork ref={mosaicArtworkRef} params={mosaicParams} />
-            ) : (
+            ) : currentArtwork === "rotated" ? (
               <RotatedGridArtwork ref={rotatedGridArtworkRef} params={rotatedGridParams} />
+            ) : (
+              <BlueMoodArtwork ref={blueMoodArtworkRef} params={blueMoodParams} />
             )}
           </div>
         </div>
@@ -545,7 +655,7 @@ export default function Home() {
               onRegenerate={handleMosaicRegenerate}
               darkMode={darkMode}
             />
-          ) : (
+          ) : currentArtwork === "rotated" ? (
             <RotatedGridControls
               params={rotatedGridParams}
               onParamChange={handleRotatedGridParamChange}
@@ -553,6 +663,16 @@ export default function Home() {
               onExportImage={handleExportImage}
               onRandomize={handleRotatedGridRandomize}
               onRegenerate={handleRotatedGridRegenerate}
+              darkMode={darkMode}
+            />
+          ) : (
+            <BlueMoodControls
+              params={blueMoodParams}
+              onParamChange={handleBlueMoodParamChange}
+              onColorChange={handleBlueMoodColorChange}
+              onExportImage={handleExportImage}
+              onRandomize={handleBlueMoodRandomize}
+              onRegenerate={handleBlueMoodRegenerate}
               darkMode={darkMode}
             />
           )}
