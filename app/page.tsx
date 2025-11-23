@@ -328,6 +328,8 @@ export default function Home() {
       flowArtworkRef.current?.exportGif(duration, fps);
     } else if (currentArtwork === "grid") {
       gridArtworkRef.current?.exportGif(duration, fps);
+    } else if (currentArtwork === "bluemood") {
+      blueMoodArtworkRef.current?.exportGif(duration, fps);
     }
     setTimeout(() => {
       setExportStatus({ isExporting: false, message: "GIF exported!" });
@@ -671,6 +673,8 @@ export default function Home() {
               onParamChange={handleBlueMoodParamChange}
               onColorChange={handleBlueMoodColorChange}
               onExportImage={handleExportImage}
+              onExportGif={handleExportGif}
+              onToggleAnimation={handleToggleAnimation}
               onRandomize={handleBlueMoodRandomize}
               onRegenerate={handleBlueMoodRegenerate}
               darkMode={darkMode}

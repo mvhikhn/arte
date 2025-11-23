@@ -44,6 +44,8 @@ export interface BlueMoodArtworkParams {
 
 export interface BlueMoodArtworkRef {
   exportImage: () => void;
+  exportGif: (duration: number, fps: number) => Promise<void>;
+  toggleAnimation: () => void;
   regenerate: () => void;
 }
 
@@ -61,6 +63,17 @@ const BlueMoodArtwork = forwardRef<BlueMoodArtworkRef, BlueMoodArtworkProps>(
       paramsRef.current = params;
     }, [params]);
 
+    // Handle animation state changes
+    useEffect(() => {
+      if (sketchRef.current) {
+        if (params.isAnimating) {
+          sketchRef.current.loop();
+        } else {
+          sketchRef.current.noLoop();
+        }
+      }
+    }, [params.isAnimating]);
+
     useImperativeHandle(ref, () => ({
       exportImage: () => {
         if (!sketchRef.current) return;
@@ -71,10 +84,39 @@ const BlueMoodArtwork = forwardRef<BlueMoodArtworkRef, BlueMoodArtworkProps>(
         const ctx = exportCanvas.getContext("2d");
         if (ctx) {
           ctx.drawImage(currentCanvas, 0, 0, exportCanvas.width, exportCanvas.height);
-          const link = document.createElement("a");
-          link.download = `blue-mood-arte-${Date.now()}.png`;
-          link.href = exportCanvas.toDataURL();
-          link.click();
+          exportCanvas.toBlob((blob) => {
+            if (blob) {
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement("a");
+              a.href = url;
+              a.download = `blue-mood-arte-${Date.now()}.png`;
+              a.click();
+              URL.revokeObjectURL(url);
+            }
+          });
+        }
+      },
+      exportGif: async (duration: number, fps: number) => {
+        if (!sketchRef.current) return;
+        try {
+          const filename = `blue-mood-arte-${Date.now()}.gif`;
+          await sketchRef.current.saveGif(filename, duration, {
+            units: "seconds",
+            silent: true,
+            delay: Math.round(1000 / fps),
+            download: filename,
+          });
+        } catch (error) {
+          console.error("GIF export error:", error);
+        }
+      },
+      toggleAnimation: () => {
+        if (sketchRef.current) {
+          if (sketchRef.current.isLooping()) {
+            sketchRef.current.noLoop();
+          } else {
+            sketchRef.current.loop();
+          }
         }
       },
       regenerate: () => {
@@ -340,8 +382,8 @@ float noise(vec2 p, float freq ){
             p.randomSeed(paramsRef.current.seed);
             p.noiseSeed(paramsRef.current.seed);
             
-            mySize = p.min(p.windowWidth, p.windowHeight);
-            const canvas = p.createCanvas((mySize / 16) * 11, mySize);
+            mySize = 800; // Fixed size for consistency
+            const canvas = p.createCanvas(800, 1000);
             canvas.parent(containerRef.current!);
             
             webGLCanvas = p.createGraphics(p.width, p.height, p.WEBGL);
@@ -351,6 +393,7 @@ float noise(vec2 p, float freq ){
             theShader = webGLCanvas.createShader(vert, frag);
 
             plus = 0;
+            hasLooped = false;
             
             // Setup colors from params
             colors1 = [
@@ -385,6 +428,10 @@ float noise(vec2 p, float freq ){
             
             p.background(p.random(colorsbg));
             makeFilter(p);
+            
+            if (!paramsRef.current.isAnimating) {
+              p.noLoop();
+            }
           };
 
           p.draw = () => {
@@ -434,7 +481,7 @@ float noise(vec2 p, float freq ){
 
             p.image(webGLCanvas, 0, 0);
             
-            if (paramsRef.current.isAnimating && plus > -p.height / 2) {
+            if (plus > -p.height / 2) {
               plus -= 10 * p.random(0.05, 0.15);
               p.image(overAllTexture, 0, 0);
             } else {
@@ -452,9 +499,7 @@ float noise(vec2 p, float freq ){
                 p.rect(0, 0, p.width, p.height);
                 
                 hasLooped = true;
-                if (!paramsRef.current.isAnimating) {
-                  p.noLoop();
-                }
+                p.noLoop(); // Stop after animation completes
               }
             }
           };
