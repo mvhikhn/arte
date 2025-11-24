@@ -29,6 +29,18 @@ export interface TreeArtworkParams {
   tipColor3: string;
   backgroundColor: string;
   
+  // Text/Poem
+  textContent: string;
+  textEnabled: boolean;
+  fontSize: number;
+  textColor: string;
+  textAlign: 'left' | 'center' | 'right';
+  textX: number;
+  textY: number;
+  lineHeight: number;
+  fontFamily: string;
+  paperGrain: boolean;
+  
   // Technical
   seed: number;
   exportWidth: number;
@@ -344,7 +356,16 @@ const TreeArtwork = forwardRef<TreeArtworkRef, TreeArtworkProps>(
           for (let i = 0; i < paramsRef.current.initialPaths; i++) {
             paths.push(new Pathfinder());
           }
+          
+          grainApplied = false; // Reset grain flag
+          
+          // Render initial text if enabled
+          if (paramsRef.current.textEnabled && paramsRef.current.textContent) {
+            renderText();
+          }
         };
+        
+        let grainApplied = false;
         
         p.draw = () => {
           // Don't clear background - let tree build up
@@ -359,8 +380,54 @@ const TreeArtwork = forwardRef<TreeArtworkRef, TreeArtworkProps>(
           // Check if all paths are finished
           const allFinished = paths.every(path => path.isFinished || path.diameter <= paramsRef.current.minDiameter);
           if (allFinished && paths.length > 0) {
+            // Apply effects only once when tree is finished
+            if (!grainApplied) {
+              // Apply paper grain effect if enabled
+              if (paramsRef.current.paperGrain) {
+                applyGrain();
+              }
+              
+              // Render text overlay if enabled
+              if (paramsRef.current.textEnabled && paramsRef.current.textContent) {
+                renderText();
+              }
+              
+              grainApplied = true;
+            }
             p.noLoop();
           }
+        };
+        
+        const renderText = () => {
+          const lines = paramsRef.current.textContent.split('\n');
+          p.push();
+          p.fill(paramsRef.current.textColor);
+          p.textFont(paramsRef.current.fontFamily);
+          p.textSize(paramsRef.current.fontSize);
+          p.textAlign(
+            paramsRef.current.textAlign === 'left' ? p.LEFT : 
+            paramsRef.current.textAlign === 'right' ? p.RIGHT : 
+            p.CENTER
+          );
+          
+          const startY = paramsRef.current.textY;
+          const lineHeightPx = paramsRef.current.fontSize * paramsRef.current.lineHeight;
+          
+          lines.forEach((line, index) => {
+            p.text(line, paramsRef.current.textX, startY + (index * lineHeightPx));
+          });
+          p.pop();
+        };
+        
+        const applyGrain = () => {
+          p.loadPixels();
+          for (let i = 0; i < p.pixels.length; i += 4) {
+            const noise = p.random(-15, 15);
+            p.pixels[i] += noise;     // R
+            p.pixels[i + 1] += noise; // G
+            p.pixels[i + 2] += noise; // B
+          }
+          p.updatePixels();
         };
         
           // Expose resetSketch for external access

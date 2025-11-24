@@ -326,6 +326,146 @@ export default function TreeControls({
           className="w-full h-10 rounded cursor-pointer"
         />
       </div>
+
+      {/* Text/Poem Section */}
+      <div className="space-y-3 border-t border-zinc-200 pt-6">
+        <div className="flex items-center justify-between">
+          <Label className={textClass}>Poem / Letter Overlay</Label>
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={params.textEnabled}
+              onChange={(e) => onParamChange("textEnabled", e.target.checked ? 1 : 0)}
+              className="w-4 h-4"
+            />
+            <span className="text-xs text-zinc-600">Enable</span>
+          </label>
+        </div>
+
+        {params.textEnabled && (
+          <>
+            <div className="space-y-2">
+              <Label className={`text-xs ${textClass}`}>Your Text</Label>
+              <textarea
+                value={params.textContent}
+                onChange={(e) => {
+                  const newParams = { ...params, textContent: e.target.value };
+                  onColorChange("textContent" as any, e.target.value);
+                }}
+                placeholder="Enter your poem or letter here...&#10;Line breaks will be preserved"
+                className="w-full h-32 px-3 py-2 border border-zinc-300 rounded resize-none text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                style={{ fontFamily: params.fontFamily }}
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-2">
+                <Label className={`text-xs ${textClass}`}>Font Size: {params.fontSize}px</Label>
+                <Slider
+                  value={[params.fontSize]}
+                  onValueChange={(value) => onParamChange("fontSize", value[0])}
+                  min={12}
+                  max={48}
+                  step={1}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label className={`text-xs ${textClass}`}>Line Height: {params.lineHeight}</Label>
+                <Slider
+                  value={[params.lineHeight]}
+                  onValueChange={(value) => onParamChange("lineHeight", value[0])}
+                  min={1.0}
+                  max={2.5}
+                  step={0.1}
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label className={`text-xs ${textClass}`}>Font Family</Label>
+              <select
+                value={params.fontFamily}
+                onChange={(e) => onColorChange("fontFamily" as any, e.target.value)}
+                className="w-full px-3 py-2 border border-zinc-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500"
+              >
+                <option value="Georgia, serif">Georgia (Serif)</option>
+                <option value="'Times New Roman', serif">Times New Roman</option>
+                <option value="'Courier New', monospace">Courier (Typewriter)</option>
+                <option value="Arial, sans-serif">Arial (Sans-serif)</option>
+                <option value="'Brush Script MT', cursive">Brush Script (Handwritten)</option>
+                <option value="Garamond, serif">Garamond</option>
+              </select>
+            </div>
+
+            <div className="space-y-2">
+              <Label className={`text-xs ${textClass}`}>Text Alignment</Label>
+              <div className="flex gap-2">
+                {(['left', 'center', 'right'] as const).map((align) => (
+                  <button
+                    key={align}
+                    onClick={() => onColorChange("textAlign" as any, align)}
+                    className={`flex-1 px-3 py-2 border rounded text-xs transition-colors ${
+                      params.textAlign === align
+                        ? 'bg-cyan-500 text-white border-cyan-500'
+                        : 'bg-white text-zinc-700 border-zinc-300 hover:bg-zinc-50'
+                    }`}
+                  >
+                    {align.charAt(0).toUpperCase() + align.slice(1)}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-2">
+                <Label className={`text-xs ${textClass}`}>X Position: {params.textX}</Label>
+                <Slider
+                  value={[params.textX]}
+                  onValueChange={(value) => onParamChange("textX", value[0])}
+                  min={50}
+                  max={750}
+                  step={10}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label className={`text-xs ${textClass}`}>Y Position: {params.textY}</Label>
+                <Slider
+                  value={[params.textY]}
+                  onValueChange={(value) => onParamChange("textY", value[0])}
+                  min={30}
+                  max={500}
+                  step={10}
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label className={`text-xs ${textClass}`}>Text Color</Label>
+              <input
+                type="color"
+                value={params.textColor}
+                onChange={(e) => onColorChange("textColor", e.target.value)}
+                className="w-full h-10 rounded cursor-pointer"
+              />
+            </div>
+
+            <div className="flex items-center justify-between pt-2">
+              <Label className={`text-xs ${textClass}`}>Paper Grain Effect</Label>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={params.paperGrain}
+                  onChange={(e) => onParamChange("paperGrain", e.target.checked ? 1 : 0)}
+                  className="w-4 h-4"
+                />
+                <span className="text-xs text-zinc-600">Enable</span>
+              </label>
+            </div>
+          </>
+        )}
+      </div>
     </div>
   );
 }

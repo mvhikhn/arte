@@ -171,6 +171,16 @@ const generateRandomTreeParams = (): TreeArtworkParams => {
     tipColor2: lightenColor(tipPalette.colors[1]),
     tipColor3: lightenColor(tipPalette.colors[2]),
     backgroundColor: "#fafafa",
+    textContent: "",
+    textEnabled: false,
+    fontSize: 24,
+    textColor: "#333333",
+    textAlign: 'center' as 'left' | 'center' | 'right',
+    textX: 400,
+    textY: 50,
+    lineHeight: 1.5,
+    fontFamily: 'Georgia, serif',
+    paperGrain: false,
     seed: Date.now(),
     exportWidth: 1600,
     exportHeight: 2000,
@@ -350,7 +360,7 @@ export default function Home() {
   const handleTreeParamChange = (param: keyof TreeArtworkParams, value: number) => {
     setTreeParams((prev) => ({
       ...prev,
-      [param]: value,
+      [param]: param === 'textEnabled' || param === 'paperGrain' ? Boolean(value) : value,
     }));
   };
 
