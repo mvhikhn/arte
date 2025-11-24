@@ -43,10 +43,8 @@ export function EmailVerificationModal({ isOpen, onClose, onSuccess }: EmailVeri
         
         setSuccess(true);
         setTimeout(() => {
-          onSuccess();
-          onClose();
-          setSuccess(false);
-          setEmail('');
+          // Redirect with verified parameter to trigger state restoration
+          window.location.href = window.location.pathname + '?verified=true';
         }, 1500);
       } else {
         setError('No purchase found for this email. Please check your email or make a purchase.');
