@@ -399,7 +399,6 @@ const TreeArtwork = forwardRef<TreeArtworkRef, TreeArtworkProps>(
         };
         
         const renderText = () => {
-          const lines = paramsRef.current.textContent.split('\n');
           p.push();
           p.fill(paramsRef.current.textColor);
           p.textFont(paramsRef.current.fontFamily);
@@ -410,12 +409,65 @@ const TreeArtwork = forwardRef<TreeArtworkRef, TreeArtworkProps>(
             p.CENTER
           );
           
+          // Calculate max width for text wrapping based on alignment and margins
+          const margin = 40; // Margin from canvas edges
+          let maxWidth;
+          let textX = paramsRef.current.textX;
+          
+          if (paramsRef.current.textAlign === 'left') {
+            maxWidth = p.width - textX - margin;
+          } else if (paramsRef.current.textAlign === 'right') {
+            maxWidth = textX - margin;
+          } else { // center
+            // Use distance to nearest edge, doubled
+            const distToLeft = textX;
+            const distToRight = p.width - textX;
+            maxWidth = Math.min(distToLeft, distToRight) * 2 - (margin * 2);
+          }
+          
+          // Ensure maxWidth is reasonable
+          maxWidth = Math.max(100, Math.min(maxWidth, p.width - (margin * 2)));
+          
           const startY = paramsRef.current.textY;
           const lineHeightPx = paramsRef.current.fontSize * paramsRef.current.lineHeight;
           
-          lines.forEach((line, index) => {
-            p.text(line, paramsRef.current.textX, startY + (index * lineHeightPx));
+          // Split by user line breaks first
+          const userLines = paramsRef.current.textContent.split('\n');
+          const wrappedLines: string[] = [];
+          
+          // Wrap each user line if needed
+          userLines.forEach(line => {
+            if (line.trim() === '') {
+              wrappedLines.push(''); // Preserve empty lines
+              return;
+            }
+            
+            const words = line.split(' ');
+            let currentLine = '';
+            
+            words.forEach((word, idx) => {
+              const testLine = currentLine + (currentLine ? ' ' : '') + word;
+              const testWidth = p.textWidth(testLine);
+              
+              if (testWidth > maxWidth && currentLine !== '') {
+                wrappedLines.push(currentLine);
+                currentLine = word;
+              } else {
+                currentLine = testLine;
+              }
+              
+              // Push last word of line
+              if (idx === words.length - 1) {
+                wrappedLines.push(currentLine);
+              }
+            });
           });
+          
+          // Render all wrapped lines
+          wrappedLines.forEach((line, index) => {
+            p.text(line, textX, startY + (index * lineHeightPx));
+          });
+          
           p.pop();
         };
         
