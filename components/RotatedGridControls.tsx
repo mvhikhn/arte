@@ -74,7 +74,7 @@ export default function RotatedGridControls({ params, onParamChange, onColorChan
   };
 
   return (
-    <div className={`h-full overflow-y-auto overflow-x-hidden ${darkMode ? 'bg-zinc-900 text-zinc-100' : 'bg-white text-zinc-900'}`}>
+    <div className="h-full overflow-y-auto overflow-x-hidden bg-white text-zinc-900">
       {/* Control Buttons */}
       <div className="px-2 py-2 border-b border-zinc-200 space-y-1.5">
         <button

@@ -264,7 +264,7 @@ export default function Controls({ params, onParamChange, onColorChange, onExpor
                 onChange={(e) => onParamChange('exportWidth', parseInt(e.target.value) || 800)}
                 className={`w-16 px-1.5 py-1 rounded outline-none h-6 bg-zinc-50 border border-zinc-300 text-zinc-900`}
               />
-              <span className={darkMode ? 'text-zinc-300' : 'text-zinc-700'}>×</span>
+              <span className="text-zinc-700">×</span>
               <input
                 type="number"
                 value={params.exportHeight}
