@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Slider } from "@/components/ui/slider";
 import { ColorPicker } from "@/components/ui/color-picker";
 import { ArtworkParams } from "./Artwork";
-import { ChevronDown, ChevronRight, Play, Pause, Download, Image as ImageIcon, Shuffle } from "lucide-react";
+import { ChevronDown, ChevronRight, Play, Pause, Download, Image as ImageIcon, Shuffle, Monitor } from "lucide-react";
 
 interface ControlsProps {
   params: ArtworkParams;
@@ -12,6 +12,7 @@ interface ControlsProps {
   onColorChange: (param: keyof ArtworkParams, value: string) => void;
   onExportImage: () => void;
   onExportGif: (duration: number, fps: number) => void;
+  onExportWallpapers: () => void;
   onToggleAnimation: () => void;
   onRandomize: () => void;
   
@@ -77,7 +78,7 @@ const sections: Section[] = [
   },
 ];
 
-export default function Controls({ params, onParamChange, onColorChange, onExportImage, onExportGif, onToggleAnimation, onRandomize }: ControlsProps) {
+export default function Controls({ params, onParamChange, onColorChange, onExportImage, onExportGif, onExportWallpapers, onToggleAnimation, onRandomize }: ControlsProps) {
   const [gifDuration, setGifDuration] = useState(3);
   const [gifFps, setGifFps] = useState(30);
   const [isExporting, setIsExporting] = useState(false);
@@ -312,6 +313,13 @@ export default function Controls({ params, onParamChange, onColorChange, onExpor
             >
               <Download className="w-3.5 h-3.5" />
               {isExporting ? 'Recording...' : 'Export GIF'}
+            </button>
+            <button
+              onClick={onExportWallpapers}
+              className={`w-full px-2 py-1.5 rounded flex items-center justify-center gap-1.5 transition-colors bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-medium`}
+            >
+              <Monitor className="w-3.5 h-3.5" />
+              Export Wallpapers (6K+Mobile)
             </button>
           </div>
         )}

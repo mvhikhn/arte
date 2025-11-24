@@ -4,7 +4,7 @@ import { useState } from "react";
 import { TreeArtworkParams } from "./TreeArtwork";
 import { Label } from "./ui/label";
 import { Slider } from "./ui/slider";
-import { Download, RefreshCw, Play, Pause, Image as ImageIcon } from "lucide-react";
+import { Download, RefreshCw, Play, Pause, Image as ImageIcon, Monitor } from "lucide-react";
 
 interface TreeControlsProps {
   params: TreeArtworkParams;
@@ -12,6 +12,7 @@ interface TreeControlsProps {
   onColorChange: (param: keyof TreeArtworkParams, value: string) => void;
   onExportImage: () => void;
   onExportGif: (duration: number, fps: number) => void;
+  onExportWallpapers: () => void;
   onToggleAnimation: () => void;
   onRandomize: () => void;
   onRegenerate: () => void;
@@ -23,6 +24,7 @@ export default function TreeControls({
   onColorChange,
   onExportImage,
   onExportGif,
+  onExportWallpapers,
   onToggleAnimation,
   onRandomize,
   onRegenerate,
@@ -95,6 +97,17 @@ export default function TreeControls({
             <Download className="w-4 h-4" />
             <span className="text-sm">{isExporting ? "Recording..." : "GIF"}</span>
           </button>
+        </div>
+
+        <button
+          onClick={onExportWallpapers}
+          className="w-full px-4 py-2 rounded transition-colors bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-medium flex items-center justify-center gap-2"
+        >
+          <Monitor className="w-4 h-4" />
+          Export Wallpapers (6K+Mobile)
+        </button>
+
+        <div className="flex gap-2">
         </div>
 
         {/* GIF Settings */}

@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Slider } from "@/components/ui/slider";
 import { ColorPicker } from "@/components/ui/color-picker";
 import { GridArtworkParams } from "./GridArtwork";
-import { ChevronDown, ChevronRight, Download, Image as ImageIcon, Shuffle, Play, Pause } from "lucide-react";
+import { ChevronDown, ChevronRight, Download, Image as ImageIcon, Shuffle, Play, Pause, Monitor } from "lucide-react";
 
 interface GridControlsProps {
   params: GridArtworkParams;
@@ -12,6 +12,7 @@ interface GridControlsProps {
   onColorChange: (param: keyof GridArtworkParams, value: string) => void;
   onExportImage: () => void;
   onExportGif: (duration: number, fps: number) => void;
+  onExportWallpapers: () => void;
   onToggleAnimation: () => void;
   onRandomize: () => void;
   
@@ -50,7 +51,7 @@ const sections: Section[] = [
   },
 ];
 
-export default function GridControls({ params, onParamChange, onColorChange, onExportImage, onExportGif, onToggleAnimation, onRandomize }: GridControlsProps) {
+export default function GridControls({ params, onParamChange, onColorChange, onExportImage, onExportGif, onExportWallpapers, onToggleAnimation, onRandomize }: GridControlsProps) {
   const [gifDuration, setGifDuration] = useState(3);
   const [gifFps, setGifFps] = useState(30);
   const [isExporting, setIsExporting] = useState(false);
@@ -267,10 +268,17 @@ export default function GridControls({ params, onParamChange, onColorChange, onE
             <button
               onClick={handleExportGif}
               disabled={isExporting}
-              className="w-full px-2 py-1.5 bg-zinc-100 hover:bg-zinc-200 disabled:opacity-50 rounded flex items-center justify-center gap-1.5 transition-colors"
+              className="w-full px-2 py-1.5 bg-zinc-100 hover:bg-zinc-200 rounded flex items-center justify-center gap-1.5 transition-colors disabled:opacity-50"
             >
               <Download className="w-3.5 h-3.5" />
               {isExporting ? 'Recording...' : 'Export GIF'}
+            </button>
+            <button
+              onClick={onExportWallpapers}
+              className="w-full px-2 py-1.5 rounded flex items-center justify-center gap-1.5 transition-colors bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-medium"
+            >
+              <Monitor className="w-3.5 h-3.5" />
+              Export Wallpapers (6K+Mobile)
             </button>
           </div>
         )}

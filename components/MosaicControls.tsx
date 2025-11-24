@@ -4,15 +4,15 @@ import { useState } from "react";
 import { Slider } from "@/components/ui/slider";
 import { ColorPicker } from "@/components/ui/color-picker";
 import { MosaicArtworkParams } from "./MosaicArtwork";
-import { ChevronDown, ChevronRight, Download, Image as ImageIcon, Shuffle } from "lucide-react";
+import { ChevronDown, ChevronRight, Download, Image as ImageIcon, Shuffle, Monitor } from "lucide-react";
 
 interface MosaicControlsProps {
   params: MosaicArtworkParams;
   onParamChange: (param: keyof MosaicArtworkParams, value: number) => void;
   onColorChange: (param: keyof MosaicArtworkParams, value: string) => void;
   onExportImage: () => void;
+  onExportWallpapers: () => void;
   onRandomize: () => void;
-  
   onRegenerate: () => void;
 }
 
@@ -67,7 +67,7 @@ const sections: Section[] = [
   },
 ];
 
-export default function MosaicControls({ params, onParamChange, onColorChange, onExportImage, onRandomize, onRegenerate }: MosaicControlsProps) {
+export default function MosaicControls({ params, onParamChange, onColorChange, onExportImage, onExportWallpapers, onRandomize, onRegenerate }: MosaicControlsProps) {
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(["Division", "Colors"]));
 
   const toggleSection = (title: string) => {
@@ -233,7 +233,14 @@ export default function MosaicControls({ params, onParamChange, onColorChange, o
               className="w-full px-2 py-1.5 bg-zinc-100 hover:bg-zinc-200 rounded flex items-center justify-center gap-1.5 transition-colors"
             >
               <ImageIcon className="w-3.5 h-3.5" />
-              Export Image
+              Export PNG
+            </button>
+            <button
+              onClick={onExportWallpapers}
+              className="w-full px-2 py-1.5 rounded flex items-center justify-center gap-1.5 transition-colors bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-medium"
+            >
+              <Monitor className="w-3.5 h-3.5" />
+              Export Wallpapers (6K+Mobile)
             </button>
           </div>
         )}

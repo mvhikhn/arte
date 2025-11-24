@@ -4,15 +4,15 @@ import { useState } from "react";
 import { Slider } from "@/components/ui/slider";
 import { ColorPicker } from "@/components/ui/color-picker";
 import { RotatedGridArtworkParams } from "./RotatedGridArtwork";
-import { ChevronDown, ChevronRight, Download, Image as ImageIcon, Shuffle } from "lucide-react";
+import { ChevronDown, ChevronRight, Download, Image as ImageIcon, Shuffle, Monitor } from "lucide-react";
 
 interface RotatedGridControlsProps {
   params: RotatedGridArtworkParams;
   onParamChange: (param: keyof RotatedGridArtworkParams, value: number) => void;
   onColorChange: (param: keyof RotatedGridArtworkParams, value: string) => void;
   onExportImage: () => void;
+  onExportWallpapers: () => void;
   onRandomize: () => void;
-  
   onRegenerate: () => void;
 }
 
@@ -53,7 +53,7 @@ const sections: Section[] = [
   },
 ];
 
-export default function RotatedGridControls({ params, onParamChange, onColorChange, onExportImage, onRandomize, onRegenerate }: RotatedGridControlsProps) {
+export default function RotatedGridControls({ params, onParamChange, onColorChange, onExportImage, onExportWallpapers, onRandomize, onRegenerate }: RotatedGridControlsProps) {
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(["Grid Settings", "Colors"]));
 
   const toggleSection = (title: string) => {
@@ -220,7 +220,14 @@ export default function RotatedGridControls({ params, onParamChange, onColorChan
               className="w-full px-2 py-1.5 bg-zinc-100 hover:bg-zinc-200 rounded flex items-center justify-center gap-1.5 transition-colors"
             >
               <ImageIcon className="w-3.5 h-3.5" />
-              Export Image
+              Export PNG
+            </button>
+            <button
+              onClick={onExportWallpapers}
+              className="w-full px-2 py-1.5 rounded flex items-center justify-center gap-1.5 transition-colors bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-medium"
+            >
+              <Monitor className="w-3.5 h-3.5" />
+              Export Wallpapers (6K+Mobile)
             </button>
           </div>
         )}

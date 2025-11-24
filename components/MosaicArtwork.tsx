@@ -29,6 +29,7 @@ export interface MosaicArtworkParams {
 
 export interface MosaicArtworkRef {
   exportImage: () => void;
+  exportWallpapers: () => void;
   regenerate: () => void;
 }
 
@@ -60,6 +61,39 @@ const MosaicArtwork = forwardRef<MosaicArtworkRef, MosaicArtworkProps>(({ params
         link.href = exportCanvas.toDataURL();
         link.click();
       }
+    },
+    exportWallpapers: () => {
+      if (!sketchRef.current) return;
+      const currentCanvas = sketchRef.current.canvas;
+      const timestamp = Date.now();
+      
+      // Desktop 6K
+      const desktopCanvas = document.createElement('canvas');
+      desktopCanvas.width = 6144;
+      desktopCanvas.height = 3456;
+      const desktopCtx = desktopCanvas.getContext('2d');
+      if (desktopCtx) {
+        desktopCtx.drawImage(currentCanvas, 0, 0, 6144, 3456);
+        const link = document.createElement('a');
+        link.download = `mosaic-desktop-wallpaper-${timestamp}.png`;
+        link.href = desktopCanvas.toDataURL();
+        link.click();
+      }
+      
+      // iPhone 17 Pro
+      setTimeout(() => {
+        const mobileCanvas = document.createElement('canvas');
+        mobileCanvas.width = 1290;
+        mobileCanvas.height = 2796;
+        const mobileCtx = mobileCanvas.getContext('2d');
+        if (mobileCtx) {
+          mobileCtx.drawImage(currentCanvas, 0, 0, 1290, 2796);
+          const link = document.createElement('a');
+          link.download = `mosaic-mobile-wallpaper-${timestamp}.png`;
+          link.href = mobileCanvas.toDataURL();
+          link.click();
+        }
+      }, 100);
     },
     regenerate: () => {
       if (sketchRef.current) {

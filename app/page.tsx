@@ -351,6 +351,32 @@ export default function Home() {
     }, (duration + 1) * 1000);
   };
 
+  const handleExportWallpapers = () => {
+    // Check if user has paid for wallpaper export (same access as GIF)
+    if (!hasGifAccess()) {
+      // Show payment modal
+      setShowPaymentModal(true);
+      return;
+    }
+
+    // User has access, proceed with export
+    setExportStatus({ isExporting: true, message: "Exporting wallpapers..." });
+    if (currentArtwork === "flow") {
+      flowArtworkRef.current?.exportWallpapers();
+    } else if (currentArtwork === "grid") {
+      gridArtworkRef.current?.exportWallpapers();
+    } else if (currentArtwork === "mosaic") {
+      mosaicArtworkRef.current?.exportWallpapers();
+    } else if (currentArtwork === "rotated") {
+      rotatedGridArtworkRef.current?.exportWallpapers();
+    } else if (currentArtwork === "tree") {
+      treeArtworkRef.current?.exportWallpapers();
+    }
+    setTimeout(() => {
+      setExportStatus({ isExporting: false, message: "Wallpapers exported!" });
+    }, 1000);
+  };
+
   const handlePaymentSuccess = () => {
     // Grant access
     grantGifAccess();
@@ -601,6 +627,7 @@ export default function Home() {
               onColorChange={handleFlowColorChange}
               onExportImage={handleExportImage}
               onExportGif={handleExportGif}
+              onExportWallpapers={handleExportWallpapers}
               onToggleAnimation={handleToggleAnimation}
               onRandomize={handleFlowRandomize}
             />
@@ -611,6 +638,7 @@ export default function Home() {
               onColorChange={handleGridColorChange}
               onExportImage={handleExportImage}
               onExportGif={handleExportGif}
+              onExportWallpapers={handleExportWallpapers}
               onToggleAnimation={handleToggleAnimation}
               onRandomize={handleGridRandomize}
             />
@@ -620,6 +648,7 @@ export default function Home() {
               onParamChange={handleMosaicParamChange}
               onColorChange={handleMosaicColorChange}
               onExportImage={handleExportImage}
+              onExportWallpapers={handleExportWallpapers}
               onRandomize={handleMosaicRandomize}
               onRegenerate={handleMosaicRegenerate}
             />
@@ -629,6 +658,7 @@ export default function Home() {
               onParamChange={handleRotatedGridParamChange}
               onColorChange={handleRotatedGridColorChange}
               onExportImage={handleExportImage}
+              onExportWallpapers={handleExportWallpapers}
               onRandomize={handleRotatedGridRandomize}
               onRegenerate={handleRotatedGridRegenerate}
             />
@@ -639,6 +669,7 @@ export default function Home() {
               onColorChange={handleTreeColorChange}
               onExportImage={handleExportImage}
               onExportGif={handleExportGif}
+              onExportWallpapers={handleExportWallpapers}
               onToggleAnimation={handleToggleAnimation}
               onRandomize={handleTreeRandomize}
               onRegenerate={handleTreeRegenerate}

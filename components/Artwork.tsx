@@ -33,6 +33,7 @@ export interface ArtworkParams {
 export interface ArtworkRef {
   exportImage: () => void;
   exportGif: (duration: number, fps: number) => void;
+  exportWallpapers: () => void;
   toggleAnimation: () => void;
 }
 
@@ -96,6 +97,54 @@ const Artwork = forwardRef<ArtworkRef, ArtworkProps>(({ params }, ref) => {
       } catch (error) {
         console.error('GIF export error:', error);
       }
+    },
+    exportWallpapers: () => {
+      if (!sketchRef.current) return;
+      
+      const currentCanvas = sketchRef.current.canvas;
+      const timestamp = Date.now();
+      
+      // Desktop wallpaper - 6K (6144x3456)
+      const desktopCanvas = document.createElement('canvas');
+      desktopCanvas.width = 6144;
+      desktopCanvas.height = 3456;
+      const desktopCtx = desktopCanvas.getContext('2d');
+      
+      if (desktopCtx) {
+        desktopCtx.drawImage(currentCanvas, 0, 0, 6144, 3456);
+        desktopCanvas.toBlob((blob) => {
+          if (blob) {
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `arte-desktop-wallpaper-${timestamp}.png`;
+            a.click();
+            URL.revokeObjectURL(url);
+          }
+        });
+      }
+      
+      // Mobile wallpaper - iPhone 17 Pro (1290x2796)
+      setTimeout(() => {
+        const mobileCanvas = document.createElement('canvas');
+        mobileCanvas.width = 1290;
+        mobileCanvas.height = 2796;
+        const mobileCtx = mobileCanvas.getContext('2d');
+        
+        if (mobileCtx) {
+          mobileCtx.drawImage(currentCanvas, 0, 0, 1290, 2796);
+          mobileCanvas.toBlob((blob) => {
+            if (blob) {
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = url;
+              a.download = `arte-mobile-wallpaper-${timestamp}.png`;
+              a.click();
+              URL.revokeObjectURL(url);
+            }
+          });
+        }
+      }, 100);
     },
     toggleAnimation: () => {
       if (sketchRef.current) {
