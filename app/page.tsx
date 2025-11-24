@@ -195,37 +195,6 @@ export default function Home() {
   const [showEmailVerification, setShowEmailVerification] = useState(false);
   const [pendingGifExport, setPendingGifExport] = useState<{ duration: number; fps: number } | null>(null);
 
-  // Check if returning from successful payment
-  useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('payment') === 'success') {
-      // Grant local access (for immediate use on this device)
-      grantGifAccess();
-      
-      // Note: Email is automatically captured and stored by Polar webhook
-      // No need to manually store it here
-      
-      // Clean URL
-      window.history.replaceState({}, '', window.location.pathname);
-      // Show success message
-      setExportStatus({ isExporting: false, message: "Payment successful! GIF exports unlocked!" });
-      setTimeout(() => {
-        setExportStatus({ isExporting: false, message: "" });
-      }, 3000);
-    }
-
-    // Listen for email verification modal trigger
-    const handleShowEmailVerification = () => {
-      setShowEmailVerification(true);
-    };
-    
-    window.addEventListener('showEmailVerification', handleShowEmailVerification);
-    
-    return () => {
-      window.removeEventListener('showEmailVerification', handleShowEmailVerification);
-    };
-  }, []);
-
   const [flowParams, setFlowParams] = useState<ArtworkParams>(() => generateRandomFlowParams());
 
   const [gridParams, setGridParams] = useState<GridArtworkParams>(() => generateRandomGridParams());
@@ -235,6 +204,92 @@ export default function Home() {
   const [rotatedGridParams, setRotatedGridParams] = useState<RotatedGridArtworkParams>(() => generateRandomRotatedGridParams());
 
   const [treeParams, setTreeParams] = useState<TreeArtworkParams>(() => generateRandomTreeParams());
+
+  // Save current artwork state to localStorage
+  const saveArtworkState = () => {
+    const state = {
+      currentArtwork,
+      flowParams,
+      gridParams,
+      mosaicParams,
+      rotatedGridParams,
+      treeParams,
+      timestamp: Date.now(),
+    };
+    localStorage.setItem('artworkState', JSON.stringify(state));
+  };
+
+  // Restore artwork state from localStorage
+  const restoreArtworkState = () => {
+    try {
+      const saved = localStorage.getItem('artworkState');
+      if (saved) {
+        const state = JSON.parse(saved);
+        // Only restore if saved within last 30 minutes
+        if (Date.now() - state.timestamp < 30 * 60 * 1000) {
+          setCurrentArtwork(state.currentArtwork);
+          setFlowParams(state.flowParams);
+          setGridParams(state.gridParams);
+          setMosaicParams(state.mosaicParams);
+          setRotatedGridParams(state.rotatedGridParams);
+          setTreeParams(state.treeParams);
+          localStorage.removeItem('artworkState'); // Clear after restore
+          return true;
+        }
+        localStorage.removeItem('artworkState'); // Clear old state
+      }
+    } catch (error) {
+      console.error('Failed to restore artwork state:', error);
+      localStorage.removeItem('artworkState');
+    }
+    return false;
+  };
+
+  // Check if returning from successful payment or email verification
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const isReturningFromPayment = urlParams.get('payment') === 'success';
+    const isReturningFromVerification = urlParams.get('verified') === 'true';
+    
+    // Restore artwork state if returning from payment or verification
+    if (isReturningFromPayment || isReturningFromVerification) {
+      const restored = restoreArtworkState();
+      
+      if (isReturningFromPayment) {
+        // Grant local access (for immediate use on this device)
+        grantGifAccess();
+        
+        // Show success message
+        setExportStatus({ isExporting: false, message: "Payment successful! GIF exports unlocked!" });
+        setTimeout(() => {
+          setExportStatus({ isExporting: false, message: "" });
+        }, 3000);
+      }
+      
+      if (isReturningFromVerification) {
+        setExportStatus({ isExporting: false, message: restored ? "Welcome back! Your artwork has been restored." : "Email verified!" });
+        setTimeout(() => {
+          setExportStatus({ isExporting: false, message: "" });
+        }, 3000);
+      }
+      
+      // Clean URL
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+
+    // Listen for email verification modal trigger
+    const handleShowEmailVerification = () => {
+      saveArtworkState(); // Save state before showing verification modal
+      setShowEmailVerification(true);
+    };
+    
+    window.addEventListener('showEmailVerification', handleShowEmailVerification);
+    
+    return () => {
+      window.removeEventListener('showEmailVerification', handleShowEmailVerification);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleFlowParamChange = (param: keyof ArtworkParams, value: number) => {
     setFlowParams((prev) => ({
@@ -327,6 +382,8 @@ export default function Home() {
   const handleExportGif = async (duration: number, fps: number) => {
     // Check if user has paid for GIF export
     if (!hasGifAccess()) {
+      // Save current artwork state before payment
+      saveArtworkState();
       // Store the pending export and show payment modal
       setPendingGifExport({ duration, fps });
       setShowPaymentModal(true);
@@ -354,6 +411,8 @@ export default function Home() {
   const handleExportWallpapers = () => {
     // Check if user has paid for wallpaper export (same access as GIF)
     if (!hasGifAccess()) {
+      // Save current artwork state before payment
+      saveArtworkState();
       // Show payment modal
       setShowPaymentModal(true);
       return;
