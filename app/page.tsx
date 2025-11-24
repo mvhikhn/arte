@@ -179,6 +179,9 @@ const generateRandomTreeParams = (): TreeArtworkParams => {
 };
 
 
+// Force dynamic rendering and prevent static generation
+export const dynamic = 'force-dynamic';
+
 export default function Home() {
   const [currentArtwork, setCurrentArtwork] = useState<ArtworkType>("flow");
   const [controlsVisible, setControlsVisible] = useState(false);
@@ -223,15 +226,15 @@ export default function Home() {
     };
   }, []);
 
-  const [flowParams, setFlowParams] = useState<ArtworkParams>(generateRandomFlowParams());
+  const [flowParams, setFlowParams] = useState<ArtworkParams>(() => generateRandomFlowParams());
 
-  const [gridParams, setGridParams] = useState<GridArtworkParams>(generateRandomGridParams());
+  const [gridParams, setGridParams] = useState<GridArtworkParams>(() => generateRandomGridParams());
 
-  const [mosaicParams, setMosaicParams] = useState<MosaicArtworkParams>(generateRandomMosaicParams());
+  const [mosaicParams, setMosaicParams] = useState<MosaicArtworkParams>(() => generateRandomMosaicParams());
 
-  const [rotatedGridParams, setRotatedGridParams] = useState<RotatedGridArtworkParams>(generateRandomRotatedGridParams());
+  const [rotatedGridParams, setRotatedGridParams] = useState<RotatedGridArtworkParams>(() => generateRandomRotatedGridParams());
 
-  const [treeParams, setTreeParams] = useState<TreeArtworkParams>(generateRandomTreeParams());
+  const [treeParams, setTreeParams] = useState<TreeArtworkParams>(() => generateRandomTreeParams());
 
   const handleFlowParamChange = (param: keyof ArtworkParams, value: number) => {
     setFlowParams((prev) => ({

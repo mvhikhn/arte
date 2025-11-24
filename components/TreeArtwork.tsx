@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useImperativeHandle, forwardRef } from "react";
-import p5 from "p5";
 
 export interface TreeArtworkParams {
   // Tree Structure
@@ -134,11 +133,21 @@ const TreeArtwork = forwardRef<TreeArtworkRef, TreeArtworkProps>(
     useEffect(() => {
       if (!containerRef.current) return;
 
-      const sketch = (p: any) => {
-        class Pathfinder {
-          lastLocation: p5.Vector;
-          location: p5.Vector;
-          velocity: p5.Vector;
+      // Clear any existing sketch
+      if (containerRef.current) {
+        containerRef.current.innerHTML = '';
+      }
+
+      // Dynamically import p5
+      const loadSketch = async () => {
+        const p5Module = await import("p5");
+        const p5 = p5Module.default;
+
+        const sketch = (p: any) => {
+          class Pathfinder {
+            lastLocation: any;
+            location: any;
+            velocity: any;
           diameter: number;
           isFinished: boolean;
           age: number;
@@ -287,15 +296,28 @@ const TreeArtwork = forwardRef<TreeArtworkRef, TreeArtworkProps>(
           }
         };
         
-        // Expose resetSketch for external access
-        p.resetSketch = resetSketch;
+          // Expose resetSketch for external access
+          p.resetSketch = resetSketch;
+        };
+
+        const p5Instance = new p5(sketch);
+        sketchRef.current = p5Instance;
+
+        return () => {
+          if (sketchRef.current) {
+            sketchRef.current.remove();
+            sketchRef.current = null;
+          }
+        };
       };
 
-      const p5Instance = new p5(sketch);
-      sketchRef.current = p5Instance;
+      loadSketch().catch(console.error);
 
       return () => {
-        p5Instance.remove();
+        if (sketchRef.current) {
+          sketchRef.current.remove();
+          sketchRef.current = null;
+        }
       };
     }, []);
 
