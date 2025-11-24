@@ -69,6 +69,16 @@ const TreeArtwork = forwardRef<TreeArtworkRef, TreeArtworkProps>(
       }
     }, [params.isAnimating]);
 
+    // Handle seed changes to regenerate tree
+    useEffect(() => {
+      if (sketchRef.current && sketchRef.current.resetSketch) {
+        sketchRef.current.resetSketch();
+        // Always restart the loop when regenerating, regardless of isAnimating state
+        // The isAnimating useEffect will handle stopping it if needed
+        sketchRef.current.loop();
+      }
+    }, [params.seed]);
+
     useImperativeHandle(ref, () => ({
       exportImage: () => {
         if (!sketchRef.current) return;
@@ -259,18 +269,8 @@ const TreeArtwork = forwardRef<TreeArtworkRef, TreeArtworkProps>(
             paths.push(new Pathfinder());
           }
         };
-
-        let lastSeed = paramsRef.current.seed;
         
         p.draw = () => {
-          // Watch for seed changes to regenerate
-          if (paramsRef.current.seed !== lastSeed) {
-            lastSeed = paramsRef.current.seed;
-            resetSketch();
-            p.loop();
-            return;
-          }
-          
           // Don't clear background - let tree build up
           for (let i = paths.length - 1; i >= 0; i--) {
             paths[i].draw();
@@ -286,6 +286,9 @@ const TreeArtwork = forwardRef<TreeArtworkRef, TreeArtworkProps>(
             p.noLoop();
           }
         };
+        
+        // Expose resetSketch for external access
+        p.resetSketch = resetSketch;
       };
 
       const p5Instance = new p5(sketch);
