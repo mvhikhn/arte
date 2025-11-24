@@ -104,46 +104,73 @@ const Artwork = forwardRef<ArtworkRef, ArtworkProps>(({ params }, ref) => {
       const currentCanvas = sketchRef.current.canvas;
       const timestamp = Date.now();
       
+      // Helper function to center and fit artwork
+      const centerArtwork = (canvas: HTMLCanvasElement, targetWidth: number, targetHeight: number) => {
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+        
+        // Fill with white background
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillRect(0, 0, targetWidth, targetHeight);
+        
+        // Calculate scaling to fit artwork while maintaining aspect ratio
+        const sourceAspect = currentCanvas.width / currentCanvas.height;
+        const targetAspect = targetWidth / targetHeight;
+        
+        let drawWidth, drawHeight, offsetX, offsetY;
+        
+        if (sourceAspect > targetAspect) {
+          // Source is wider - fit to width
+          drawWidth = targetWidth;
+          drawHeight = targetWidth / sourceAspect;
+          offsetX = 0;
+          offsetY = (targetHeight - drawHeight) / 2;
+        } else {
+          // Source is taller - fit to height
+          drawHeight = targetHeight;
+          drawWidth = targetHeight * sourceAspect;
+          offsetX = (targetWidth - drawWidth) / 2;
+          offsetY = 0;
+        }
+        
+        // Draw artwork centered
+        ctx.drawImage(currentCanvas, offsetX, offsetY, drawWidth, drawHeight);
+      };
+      
       // Desktop wallpaper - 6K (6144x3456)
       const desktopCanvas = document.createElement('canvas');
       desktopCanvas.width = 6144;
       desktopCanvas.height = 3456;
-      const desktopCtx = desktopCanvas.getContext('2d');
+      centerArtwork(desktopCanvas, 6144, 3456);
       
-      if (desktopCtx) {
-        desktopCtx.drawImage(currentCanvas, 0, 0, 6144, 3456);
-        desktopCanvas.toBlob((blob) => {
-          if (blob) {
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `arte-desktop-wallpaper-${timestamp}.png`;
-            a.click();
-            URL.revokeObjectURL(url);
-          }
-        });
-      }
+      desktopCanvas.toBlob((blob) => {
+        if (blob) {
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `arte-desktop-wallpaper-${timestamp}.png`;
+          a.click();
+          URL.revokeObjectURL(url);
+        }
+      });
       
       // Mobile wallpaper - iPhone 17 Pro (1290x2796)
       setTimeout(() => {
         const mobileCanvas = document.createElement('canvas');
         mobileCanvas.width = 1290;
         mobileCanvas.height = 2796;
-        const mobileCtx = mobileCanvas.getContext('2d');
+        centerArtwork(mobileCanvas, 1290, 2796);
         
-        if (mobileCtx) {
-          mobileCtx.drawImage(currentCanvas, 0, 0, 1290, 2796);
-          mobileCanvas.toBlob((blob) => {
-            if (blob) {
-              const url = URL.createObjectURL(blob);
-              const a = document.createElement('a');
-              a.href = url;
-              a.download = `arte-mobile-wallpaper-${timestamp}.png`;
-              a.click();
-              URL.revokeObjectURL(url);
-            }
-          });
-        }
+        mobileCanvas.toBlob((blob) => {
+          if (blob) {
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `arte-mobile-wallpaper-${timestamp}.png`;
+            a.click();
+            URL.revokeObjectURL(url);
+          }
+        });
       }, 100);
     },
     toggleAnimation: () => {

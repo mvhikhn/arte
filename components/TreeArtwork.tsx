@@ -106,44 +106,65 @@ const TreeArtwork = forwardRef<TreeArtworkRef, TreeArtworkProps>(
         const currentCanvas = sketchRef.current.canvas;
         const timestamp = Date.now();
         
+        const centerArtwork = (canvas: HTMLCanvasElement, targetWidth: number, targetHeight: number) => {
+          const ctx = canvas.getContext('2d');
+          if (!ctx) return;
+          
+          ctx.fillStyle = '#FFFFFF';
+          ctx.fillRect(0, 0, targetWidth, targetHeight);
+          
+          const sourceAspect = currentCanvas.width / currentCanvas.height;
+          const targetAspect = targetWidth / targetHeight;
+          
+          let drawWidth, drawHeight, offsetX, offsetY;
+          
+          if (sourceAspect > targetAspect) {
+            drawWidth = targetWidth;
+            drawHeight = targetWidth / sourceAspect;
+            offsetX = 0;
+            offsetY = (targetHeight - drawHeight) / 2;
+          } else {
+            drawHeight = targetHeight;
+            drawWidth = targetHeight * sourceAspect;
+            offsetX = (targetWidth - drawWidth) / 2;
+            offsetY = 0;
+          }
+          
+          ctx.drawImage(currentCanvas, offsetX, offsetY, drawWidth, drawHeight);
+        };
+        
         // Desktop 6K
         const desktopCanvas = document.createElement('canvas');
         desktopCanvas.width = 6144;
         desktopCanvas.height = 3456;
-        const desktopCtx = desktopCanvas.getContext('2d');
-        if (desktopCtx) {
-          desktopCtx.drawImage(currentCanvas, 0, 0, 6144, 3456);
-          desktopCanvas.toBlob((blob) => {
-            if (blob) {
-              const url = URL.createObjectURL(blob);
-              const a = document.createElement('a');
-              a.href = url;
-              a.download = `tree-desktop-wallpaper-${timestamp}.png`;
-              a.click();
-              URL.revokeObjectURL(url);
-            }
-          });
-        }
+        centerArtwork(desktopCanvas, 6144, 3456);
+        desktopCanvas.toBlob((blob) => {
+          if (blob) {
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `tree-desktop-wallpaper-${timestamp}.png`;
+            a.click();
+            URL.revokeObjectURL(url);
+          }
+        });
         
         // iPhone 17 Pro
         setTimeout(() => {
           const mobileCanvas = document.createElement('canvas');
           mobileCanvas.width = 1290;
           mobileCanvas.height = 2796;
-          const mobileCtx = mobileCanvas.getContext('2d');
-          if (mobileCtx) {
-            mobileCtx.drawImage(currentCanvas, 0, 0, 1290, 2796);
-            mobileCanvas.toBlob((blob) => {
-              if (blob) {
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `tree-mobile-wallpaper-${timestamp}.png`;
-                a.click();
-                URL.revokeObjectURL(url);
-              }
-            });
-          }
+          centerArtwork(mobileCanvas, 1290, 2796);
+          mobileCanvas.toBlob((blob) => {
+            if (blob) {
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = url;
+              a.download = `tree-mobile-wallpaper-${timestamp}.png`;
+              a.click();
+              URL.revokeObjectURL(url);
+            }
+          });
         }, 100);
       },
       exportGif: async (duration: number, fps: number) => {

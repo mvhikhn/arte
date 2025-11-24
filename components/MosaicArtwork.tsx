@@ -67,32 +67,53 @@ const MosaicArtwork = forwardRef<MosaicArtworkRef, MosaicArtworkProps>(({ params
       const currentCanvas = sketchRef.current.canvas;
       const timestamp = Date.now();
       
+      const centerArtwork = (canvas: HTMLCanvasElement, targetWidth: number, targetHeight: number) => {
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+        
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillRect(0, 0, targetWidth, targetHeight);
+        
+        const sourceAspect = currentCanvas.width / currentCanvas.height;
+        const targetAspect = targetWidth / targetHeight;
+        
+        let drawWidth, drawHeight, offsetX, offsetY;
+        
+        if (sourceAspect > targetAspect) {
+          drawWidth = targetWidth;
+          drawHeight = targetWidth / sourceAspect;
+          offsetX = 0;
+          offsetY = (targetHeight - drawHeight) / 2;
+        } else {
+          drawHeight = targetHeight;
+          drawWidth = targetHeight * sourceAspect;
+          offsetX = (targetWidth - drawWidth) / 2;
+          offsetY = 0;
+        }
+        
+        ctx.drawImage(currentCanvas, offsetX, offsetY, drawWidth, drawHeight);
+      };
+      
       // Desktop 6K
       const desktopCanvas = document.createElement('canvas');
       desktopCanvas.width = 6144;
       desktopCanvas.height = 3456;
-      const desktopCtx = desktopCanvas.getContext('2d');
-      if (desktopCtx) {
-        desktopCtx.drawImage(currentCanvas, 0, 0, 6144, 3456);
-        const link = document.createElement('a');
-        link.download = `mosaic-desktop-wallpaper-${timestamp}.png`;
-        link.href = desktopCanvas.toDataURL();
-        link.click();
-      }
+      centerArtwork(desktopCanvas, 6144, 3456);
+      const link = document.createElement('a');
+      link.download = `mosaic-desktop-wallpaper-${timestamp}.png`;
+      link.href = desktopCanvas.toDataURL();
+      link.click();
       
       // iPhone 17 Pro
       setTimeout(() => {
         const mobileCanvas = document.createElement('canvas');
         mobileCanvas.width = 1290;
         mobileCanvas.height = 2796;
-        const mobileCtx = mobileCanvas.getContext('2d');
-        if (mobileCtx) {
-          mobileCtx.drawImage(currentCanvas, 0, 0, 1290, 2796);
-          const link = document.createElement('a');
-          link.download = `mosaic-mobile-wallpaper-${timestamp}.png`;
-          link.href = mobileCanvas.toDataURL();
-          link.click();
-        }
+        centerArtwork(mobileCanvas, 1290, 2796);
+        const link = document.createElement('a');
+        link.download = `mosaic-mobile-wallpaper-${timestamp}.png`;
+        link.href = mobileCanvas.toDataURL();
+        link.click();
       }, 100);
     },
     regenerate: () => {
