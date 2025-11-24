@@ -14,7 +14,7 @@ interface ControlsProps {
   onExportGif: (duration: number, fps: number) => void;
   onToggleAnimation: () => void;
   onRandomize: () => void;
-  darkMode?: boolean;
+  
 }
 
 interface ControlConfig {
@@ -77,7 +77,7 @@ const sections: Section[] = [
   },
 ];
 
-export default function Controls({ params, onParamChange, onColorChange, onExportImage, onExportGif, onToggleAnimation, onRandomize, darkMode = false }: ControlsProps) {
+export default function Controls({ params, onParamChange, onColorChange, onExportImage, onExportGif, onToggleAnimation, onRandomize }: ControlsProps) {
   const [gifDuration, setGifDuration] = useState(3);
   const [gifFps, setGifFps] = useState(30);
   const [isExporting, setIsExporting] = useState(false);
@@ -112,12 +112,12 @@ export default function Controls({ params, onParamChange, onColorChange, onExpor
   };
 
   return (
-    <div className={`h-full overflow-y-auto overflow-x-hidden ${darkMode ? 'bg-zinc-900 text-zinc-100' : 'bg-white text-zinc-900'}`}>
+    <div className={`h-full overflow-y-auto overflow-x-hidden bg-white text-zinc-900`}>
       {/* Control Buttons */}
-      <div className={`px-2 py-2 space-y-1.5 ${darkMode ? 'border-b border-zinc-700' : 'border-b border-zinc-200'}`}>
+      <div className={`px-2 py-2 space-y-1.5 border-b border-zinc-200`}>
         <button
           onClick={onToggleAnimation}
-          className={`w-full px-2 py-1.5 rounded flex items-center justify-center gap-1.5 transition-colors ${darkMode ? 'bg-zinc-800 hover:bg-zinc-700 text-zinc-100' : 'bg-zinc-100 hover:bg-zinc-200 text-zinc-900'}`}
+          className={`w-full px-2 py-1.5 rounded flex items-center justify-center gap-1.5 transition-colors bg-zinc-100 hover:bg-zinc-200 text-zinc-900`}
         >
           {params.isAnimating ? (
             <>
@@ -144,10 +144,10 @@ export default function Controls({ params, onParamChange, onColorChange, onExpor
       {sections.map((section) => {
         const isExpanded = expandedSections.has(section.title);
         return (
-          <div key={section.title} className={`${darkMode ? 'border-b border-zinc-700' : 'border-b border-zinc-200'}`}>
+          <div key={section.title} className={`border-b border-zinc-200`}>
             <button
               onClick={() => toggleSection(section.title)}
-              className={`w-full px-2 py-2 flex items-center justify-between transition-colors ${darkMode ? 'hover:bg-zinc-800' : 'hover:bg-zinc-50'}`}
+              className={`w-full px-2 py-2 flex items-center justify-between transition-colors hover:bg-zinc-50`}
             >
               <span className="font-medium">{section.title}</span>
               {isExpanded ? (
@@ -163,7 +163,7 @@ export default function Controls({ params, onParamChange, onColorChange, onExpor
                   if (typeof value !== 'number') return null;
                   return (
                     <div key={config.key} className="flex items-center gap-1.5">
-                      <span className={`min-w-[75px] text-ellipsis overflow-hidden whitespace-nowrap flex-shrink-0 text-[13px] ${darkMode ? 'text-zinc-300' : 'text-zinc-700'}`}>{config.label}</span>
+                      <span className={`min-w-[75px] text-ellipsis overflow-hidden whitespace-nowrap flex-shrink-0 text-[13px] text-zinc-700`}>{config.label}</span>
                       <div className="flex-1 min-w-0">
                         <Slider
                           min={config.min}
@@ -185,7 +185,7 @@ export default function Controls({ params, onParamChange, onColorChange, onExpor
                         step={config.step}
                         min={config.min}
                         max={config.max}
-                        className={`w-11 h-6 rounded px-1.5 font-mono text-right focus:outline-none focus:border-cyan-500 flex-shrink-0 ${darkMode ? 'bg-zinc-800 border border-zinc-600 text-zinc-100' : 'bg-zinc-50 border border-zinc-300 text-zinc-900'}`}
+                        className={`w-11 h-6 rounded px-1.5 font-mono text-right focus:outline-none focus:border-cyan-500 flex-shrink-0 bg-zinc-50 border border-zinc-300 text-zinc-900`}
                       />
                     </div>
                   );
@@ -197,10 +197,10 @@ export default function Controls({ params, onParamChange, onColorChange, onExpor
       })}
 
       {/* Color Palette Section */}
-      <div className={`${darkMode ? 'border-b border-zinc-700' : 'border-b border-zinc-200'}`}>
+      <div className={`border-b border-zinc-200`}>
         <button
           onClick={() => toggleSection("Color Palette")}
-          className={`w-full px-2 py-2 flex items-center justify-between transition-colors ${darkMode ? 'hover:bg-zinc-800' : 'hover:bg-zinc-50'}`}
+          className={`w-full px-2 py-2 flex items-center justify-between transition-colors hover:bg-zinc-50`}
         >
           <span className="font-medium">Color Palette</span>
           {expandedSections.has("Color Palette") ? (
@@ -215,7 +215,7 @@ export default function Controls({ params, onParamChange, onColorChange, onExpor
               const value = params[colorKey as keyof ArtworkParams] as string;
               return (
                 <div key={colorKey} className="flex items-center gap-1.5">
-                  <span className={`min-w-[50px] flex-shrink-0 text-[13px] ${darkMode ? 'text-zinc-300' : 'text-zinc-700'}`}>Color {index + 1}</span>
+                  <span className={`min-w-[50px] flex-shrink-0 text-[13px] text-zinc-700`}>Color {index + 1}</span>
                   <div className="w-14 flex-shrink-0">
                     <ColorPicker 
                       value={value} 
@@ -231,7 +231,7 @@ export default function Controls({ params, onParamChange, onColorChange, onExpor
                         onColorChange(colorKey as keyof ArtworkParams, newVal);
                       }
                     }}
-                    className={`flex-1 min-w-0 h-6 rounded px-1.5 font-mono text-[13px] focus:outline-none focus:border-cyan-500 ${darkMode ? 'bg-zinc-800 border border-zinc-600 text-zinc-100' : 'bg-zinc-50 border border-zinc-300 text-zinc-900'}`}
+                    className={`flex-1 min-w-0 h-6 rounded px-1.5 font-mono text-[13px] focus:outline-none focus:border-cyan-500 bg-zinc-50 border border-zinc-300 text-zinc-900`}
                     placeholder="#000000"
                   />
                 </div>
@@ -242,10 +242,10 @@ export default function Controls({ params, onParamChange, onColorChange, onExpor
       </div>
 
       {/* Export Section */}
-      <div className={`${darkMode ? 'border-b border-zinc-700' : 'border-b border-zinc-200'}`}>
+      <div className={`border-b border-zinc-200`}>
         <button
           onClick={() => toggleSection("Export")}
-          className={`w-full px-2 py-2 flex items-center justify-between transition-colors ${darkMode ? 'hover:bg-zinc-800' : 'hover:bg-zinc-50'}`}
+          className={`w-full px-2 py-2 flex items-center justify-between transition-colors hover:bg-zinc-50`}
         >
           <span className="font-medium">Export</span>
           {expandedSections.has("Export") ? (
@@ -257,30 +257,30 @@ export default function Controls({ params, onParamChange, onColorChange, onExpor
         {expandedSections.has("Export") && (
           <div className="px-2 pb-2 space-y-2">
             <div className="flex items-center gap-1.5">
-              <span className={`min-w-[50px] flex-shrink-0 ${darkMode ? 'text-zinc-300' : 'text-zinc-700'}`}>Size</span>
+              <span className={`min-w-[50px] flex-shrink-0 text-zinc-700`}>Size</span>
               <input
                 type="number"
                 value={params.exportWidth}
                 onChange={(e) => onParamChange('exportWidth', parseInt(e.target.value) || 800)}
-                className={`w-16 px-1.5 py-1 rounded outline-none h-6 ${darkMode ? 'bg-zinc-800 border border-zinc-600 text-zinc-100' : 'bg-zinc-50 border border-zinc-300 text-zinc-900'}`}
+                className={`w-16 px-1.5 py-1 rounded outline-none h-6 bg-zinc-50 border border-zinc-300 text-zinc-900`}
               />
               <span className={darkMode ? 'text-zinc-300' : 'text-zinc-700'}>×</span>
               <input
                 type="number"
                 value={params.exportHeight}
                 onChange={(e) => onParamChange('exportHeight', parseInt(e.target.value) || 1000)}
-                className={`w-16 px-1.5 py-1 rounded outline-none h-6 ${darkMode ? 'bg-zinc-800 border border-zinc-600 text-zinc-100' : 'bg-zinc-50 border border-zinc-300 text-zinc-900'}`}
+                className={`w-16 px-1.5 py-1 rounded outline-none h-6 bg-zinc-50 border border-zinc-300 text-zinc-900`}
               />
             </div>
             <button
               onClick={onExportImage}
-              className={`w-full px-2 py-1.5 rounded flex items-center justify-center gap-1.5 transition-colors ${darkMode ? 'bg-zinc-800 hover:bg-zinc-700 text-zinc-100' : 'bg-zinc-100 hover:bg-zinc-200 text-zinc-900'}`}
+              className={`w-full px-2 py-1.5 rounded flex items-center justify-center gap-1.5 transition-colors bg-zinc-100 hover:bg-zinc-200 text-zinc-900`}
             >
               <ImageIcon className="w-3.5 h-3.5" />
               Export Image
             </button>
             <div className="flex items-center gap-1.5">
-              <span className={`min-w-[75px] flex-shrink-0 ${darkMode ? 'text-zinc-300' : 'text-zinc-700'}`}>GIF Duration</span>
+              <span className={`min-w-[75px] flex-shrink-0 text-zinc-700`}>GIF Duration</span>
               <div className="flex-1 min-w-0">
                 <Slider
                   min={1}
@@ -302,13 +302,13 @@ export default function Controls({ params, onParamChange, onColorChange, onExpor
                 step={0.5}
                 min={1}
                 max={10}
-                className={`w-11 h-6 rounded px-1.5 font-mono text-right focus:outline-none focus:border-cyan-500 flex-shrink-0 ${darkMode ? 'bg-zinc-800 border border-zinc-600 text-zinc-100' : 'bg-zinc-50 border border-zinc-300 text-zinc-900'}`}
+                className={`w-11 h-6 rounded px-1.5 font-mono text-right focus:outline-none focus:border-cyan-500 flex-shrink-0 bg-zinc-50 border border-zinc-300 text-zinc-900`}
               />
             </div>
             <button
               onClick={handleExportGif}
               disabled={isExporting}
-              className={`w-full px-2 py-1.5 disabled:opacity-50 rounded flex items-center justify-center gap-1.5 transition-colors ${darkMode ? 'bg-zinc-800 hover:bg-zinc-700 text-zinc-100' : 'bg-zinc-100 hover:bg-zinc-200 text-zinc-900'}`}
+              className={`w-full px-2 py-1.5 disabled:opacity-50 rounded flex items-center justify-center gap-1.5 transition-colors bg-zinc-100 hover:bg-zinc-200 text-zinc-900`}
             >
               <Download className="w-3.5 h-3.5" />
               {isExporting ? 'Recording...' : 'Export GIF'}

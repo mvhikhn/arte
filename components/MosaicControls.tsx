@@ -12,7 +12,7 @@ interface MosaicControlsProps {
   onColorChange: (param: keyof MosaicArtworkParams, value: string) => void;
   onExportImage: () => void;
   onRandomize: () => void;
-  darkMode?: boolean;
+  
   onRegenerate: () => void;
 }
 
@@ -67,7 +67,7 @@ const sections: Section[] = [
   },
 ];
 
-export default function MosaicControls({ params, onParamChange, onColorChange, onExportImage, onRandomize, onRegenerate, darkMode = false }: MosaicControlsProps) {
+export default function MosaicControls({ params, onParamChange, onColorChange, onExportImage, onRandomize, onRegenerate }: MosaicControlsProps) {
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(["Division", "Colors"]));
 
   const toggleSection = (title: string) => {

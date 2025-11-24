@@ -7,10 +7,9 @@ interface EmailVerificationModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
-  darkMode?: boolean;
 }
 
-export function EmailVerificationModal({ isOpen, onClose, onSuccess, darkMode = false }: EmailVerificationModalProps) {
+export function EmailVerificationModal({ isOpen, onClose, onSuccess }: EmailVerificationModalProps) {
   const [email, setEmail] = useState('');
   const [isVerifying, setIsVerifying] = useState(false);
   const [error, setError] = useState('');
@@ -71,14 +70,14 @@ export function EmailVerificationModal({ isOpen, onClose, onSuccess, darkMode = 
       />
       
       {/* Modal */}
-      <div className={`relative w-full max-w-md rounded-lg shadow-2xl overflow-hidden ${darkMode ? 'bg-zinc-900 text-zinc-100' : 'bg-white text-zinc-900'}`}>
+      <div className="relative w-full max-w-md rounded-lg shadow-2xl overflow-hidden bg-white text-zinc-900">
         {/* Header */}
-        <div className={`px-6 py-4 border-b ${darkMode ? 'border-zinc-700' : 'border-zinc-200'}`}>
+        <div className="px-6 py-4 border-b border-zinc-200">
           <div className="flex items-center justify-between">
             <h2 className="text-[13px] font-semibold">Verify Your Access</h2>
             <button
               onClick={onClose}
-              className={`p-1 rounded-lg transition-colors ${darkMode ? 'hover:bg-zinc-800' : 'hover:bg-zinc-100'}`}
+              className="p-1 rounded-lg transition-colors hover:bg-zinc-100"
               aria-label="Close"
             >
               <X className="w-4 h-4" />
@@ -91,18 +90,18 @@ export function EmailVerificationModal({ isOpen, onClose, onSuccess, darkMode = 
           {success ? (
             <div className="flex flex-col items-center justify-center py-8 space-y-3">
               <CheckCircle2 className="w-12 h-12 text-green-500" />
-              <p className={`text-[13px] text-center ${darkMode ? 'text-zinc-300' : 'text-zinc-700'}`}>
+              <p className="text-[13px] text-center text-zinc-700">
                 Access verified successfully!
               </p>
             </div>
           ) : (
             <div className="space-y-4">
               <div>
-                <p className={`text-[13px] mb-4 ${darkMode ? 'text-zinc-400' : 'text-zinc-600'}`}>
+                <p className="text-[13px] mb-4 text-zinc-600">
                   Enter the email you used when purchasing GIF export access to restore it on this device.
                 </p>
                 
-                <label className={`block text-[13px] font-medium mb-2 ${darkMode ? 'text-zinc-300' : 'text-zinc-700'}`}>
+                <label className="block text-[13px] font-medium mb-2 text-zinc-700">
                   Your email
                 </label>
                 <input
@@ -118,11 +117,7 @@ export function EmailVerificationModal({ isOpen, onClose, onSuccess, darkMode = 
                     }
                   }}
                   placeholder="your@email.com"
-                  className={`w-full px-3 py-2 rounded-lg text-[13px] outline-none focus:ring-2 focus:ring-cyan-500 ${
-                    darkMode 
-                      ? 'bg-zinc-800 border border-zinc-600 text-zinc-100 placeholder-zinc-500' 
-                      : 'bg-white border border-zinc-300 text-zinc-900 placeholder-zinc-400'
-                  } ${error ? 'border-red-500' : ''}`}
+                  className={`w-full px-3 py-2 rounded-lg text-[13px] outline-none focus:ring-2 focus:ring-cyan-500 bg-white border border-zinc-300 text-zinc-900 placeholder-zinc-400 ${error ? 'border-red-500' : ''}`}
                 />
                 {error && (
                   <p className="text-red-500 text-[11px] mt-1">{error}</p>
@@ -144,7 +139,7 @@ export function EmailVerificationModal({ isOpen, onClose, onSuccess, darkMode = 
                 )}
               </button>
 
-              <p className={`text-[11px] text-center ${darkMode ? 'text-zinc-500' : 'text-zinc-500'}`}>
+              <p className="text-[11px] text-center text-zinc-500">
                 Don&apos;t have access yet?{' '}
                 <button 
                   onClick={() => {

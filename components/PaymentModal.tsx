@@ -7,10 +7,9 @@ interface PaymentModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
-  darkMode?: boolean;
 }
 
-export function PaymentModal({ isOpen, onClose, onSuccess, darkMode = false }: PaymentModalProps) {
+export function PaymentModal({ isOpen, onClose, onSuccess }: PaymentModalProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [checkoutUrl, setCheckoutUrl] = useState<string | null>(null);
 
@@ -58,14 +57,14 @@ export function PaymentModal({ isOpen, onClose, onSuccess, darkMode = false }: P
       />
       
       {/* Modal */}
-      <div className={`relative w-full max-w-md rounded-lg shadow-2xl overflow-hidden ${darkMode ? 'bg-zinc-900 text-zinc-100' : 'bg-white text-zinc-900'}`}>
+      <div className="relative w-full max-w-md rounded-lg shadow-2xl overflow-hidden bg-white text-zinc-900">
         {/* Header */}
-        <div className={`px-6 py-4 border-b ${darkMode ? 'border-zinc-700' : 'border-zinc-200'}`}>
+        <div className="px-6 py-4 border-b border-zinc-200">
           <div className="flex items-center justify-between">
             <h2 className="text-[13px] font-semibold">Unlock GIF Exports</h2>
             <button
               onClick={onClose}
-              className={`p-1 rounded-lg transition-colors ${darkMode ? 'hover:bg-zinc-800' : 'hover:bg-zinc-100'}`}
+              className="p-1 rounded-lg transition-colors hover:bg-zinc-100"
               aria-label="Close"
             >
               <X className="w-4 h-4" />
@@ -78,23 +77,23 @@ export function PaymentModal({ isOpen, onClose, onSuccess, darkMode = false }: P
           <div className="space-y-4">
             <div>
               <h3 className="text-[13px] font-medium mb-2">GIF Export Feature</h3>
-              <p className={`text-[13px] ${darkMode ? 'text-zinc-400' : 'text-zinc-600'}`}>
+              <p className="text-[13px] text-zinc-600">
                 Get unlimited GIF exports for all your generative artworks. Perfect for sharing your creations on social media!
               </p>
-              <p className={`text-[11px] mt-2 ${darkMode ? 'text-zinc-500' : 'text-zinc-500'}`}>
+              <p className="text-[11px] mt-2 text-zinc-500">
                 You&apos;ll be redirected to Polar to complete your payment. Enter your email there to enable cross-device access.
               </p>
             </div>
 
-            <div className={`p-4 rounded-lg ${darkMode ? 'bg-zinc-800' : 'bg-zinc-50'}`}>
+            <div className="p-4 rounded-lg bg-zinc-50">
               <div className="flex items-baseline gap-2">
                 <span className="text-[13px] font-bold">Pay What You Want</span>
-                <span className={`text-[13px] ${darkMode ? 'text-zinc-400' : 'text-zinc-600'}`}>· one-time</span>
+                <span className="text-[13px] text-zinc-600">· one-time</span>
               </div>
-              <p className={`mt-2 text-[11px] ${darkMode ? 'text-zinc-500' : 'text-zinc-500'}`}>
+              <p className="mt-2 text-[11px] text-zinc-500">
                 Choose your own price. Suggested: $5
               </p>
-              <ul className={`mt-3 space-y-2 text-[13px] ${darkMode ? 'text-zinc-300' : 'text-zinc-700'}`}>
+              <ul className="mt-3 space-y-2 text-[13px] text-zinc-700">
                 <li className="flex items-center gap-2">
                   <span className="text-cyan-500">✓</span>
                   <span>Unlimited GIF exports</span>
@@ -117,7 +116,7 @@ export function PaymentModal({ isOpen, onClose, onSuccess, darkMode = false }: P
             {isLoading ? (
               <div className="flex items-center justify-center py-8">
                 <Loader2 className="w-6 h-6 animate-spin text-cyan-500" />
-                <span className={`ml-2 text-[13px] ${darkMode ? 'text-zinc-400' : 'text-zinc-600'}`}>Creating checkout...</span>
+                <span className="ml-2 text-[13px] text-zinc-600">Creating checkout...</span>
               </div>
             ) : checkoutUrl ? (
               <a
@@ -128,7 +127,7 @@ export function PaymentModal({ isOpen, onClose, onSuccess, darkMode = false }: P
                 <ExternalLink className="w-4 h-4" />
               </a>
             ) : (
-              <div className={`text-[13px] text-center py-4 ${darkMode ? 'text-zinc-400' : 'text-zinc-600'}`}>
+              <div className="text-[13px] text-center py-4 text-zinc-600">
                 Failed to create checkout. Please try again.
               </div>
             )}
@@ -136,7 +135,7 @@ export function PaymentModal({ isOpen, onClose, onSuccess, darkMode = false }: P
         </div>
 
         {/* Footer */}
-        <div className={`px-6 py-3 text-[13px] border-t ${darkMode ? 'border-zinc-700 text-zinc-500' : 'border-zinc-200 text-zinc-500'}`}>
+        <div className="px-6 py-3 text-[13px] border-t border-zinc-200 text-zinc-500">
           <p className="text-center mb-2">
             Secure payment powered by{" "}
             <a 

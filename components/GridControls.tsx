@@ -14,7 +14,7 @@ interface GridControlsProps {
   onExportGif: (duration: number, fps: number) => void;
   onToggleAnimation: () => void;
   onRandomize: () => void;
-  darkMode?: boolean;
+  
 }
 
 interface ControlConfig {
@@ -50,7 +50,7 @@ const sections: Section[] = [
   },
 ];
 
-export default function GridControls({ params, onParamChange, onColorChange, onExportImage, onExportGif, onToggleAnimation, onRandomize, darkMode = false }: GridControlsProps) {
+export default function GridControls({ params, onParamChange, onColorChange, onExportImage, onExportGif, onToggleAnimation, onRandomize }: GridControlsProps) {
   const [gifDuration, setGifDuration] = useState(3);
   const [gifFps, setGifFps] = useState(30);
   const [isExporting, setIsExporting] = useState(false);

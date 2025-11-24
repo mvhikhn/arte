@@ -12,7 +12,7 @@ interface RotatedGridControlsProps {
   onColorChange: (param: keyof RotatedGridArtworkParams, value: string) => void;
   onExportImage: () => void;
   onRandomize: () => void;
-  darkMode?: boolean;
+  
   onRegenerate: () => void;
 }
 
@@ -53,7 +53,7 @@ const sections: Section[] = [
   },
 ];
 
-export default function RotatedGridControls({ params, onParamChange, onColorChange, onExportImage, onRandomize, onRegenerate, darkMode = false }: RotatedGridControlsProps) {
+export default function RotatedGridControls({ params, onParamChange, onColorChange, onExportImage, onRandomize, onRegenerate }: RotatedGridControlsProps) {
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(["Grid Settings", "Colors"]));
 
   const toggleSection = (title: string) => {
