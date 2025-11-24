@@ -5,10 +5,12 @@ import Artwork, { ArtworkParams, ArtworkRef } from "@/components/Artwork";
 import GridArtwork, { GridArtworkParams, GridArtworkRef } from "@/components/GridArtwork";
 import MosaicArtwork, { MosaicArtworkParams, MosaicArtworkRef } from "@/components/MosaicArtwork";
 import RotatedGridArtwork, { RotatedGridArtworkParams, RotatedGridArtworkRef } from "@/components/RotatedGridArtwork";
+import TreeArtwork, { TreeArtworkParams, TreeArtworkRef } from "@/components/TreeArtwork";
 import Controls from "@/components/Controls";
 import GridControls from "@/components/GridControls";
 import MosaicControls from "@/components/MosaicControls";
 import RotatedGridControls from "@/components/RotatedGridControls";
+import TreeControls from "@/components/TreeControls";
 import { ExportPopup } from "@/components/ExportPopup";
 import { PaymentModal } from "@/components/PaymentModal";
 import { EmailVerificationModal } from "@/components/EmailVerificationModal";
@@ -16,7 +18,7 @@ import { ArrowRight } from "lucide-react";
 import { getRandomColors } from "@/lib/colorPalettes";
 import { hasGifAccess, grantGifAccess } from "@/lib/paymentUtils";
 
-type ArtworkType = "flow" | "grid" | "mosaic" | "rotated";
+type ArtworkType = "flow" | "grid" | "mosaic" | "rotated" | "tree";
 
 // Helper to generate random value within range
 const randomInRange = (min: number, max: number) => Math.random() * (max - min) + min;
@@ -127,6 +129,55 @@ const generateRandomRotatedGridParams = (): RotatedGridArtworkParams => {
   };
 };
 
+// Generate random tree params with darker stems and lighter tips
+const generateRandomTreeParams = (): TreeArtworkParams => {
+  const stemPalette = getRandomColors(3); // Get darker colors for stems
+  const tipPalette = getRandomColors(3);  // Get lighter colors for tips
+  
+  // Helper to darken a color
+  const darkenColor = (hex: string) => {
+    const r = parseInt(hex.slice(1, 3), 16);
+    const g = parseInt(hex.slice(3, 5), 16);
+    const b = parseInt(hex.slice(5, 7), 16);
+    const factor = 0.6; // Darken by 40%
+    return `#${Math.floor(r * factor).toString(16).padStart(2, '0')}${Math.floor(g * factor).toString(16).padStart(2, '0')}${Math.floor(b * factor).toString(16).padStart(2, '0')}`;
+  };
+  
+  // Helper to lighten a color
+  const lightenColor = (hex: string) => {
+    const r = parseInt(hex.slice(1, 3), 16);
+    const g = parseInt(hex.slice(3, 5), 16);
+    const b = parseInt(hex.slice(5, 7), 16);
+    const factor = 1.4; // Lighten by 40%
+    return `#${Math.min(255, Math.floor(r * factor)).toString(16).padStart(2, '0')}${Math.min(255, Math.floor(g * factor)).toString(16).padStart(2, '0')}${Math.min(255, Math.floor(b * factor)).toString(16).padStart(2, '0')}`;
+  };
+  
+  return {
+    initialPaths: Math.floor(randomInRange(1, 3)),
+    initialVelocity: randomInRange(8, 15),
+    branchProbability: randomInRange(0.15, 0.25),
+    diameterShrink: randomInRange(0.6, 0.7),
+    minDiameter: randomInRange(0.2, 0.4),
+    bumpMultiplier: randomInRange(0.15, 0.3),
+    velocityRetention: randomInRange(0.7, 0.85),
+    speedMin: randomInRange(4, 6),
+    speedMax: randomInRange(9, 12),
+    finishedCircleSize: randomInRange(8, 15),
+    strokeWeightMultiplier: randomInRange(0.8, 1.5),
+    stemColor1: darkenColor(stemPalette.colors[0]),
+    stemColor2: darkenColor(stemPalette.colors[1]),
+    stemColor3: darkenColor(stemPalette.colors[2]),
+    tipColor1: lightenColor(tipPalette.colors[0]),
+    tipColor2: lightenColor(tipPalette.colors[1]),
+    tipColor3: lightenColor(tipPalette.colors[2]),
+    backgroundColor: "#fafafa",
+    seed: Date.now(),
+    exportWidth: 1600,
+    exportHeight: 2000,
+    isAnimating: true,
+  };
+};
+
 
 export default function Home() {
   const [currentArtwork, setCurrentArtwork] = useState<ArtworkType>("flow");
@@ -135,6 +186,7 @@ export default function Home() {
   const gridArtworkRef = useRef<GridArtworkRef>(null);
   const mosaicArtworkRef = useRef<MosaicArtworkRef>(null);
   const rotatedGridArtworkRef = useRef<RotatedGridArtworkRef>(null);
+  const treeArtworkRef = useRef<TreeArtworkRef>(null);
   const [exportStatus, setExportStatus] = useState({ isExporting: false, message: "" });
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [showEmailVerification, setShowEmailVerification] = useState(false);
@@ -178,6 +230,8 @@ export default function Home() {
   const [mosaicParams, setMosaicParams] = useState<MosaicArtworkParams>(generateRandomMosaicParams());
 
   const [rotatedGridParams, setRotatedGridParams] = useState<RotatedGridArtworkParams>(generateRandomRotatedGridParams());
+
+  const [treeParams, setTreeParams] = useState<TreeArtworkParams>(generateRandomTreeParams());
 
   const handleFlowParamChange = (param: keyof ArtworkParams, value: number) => {
     setFlowParams((prev) => ({
@@ -235,6 +289,20 @@ export default function Home() {
     }));
   };
 
+  const handleTreeParamChange = (param: keyof TreeArtworkParams, value: number) => {
+    setTreeParams((prev) => ({
+      ...prev,
+      [param]: value,
+    }));
+  };
+
+  const handleTreeColorChange = (param: keyof TreeArtworkParams, value: string) => {
+    setTreeParams((prev) => ({
+      ...prev,
+      [param]: value,
+    }));
+  };
+
   const handleExportImage = () => {
     setExportStatus({ isExporting: true, message: "Exporting image..." });
     if (currentArtwork === "flow") {
@@ -245,6 +313,8 @@ export default function Home() {
       mosaicArtworkRef.current?.exportImage();
     } else if (currentArtwork === "rotated") {
       rotatedGridArtworkRef.current?.exportImage();
+    } else if (currentArtwork === "tree") {
+      treeArtworkRef.current?.exportImage();
     }
     setTimeout(() => {
       setExportStatus({ isExporting: false, message: "Image exported!" });
@@ -270,6 +340,8 @@ export default function Home() {
       flowArtworkRef.current?.exportGif(duration, fps);
     } else if (currentArtwork === "grid") {
       gridArtworkRef.current?.exportGif(duration, fps);
+    } else if (currentArtwork === "tree") {
+      treeArtworkRef.current?.exportGif(duration, fps);
     }
     setTimeout(() => {
       setExportStatus({ isExporting: false, message: "GIF exported!" });
@@ -295,6 +367,11 @@ export default function Home() {
       }));
     } else if (currentArtwork === "grid") {
       setGridParams((prev) => ({
+        ...prev,
+        isAnimating: !prev.isAnimating,
+      }));
+    } else if (currentArtwork === "tree") {
+      setTreeParams((prev) => ({
         ...prev,
         isAnimating: !prev.isAnimating,
       }));
@@ -425,11 +502,23 @@ export default function Home() {
     }));
   };
 
+  const handleTreeRandomize = () => {
+    setTreeParams(generateRandomTreeParams());
+  };
+
+  const handleTreeRegenerate = () => {
+    setTreeParams((prev) => ({
+      ...prev,
+      seed: Date.now(),
+    }));
+  };
+
   const handleNextArtwork = () => {
     setCurrentArtwork((prev) => {
       if (prev === "flow") return "grid";
       if (prev === "grid") return "mosaic";
       if (prev === "mosaic") return "rotated";
+      if (prev === "rotated") return "tree";
       return "flow";
     });
   };
@@ -468,8 +557,10 @@ export default function Home() {
               <GridArtwork ref={gridArtworkRef} params={gridParams} />
             ) : currentArtwork === "mosaic" ? (
               <MosaicArtwork ref={mosaicArtworkRef} params={mosaicParams} />
-            ) : (
+            ) : currentArtwork === "rotated" ? (
               <RotatedGridArtwork ref={rotatedGridArtworkRef} params={rotatedGridParams} />
+            ) : (
+              <TreeArtwork ref={treeArtworkRef} params={treeParams} />
             )}
           </div>
         </div>
@@ -529,7 +620,7 @@ export default function Home() {
               onRandomize={handleMosaicRandomize}
               onRegenerate={handleMosaicRegenerate}
             />
-          ) : (
+          ) : currentArtwork === "rotated" ? (
             <RotatedGridControls
               params={rotatedGridParams}
               onParamChange={handleRotatedGridParamChange}
@@ -537,6 +628,17 @@ export default function Home() {
               onExportImage={handleExportImage}
               onRandomize={handleRotatedGridRandomize}
               onRegenerate={handleRotatedGridRegenerate}
+            />
+          ) : (
+            <TreeControls
+              params={treeParams}
+              onParamChange={handleTreeParamChange}
+              onColorChange={handleTreeColorChange}
+              onExportImage={handleExportImage}
+              onExportGif={handleExportGif}
+              onToggleAnimation={handleToggleAnimation}
+              onRandomize={handleTreeRandomize}
+              onRegenerate={handleTreeRegenerate}
             />
           )}
         </div>
