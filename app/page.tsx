@@ -674,6 +674,20 @@ export default function Home() {
         <ArrowRight className="w-5 h-5" />
       </button>
 
+      {/* Controls Toggle Button - Always Visible */}
+      {!controlsVisible && (
+        <button
+          onClick={() => setControlsVisible(true)}
+          className="fixed top-6 right-6 px-4 py-3 bg-white hover:bg-zinc-50 border border-zinc-200 rounded-lg shadow-lg transition-all hover:shadow-xl flex items-center gap-2 z-40"
+          aria-label="Open controls"
+        >
+          <span className="text-sm font-medium">Controls</span>
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          </svg>
+        </button>
+      )}
+
       {/* Controls Dropdown Panel - Fixed to viewport right edge */}
       <div className={`fixed top-0 right-0 w-[340px] max-h-screen shadow-2xl transition-all duration-300 z-50 bg-white border-l border-zinc-200 ${controlsVisible ? 'translate-x-0' : 'translate-x-full'}`}>
         {/* Controls Header - Toggle Button Integrated */}
