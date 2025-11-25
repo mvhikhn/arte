@@ -662,33 +662,34 @@ export default function Home() {
             )}
           </div>
         </div>
-
-        {/* Next Button */}
-        <button
-          onClick={handleNextArtwork}
-          className="fixed bottom-4 left-4 sm:bottom-6 sm:left-6 md:bottom-8 md:left-8 w-10 h-10 flex items-center justify-center transition-colors z-30 text-zinc-400 hover:text-zinc-600"
-          aria-label="Next artwork"
-        >
-          <ArrowRight className="w-6 h-6" />
-        </button>
       </main>
 
-      {/* Controls Toggle Button - Fixed to viewport */}
-      <div className="fixed top-4 right-4 sm:top-6 sm:right-6 md:top-8 md:right-8 z-50">
+      {/* Next Artwork Button - Bottom Right */}
+      <button
+        onClick={handleNextArtwork}
+        className="fixed bottom-6 right-6 px-6 py-3 bg-zinc-900 hover:bg-zinc-800 text-white rounded-lg shadow-lg transition-all hover:shadow-xl flex items-center gap-2 z-40"
+        aria-label="Next artwork"
+      >
+        <span className="text-sm font-medium">Next Artwork</span>
+        <ArrowRight className="w-5 h-5" />
+      </button>
+
+      {/* Controls Dropdown Panel - Fixed to viewport right edge */}
+      <div className={`fixed top-0 right-0 w-[340px] max-h-screen shadow-2xl transition-all duration-300 z-50 bg-white border-l border-zinc-200 ${controlsVisible ? 'translate-x-0' : 'translate-x-full'}`}>
+        {/* Controls Header - Toggle Button Integrated */}
         <button
           onClick={() => setControlsVisible(!controlsVisible)}
-          className="px-4 py-2 border shadow-sm transition-colors flex items-center gap-2 bg-white border-zinc-300 hover:bg-zinc-50 text-zinc-700"
+          className="w-full px-6 py-4 border-b border-zinc-200 transition-colors flex items-center justify-between bg-white hover:bg-zinc-50 text-zinc-700 sticky top-0 z-10"
           aria-label="Toggle controls"
         >
-          <span className="text-[13px] font-medium">Controls</span>
-          <svg className={`w-4 h-4 transition-transform ${controlsVisible ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+          <span className="text-sm font-semibold">Controls</span>
+          <svg className={`w-5 h-5 transition-transform ${controlsVisible ? 'rotate-0' : 'rotate-180'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
           </svg>
         </button>
-      </div>
-
-      {/* Controls Dropdown - Fixed to viewport right edge */}
-      <div className={`fixed top-16 right-0 w-[340px] sm:top-20 md:top-24 max-h-[calc(100vh-5rem)] sm:max-h-[70vh] shadow-2xl overflow-y-auto transition-all duration-300 z-50 bg-white border-l border-zinc-200 ${controlsVisible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4 pointer-events-none'}`}>
+        
+        {/* Controls Content - Scrollable */}
+        <div className="overflow-y-auto" style={{ maxHeight: 'calc(100vh - 73px)' }}>
           {currentArtwork === "flow" ? (
             <Controls 
               params={flowParams} 
@@ -745,6 +746,7 @@ export default function Home() {
             />
           )}
         </div>
+      </div>
       
       {/* Backdrop */}
       {controlsVisible && (
