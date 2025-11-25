@@ -193,7 +193,7 @@ const generateRandomTreeParams = (): TreeArtworkParams => {
 export const dynamic = 'force-dynamic';
 
 export default function Home() {
-  const [currentArtwork, setCurrentArtwork] = useState<ArtworkType>("flow");
+  const [currentArtwork, setCurrentArtwork] = useState<ArtworkType>("tree");
   const [controlsVisible, setControlsVisible] = useState(false);
   const flowArtworkRef = useRef<ArtworkRef>(null);
   const gridArtworkRef = useRef<GridArtworkRef>(null);
