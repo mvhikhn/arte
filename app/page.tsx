@@ -14,7 +14,7 @@ import TreeControls from "@/components/TreeControls";
 import { ExportPopup } from "@/components/ExportPopup";
 import { PaymentModal } from "@/components/PaymentModal";
 import { EmailVerificationModal } from "@/components/EmailVerificationModal";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, SlidersHorizontal } from "lucide-react";
 import { getRandomColors } from "@/lib/colorPalettes";
 import { hasGifAccess, grantGifAccess } from "@/lib/paymentUtils";
 
@@ -22,6 +22,43 @@ type ArtworkType = "flow" | "grid" | "mosaic" | "rotated" | "tree";
 
 // Helper to generate random value within range
 const randomInRange = (min: number, max: number) => Math.random() * (max - min) + min;
+
+// Fixed default params for SSR/hydration consistency
+const getDefaultTreeParams = (): TreeArtworkParams => ({
+  initialPaths: 2,
+  initialVelocity: 10,
+  branchProbability: 0.2,
+  diameterShrink: 0.65,
+  minDiameter: 0.3,
+  bumpMultiplier: 0.2,
+  velocityRetention: 0.77,
+  speedMin: 5,
+  speedMax: 10,
+  finishedCircleSize: 12,
+  strokeWeightMultiplier: 1.1,
+  stemColor1: "#3d2817",
+  stemColor2: "#4a3319",
+  stemColor3: "#5c3d1f",
+  tipColor1: "#e8c4a0",
+  tipColor2: "#f0d4b8",
+  tipColor3: "#d9b89a",
+  backgroundColor: "#fafafa",
+  textContent: "",
+  textEnabled: false,
+  fontSize: 24,
+  textColor: "#333333",
+  textAlign: 'center' as 'left' | 'center' | 'right',
+  textX: 400,
+  textY: 50,
+  lineHeight: 1.5,
+  fontFamily: 'Georgia, serif',
+  fontUrl: '',
+  paperGrain: false,
+  seed: 1000,
+  exportWidth: 1600,
+  exportHeight: 2000,
+  isAnimating: true,
+});
 
 // Generate random initial flow params
 const generateRandomFlowParams = (): ArtworkParams => {
@@ -133,7 +170,7 @@ const generateRandomRotatedGridParams = (): RotatedGridArtworkParams => {
 const generateRandomTreeParams = (): TreeArtworkParams => {
   const stemPalette = getRandomColors(3); // Get darker colors for stems
   const tipPalette = getRandomColors(3);  // Get lighter colors for tips
-  
+
   // Helper to darken a color
   const darkenColor = (hex: string) => {
     const r = parseInt(hex.slice(1, 3), 16);
@@ -142,7 +179,7 @@ const generateRandomTreeParams = (): TreeArtworkParams => {
     const factor = 0.6; // Darken by 40%
     return `#${Math.floor(r * factor).toString(16).padStart(2, '0')}${Math.floor(g * factor).toString(16).padStart(2, '0')}${Math.floor(b * factor).toString(16).padStart(2, '0')}`;
   };
-  
+
   // Helper to lighten a color
   const lightenColor = (hex: string) => {
     const r = parseInt(hex.slice(1, 3), 16);
@@ -151,7 +188,7 @@ const generateRandomTreeParams = (): TreeArtworkParams => {
     const factor = 1.4; // Lighten by 40%
     return `#${Math.min(255, Math.floor(r * factor)).toString(16).padStart(2, '0')}${Math.min(255, Math.floor(g * factor)).toString(16).padStart(2, '0')}${Math.min(255, Math.floor(b * factor)).toString(16).padStart(2, '0')}`;
   };
-  
+
   return {
     initialPaths: Math.floor(randomInRange(1, 3)),
     initialVelocity: randomInRange(8, 15),
@@ -180,6 +217,7 @@ const generateRandomTreeParams = (): TreeArtworkParams => {
     textY: 50,
     lineHeight: 1.5,
     fontFamily: 'Georgia, serif',
+    customFontFamily: '',
     paperGrain: false,
     seed: Date.now(),
     exportWidth: 1600,
@@ -255,34 +293,40 @@ export default function Home() {
     return false;
   };
 
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
   // Check if returning from successful payment or email verification
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const isReturningFromPayment = urlParams.get('payment') === 'success';
     const isReturningFromVerification = urlParams.get('verified') === 'true';
-    
+
     // Restore artwork state if returning from payment or verification
     if (isReturningFromPayment || isReturningFromVerification) {
       const restored = restoreArtworkState();
-      
+
       if (isReturningFromPayment) {
         // Grant local access (for immediate use on this device)
         grantGifAccess();
-        
+
         // Show success message
         setExportStatus({ isExporting: false, message: "Payment successful! GIF exports unlocked!" });
         setTimeout(() => {
           setExportStatus({ isExporting: false, message: "" });
         }, 3000);
       }
-      
+
       if (isReturningFromVerification) {
         setExportStatus({ isExporting: false, message: restored ? "Welcome back! Your artwork has been restored." : "Email verified!" });
         setTimeout(() => {
           setExportStatus({ isExporting: false, message: "" });
         }, 3000);
       }
-      
+
       // Clean URL
       window.history.replaceState({}, '', window.location.pathname);
     }
@@ -292,14 +336,16 @@ export default function Home() {
       saveArtworkState(); // Save state before showing verification modal
       setShowEmailVerification(true);
     };
-    
+
     window.addEventListener('showEmailVerification', handleShowEmailVerification);
-    
+
     return () => {
       window.removeEventListener('showEmailVerification', handleShowEmailVerification);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+
 
   const handleFlowParamChange = (param: keyof ArtworkParams, value: number) => {
     setFlowParams((prev) => ({
@@ -449,7 +495,7 @@ export default function Home() {
   const handlePaymentSuccess = () => {
     // Grant access
     grantGifAccess();
-    
+
     // Execute the pending export if exists
     if (pendingGifExport) {
       executeGifExport(pendingGifExport.duration, pendingGifExport.fps);
@@ -621,20 +667,24 @@ export default function Home() {
     });
   };
 
+  if (!isMounted) {
+    return null;
+  }
+
   return (
-    <div className="relative">
-      <ExportPopup 
-        isExporting={exportStatus.isExporting} 
+    <div className="relative w-full h-full">
+      <ExportPopup
+        isExporting={exportStatus.isExporting}
         message={exportStatus.message}
         onClose={() => setExportStatus({ isExporting: false, message: "" })}
       />
       <PaymentModal
         isOpen={showPaymentModal}
-        onClose={() => {
-          setShowPaymentModal(false);
-          setPendingGifExport(null);
+        onClose={() => setShowPaymentModal(false)}
+        onSuccess={() => {
+          // Payment successful, refresh to update status
+          window.location.reload();
         }}
-        onSuccess={handlePaymentSuccess}
       />
       <EmailVerificationModal
         isOpen={showEmailVerification}
@@ -677,19 +727,21 @@ export default function Home() {
       {!controlsVisible && (
         <button
           onClick={() => setControlsVisible(true)}
-          className="fixed top-6 right-0 w-[340px] py-4 bg-white hover:bg-zinc-50 border-l border-t border-b border-zinc-200 shadow-lg transition-all hover:shadow-xl flex items-center justify-between px-6 z-40"
+          className="fixed top-6 right-6 w-12 h-12 flex items-center justify-center bg-zinc-900 hover:bg-zinc-800 text-white rounded-full shadow-lg transition-all hover:shadow-xl z-40"
           aria-label="Open controls"
         >
-          <span className="text-sm font-medium text-zinc-700">Controls</span>
-          <svg className="w-5 h-5 text-zinc-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-          </svg>
+          <SlidersHorizontal className="w-6 h-6" />
         </button>
       )}
 
-      {/* Controls Dropdown Panel - Fixed to viewport right edge */}
-      <div className={`fixed top-0 right-0 w-[340px] max-h-screen shadow-2xl transition-all duration-300 z-50 bg-white border-l border-zinc-200 ${controlsVisible ? 'translate-x-0' : 'translate-x-full'}`}>
-        {/* Controls Header - Toggle Button Integrated */}
+      {/* Controls Dropdown Panel - Floating below button */}
+      <div
+        className={`fixed top-20 right-6 w-[300px] max-h-[calc(100vh-6rem)] overflow-y-auto bg-white/90 backdrop-blur-md border border-zinc-200 shadow-2xl rounded-2xl transition-all duration-300 z-50 origin-top-right ${controlsVisible
+          ? 'opacity-100 scale-100 translate-y-0'
+          : 'opacity-0 scale-95 -translate-y-2 pointer-events-none'
+          }`}
+      >
+        {/* Controls Header - Minimal */}
         <button
           onClick={() => setControlsVisible(!controlsVisible)}
           className="w-full px-6 py-4 border-b border-zinc-200 transition-colors flex items-center justify-between bg-white hover:bg-zinc-50 text-zinc-700 sticky top-0 z-10"
@@ -700,13 +752,13 @@ export default function Home() {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
           </svg>
         </button>
-        
+
         {/* Controls Content - Scrollable */}
         <div className="overflow-y-auto" style={{ maxHeight: 'calc(100vh - 73px)' }}>
           {currentArtwork === "flow" ? (
-            <Controls 
-              params={flowParams} 
-              onParamChange={handleFlowParamChange} 
+            <Controls
+              params={flowParams}
+              onParamChange={handleFlowParamChange}
               onColorChange={handleFlowColorChange}
               onExportImage={handleExportImage}
               onExportGif={handleExportGif}
@@ -760,10 +812,10 @@ export default function Home() {
           )}
         </div>
       </div>
-      
+
       {/* Backdrop */}
       {controlsVisible && (
-        <div 
+        <div
           className="fixed inset-0 z-40"
           onClick={() => setControlsVisible(false)}
         />

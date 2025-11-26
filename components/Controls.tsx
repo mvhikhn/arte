@@ -15,7 +15,7 @@ interface ControlsProps {
   onExportWallpapers: () => void;
   onToggleAnimation: () => void;
   onRandomize: () => void;
-  
+
 }
 
 interface ControlConfig {
@@ -113,30 +113,30 @@ export default function Controls({ params, onParamChange, onColorChange, onExpor
   };
 
   return (
-    <div className={`h-full overflow-y-auto overflow-x-hidden bg-white text-zinc-900`}>
+    <div className="h-full overflow-y-auto overflow-x-hidden bg-white text-zinc-900 text-xs">
       {/* Control Buttons */}
-      <div className={`px-2 py-2 space-y-1.5 border-b border-zinc-200`}>
+      <div className="px-3 py-3 border-b border-zinc-100 flex gap-2">
         <button
           onClick={onToggleAnimation}
-          className={`w-full px-2 py-1.5 rounded flex items-center justify-center gap-1.5 transition-colors bg-zinc-100 hover:bg-zinc-200 text-zinc-900`}
+          className="flex-1 px-3 py-1.5 bg-zinc-100 hover:bg-zinc-200 rounded-md flex items-center justify-center gap-1.5 transition-colors font-medium text-xs"
         >
           {params.isAnimating ? (
             <>
-              <Pause className="w-3.5 h-3.5" />
+              <Pause className="w-3 h-3" />
               Pause
             </>
           ) : (
             <>
-              <Play className="w-3.5 h-3.5" />
+              <Play className="w-3 h-3" />
               Play
             </>
           )}
         </button>
         <button
           onClick={onRandomize}
-          className="w-full px-2 py-1.5 bg-cyan-500 hover:bg-cyan-600 text-white rounded flex items-center justify-center gap-1.5 transition-colors"
+          className="flex-1 px-3 py-1.5 bg-zinc-900 hover:bg-zinc-800 text-white rounded-md flex items-center justify-center gap-1.5 transition-colors font-medium text-xs"
         >
-          <Shuffle className="w-3.5 h-3.5" />
+          <Shuffle className="w-3 h-3" />
           Randomize
         </button>
       </div>
@@ -145,48 +145,49 @@ export default function Controls({ params, onParamChange, onColorChange, onExpor
       {sections.map((section) => {
         const isExpanded = expandedSections.has(section.title);
         return (
-          <div key={section.title} className={`border-b border-zinc-200`}>
+          <div key={section.title} className="border-b border-zinc-100">
             <button
               onClick={() => toggleSection(section.title)}
-              className={`w-full px-2 py-2 flex items-center justify-between transition-colors hover:bg-zinc-50`}
+              className="w-full px-3 py-2 flex items-center justify-between hover:bg-zinc-50 transition-colors"
             >
-              <span className="font-medium">{section.title}</span>
+              <span className="font-semibold text-xs uppercase tracking-wider text-zinc-500">{section.title}</span>
               {isExpanded ? (
-                <ChevronDown className="w-3.5 h-3.5" />
+                <ChevronDown className="w-3 h-3 text-zinc-400" />
               ) : (
-                <ChevronRight className="w-3.5 h-3.5" />
+                <ChevronRight className="w-3 h-3 text-zinc-400" />
               )}
             </button>
             {isExpanded && (
-              <div className="px-2 pb-2 space-y-1.5">
+              <div className="px-3 pb-3 space-y-3">
                 {section.controls.map((config) => {
                   const value = params[config.key];
                   if (typeof value !== 'number') return null;
                   return (
-                    <div key={config.key} className="flex items-center gap-1.5">
-                      <span className={`min-w-[75px] text-ellipsis overflow-hidden whitespace-nowrap flex-shrink-0 text-[13px] text-zinc-700`}>{config.label}</span>
-                      <div className="flex-1 min-w-0">
-                        <Slider
+                    <div key={config.key} className="space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <span className="text-zinc-700 font-medium">{config.label}</span>
+                        <input
+                          type="number"
+                          value={formatValue(value, config.step)}
+                          onChange={(e) => {
+                            const newVal = parseFloat(e.target.value);
+                            if (!isNaN(newVal)) {
+                              onParamChange(config.key, newVal);
+                            }
+                          }}
+                          step={config.step}
                           min={config.min}
                           max={config.max}
-                          step={config.step}
-                          value={[value]}
-                          onValueChange={(values) => onParamChange(config.key, values[0])}
+                          className="w-12 h-5 bg-transparent text-right font-mono text-zinc-500 focus:outline-none focus:text-zinc-900"
                         />
                       </div>
-                      <input
-                        type="number"
-                        value={formatValue(value, config.step)}
-                        onChange={(e) => {
-                          const newVal = parseFloat(e.target.value);
-                          if (!isNaN(newVal)) {
-                            onParamChange(config.key, newVal);
-                          }
-                        }}
-                        step={config.step}
+                      <Slider
                         min={config.min}
                         max={config.max}
-                        className={`w-11 h-6 rounded px-1.5 font-mono text-right focus:outline-none focus:border-cyan-500 flex-shrink-0 bg-zinc-50 border border-zinc-300 text-zinc-900`}
+                        step={config.step}
+                        value={[value]}
+                        onValueChange={(values) => onParamChange(config.key, values[0])}
+                        className="py-1"
                       />
                     </div>
                   );
@@ -198,43 +199,45 @@ export default function Controls({ params, onParamChange, onColorChange, onExpor
       })}
 
       {/* Color Palette Section */}
-      <div className={`border-b border-zinc-200`}>
+      <div className="border-b border-zinc-100">
         <button
           onClick={() => toggleSection("Color Palette")}
-          className={`w-full px-2 py-2 flex items-center justify-between transition-colors hover:bg-zinc-50`}
+          className="w-full px-3 py-2 flex items-center justify-between hover:bg-zinc-50 transition-colors"
         >
-          <span className="font-medium">Color Palette</span>
+          <span className="font-semibold text-xs uppercase tracking-wider text-zinc-500">Color Palette</span>
           {expandedSections.has("Color Palette") ? (
-            <ChevronDown className="w-3.5 h-3.5" />
+            <ChevronDown className="w-3 h-3 text-zinc-400" />
           ) : (
-            <ChevronRight className="w-3.5 h-3.5" />
+            <ChevronRight className="w-3 h-3 text-zinc-400" />
           )}
         </button>
         {expandedSections.has("Color Palette") && (
-          <div className="px-2 pb-2 space-y-1.5">
+          <div className="px-3 pb-3 grid grid-cols-2 gap-2">
             {['color1', 'color2', 'color3', 'color4', 'color5'].map((colorKey, index) => {
               const value = params[colorKey as keyof ArtworkParams] as string;
               return (
-                <div key={colorKey} className="flex items-center gap-1.5">
-                  <span className={`min-w-[50px] flex-shrink-0 text-[13px] text-zinc-700`}>Color {index + 1}</span>
-                  <div className="w-14 flex-shrink-0">
-                    <ColorPicker 
-                      value={value} 
-                      onChange={(v) => onColorChange(colorKey as keyof ArtworkParams, v)} 
+                <div key={colorKey} className="flex flex-col gap-1">
+                  <span className="text-[10px] text-zinc-500 uppercase tracking-wide">Color {index + 1}</span>
+                  <div className="flex items-center gap-2">
+                    <div className="w-6 h-6 rounded-full overflow-hidden border border-zinc-200 flex-shrink-0">
+                      <ColorPicker
+                        value={value}
+                        onChange={(v) => onColorChange(colorKey as keyof ArtworkParams, v)}
+                      />
+                    </div>
+                    <input
+                      type="text"
+                      value={value}
+                      onChange={(e) => {
+                        const newVal = e.target.value;
+                        if (/^#[0-9A-Fa-f]{0,6}$/.test(newVal)) {
+                          onColorChange(colorKey as keyof ArtworkParams, newVal);
+                        }
+                      }}
+                      className="w-full h-6 bg-transparent font-mono text-[10px] text-zinc-700 focus:outline-none uppercase"
+                      placeholder="#000000"
                     />
                   </div>
-                  <input
-                    type="text"
-                    value={value}
-                    onChange={(e) => {
-                      const newVal = e.target.value;
-                      if (/^#[0-9A-Fa-f]{0,6}$/.test(newVal)) {
-                        onColorChange(colorKey as keyof ArtworkParams, newVal);
-                      }
-                    }}
-                    className={`flex-1 min-w-0 h-6 rounded px-1.5 font-mono text-[13px] focus:outline-none focus:border-cyan-500 bg-zinc-50 border border-zinc-300 text-zinc-900`}
-                    placeholder="#000000"
-                  />
                 </div>
               );
             })}
@@ -243,83 +246,89 @@ export default function Controls({ params, onParamChange, onColorChange, onExpor
       </div>
 
       {/* Export Section */}
-      <div className={`border-b border-zinc-200`}>
+      <div className="border-b border-zinc-100">
         <button
           onClick={() => toggleSection("Export")}
-          className={`w-full px-2 py-2 flex items-center justify-between transition-colors hover:bg-zinc-50`}
+          className="w-full px-3 py-2 flex items-center justify-between hover:bg-zinc-50 transition-colors"
         >
-          <span className="font-medium">Export</span>
+          <span className="font-semibold text-xs uppercase tracking-wider text-zinc-500">Export</span>
           {expandedSections.has("Export") ? (
-            <ChevronDown className="w-3.5 h-3.5" />
+            <ChevronDown className="w-3 h-3 text-zinc-400" />
           ) : (
-            <ChevronRight className="w-3.5 h-3.5" />
+            <ChevronRight className="w-3 h-3 text-zinc-400" />
           )}
         </button>
         {expandedSections.has("Export") && (
-          <div className="px-2 pb-2 space-y-2">
-            <div className="flex items-center gap-1.5">
-              <span className={`min-w-[50px] flex-shrink-0 text-zinc-700`}>Size</span>
-              <input
-                type="number"
-                value={params.exportWidth}
-                onChange={(e) => onParamChange('exportWidth', parseInt(e.target.value) || 800)}
-                className={`w-16 px-1.5 py-1 rounded outline-none h-6 bg-zinc-50 border border-zinc-300 text-zinc-900`}
-              />
-              <span className="text-zinc-700">×</span>
-              <input
-                type="number"
-                value={params.exportHeight}
-                onChange={(e) => onParamChange('exportHeight', parseInt(e.target.value) || 1000)}
-                className={`w-16 px-1.5 py-1 rounded outline-none h-6 bg-zinc-50 border border-zinc-300 text-zinc-900`}
-              />
+          <div className="px-3 pb-3 space-y-2">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-zinc-700 font-medium">Size</span>
+              <div className="flex items-center gap-2">
+                <input
+                  type="number"
+                  value={params.exportWidth}
+                  onChange={(e) => onParamChange('exportWidth', parseInt(e.target.value) || 800)}
+                  className="w-12 h-5 bg-transparent text-right font-mono text-zinc-500 focus:outline-none focus:text-zinc-900"
+                />
+                <span className="text-zinc-400">×</span>
+                <input
+                  type="number"
+                  value={params.exportHeight}
+                  onChange={(e) => onParamChange('exportHeight', parseInt(e.target.value) || 1000)}
+                  className="w-12 h-5 bg-transparent text-right font-mono text-zinc-500 focus:outline-none focus:text-zinc-900"
+                />
+              </div>
             </div>
+
             <button
               onClick={onExportImage}
-              className={`w-full px-2 py-1.5 rounded flex items-center justify-center gap-1.5 transition-colors bg-zinc-100 hover:bg-zinc-200 text-zinc-900`}
+              className="w-full px-3 py-2 bg-zinc-50 hover:bg-zinc-100 border border-zinc-200 rounded-md flex items-center justify-center gap-2 transition-colors text-xs font-medium text-zinc-700"
             >
               <ImageIcon className="w-3.5 h-3.5" />
               Export Image
             </button>
-            <div className="flex items-center gap-1.5">
-              <span className={`min-w-[75px] flex-shrink-0 text-zinc-700`}>GIF Duration</span>
-              <div className="flex-1 min-w-0">
-                <Slider
+
+            <div className="pt-2 border-t border-zinc-100">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-zinc-700 font-medium">GIF Duration (s)</span>
+                <input
+                  type="number"
+                  value={gifDuration}
+                  onChange={(e) => {
+                    const newVal = parseFloat(e.target.value);
+                    if (!isNaN(newVal) && newVal >= 1 && newVal <= 10) {
+                      setGifDuration(newVal);
+                    }
+                  }}
+                  step={0.5}
                   min={1}
                   max={10}
-                  step={0.5}
-                  value={[gifDuration]}
-                  onValueChange={(v) => setGifDuration(v[0])}
+                  className="w-12 h-5 bg-transparent text-right font-mono text-zinc-500 focus:outline-none focus:text-zinc-900"
                 />
               </div>
-              <input
-                type="number"
-                value={gifDuration}
-                onChange={(e) => {
-                  const newVal = parseFloat(e.target.value);
-                  if (!isNaN(newVal) && newVal >= 1 && newVal <= 10) {
-                    setGifDuration(newVal);
-                  }
-                }}
-                step={0.5}
+              <Slider
                 min={1}
                 max={10}
-                className={`w-11 h-6 rounded px-1.5 font-mono text-right focus:outline-none focus:border-cyan-500 flex-shrink-0 bg-zinc-50 border border-zinc-300 text-zinc-900`}
+                step={0.5}
+                value={[gifDuration]}
+                onValueChange={(v) => setGifDuration(v[0])}
+                className="mb-2"
               />
+              <button
+                onClick={handleExportGif}
+                disabled={isExporting}
+                className="w-full px-3 py-2 bg-zinc-50 hover:bg-zinc-100 border border-zinc-200 rounded-md flex items-center justify-center gap-2 transition-colors disabled:opacity-50 text-xs font-medium text-zinc-700"
+              >
+                <Download className="w-3.5 h-3.5" />
+                {isExporting ? 'Recording...' : 'Export GIF'}
+              </button>
             </div>
-            <button
-              onClick={handleExportGif}
-              disabled={isExporting}
-              className={`w-full px-2 py-1.5 disabled:opacity-50 rounded flex items-center justify-center gap-1.5 transition-colors bg-zinc-100 hover:bg-zinc-200 text-zinc-900`}
-            >
-              <Download className="w-3.5 h-3.5" />
-              {isExporting ? 'Recording...' : 'Export GIF'}
-            </button>
+
             <button
               onClick={onExportWallpapers}
-              className={`w-full px-2 py-1.5 rounded flex items-center justify-center gap-1.5 transition-colors bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-medium`}
+              className="w-full px-3 py-2 rounded-md flex items-center justify-center gap-2 transition-colors bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-medium mt-2"
             >
               <Monitor className="w-3.5 h-3.5" />
-              Export Wallpapers (6K+Mobile)
+              Export Wallpapers
             </button>
           </div>
         )}

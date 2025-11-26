@@ -4,7 +4,7 @@ import { useState } from "react";
 import { TreeArtworkParams } from "./TreeArtwork";
 import { Label } from "./ui/label";
 import { Slider } from "./ui/slider";
-import { Download, RefreshCw, Play, Pause, Image as ImageIcon, Monitor } from "lucide-react";
+import { ChevronDown, ChevronRight, Pause, Play, RefreshCw, Shuffle, Download, Image as ImageIcon, Monitor } from "lucide-react";
 
 interface TreeControlsProps {
   params: TreeArtworkParams;
@@ -32,9 +32,17 @@ export default function TreeControls({
   const [gifDuration, setGifDuration] = useState(5);
   const [gifFps, setGifFps] = useState(30);
   const [isExporting, setIsExporting] = useState(false);
-  
-  const textClass = "text-zinc-700";
-  const borderClass = "border-zinc-200";
+  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(["Tree Structure", "Visual"]));
+
+  const toggleSection = (title: string) => {
+    const newExpanded = new Set(expandedSections);
+    if (newExpanded.has(title)) {
+      newExpanded.delete(title);
+    } else {
+      newExpanded.add(title);
+    }
+    setExpandedSections(newExpanded);
+  };
 
   const handleExportGif = async () => {
     setIsExporting(true);
@@ -47,423 +55,512 @@ export default function TreeControls({
     }
   };
 
+  const formatValue = (value: number, step: number) => {
+    if (step < 1) {
+      return value.toFixed(step < 0.01 ? 3 : 2);
+    }
+    return Math.round(value).toString();
+  };
+
   return (
-    <div className="space-y-6 p-6">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className={`text-lg font-semibold ${textClass}`}>Tree Growth</h2>
-        <div className="flex gap-2">
-          <button
-            onClick={onToggleAnimation}
-            className={`p-2 border rounded transition-colors ${borderClass} hover:bg-zinc-100 text-zinc-600`}
-            title={params.isAnimating ? "Pause" : "Play"}
-          >
-            {params.isAnimating ? (
-              <Pause className="w-4 h-4" />
-            ) : (
-              <Play className="w-4 h-4" />
-            )}
-          </button>
-          <button
-            onClick={onRegenerate}
-            className={`p-2 border rounded transition-colors ${borderClass} hover:bg-zinc-100 text-zinc-600`}
-            title="Regenerate"
-          >
-            <RefreshCw className="w-4 h-4" />
-          </button>
-        </div>
-      </div>
-
-      {/* Export & Randomize Section */}
-      <div className="space-y-3">
-        <div className="flex gap-2">
-          <button
-            onClick={onExportImage}
-            className={`flex-1 px-3 py-2 border rounded transition-colors flex items-center justify-center gap-2 ${borderClass} bg-white hover:bg-zinc-50 text-zinc-700`}
-            title="Export PNG"
-          >
-            <ImageIcon className="w-4 h-4" />
-            <span className="text-sm">PNG</span>
-          </button>
-          <button
-            onClick={handleExportGif}
-            disabled={isExporting}
-            className={`flex-1 px-3 py-2 border rounded transition-colors flex items-center justify-center gap-2 ${borderClass} ${
-              isExporting
-                ? "opacity-50 cursor-not-allowed"
-                : "bg-white hover:bg-zinc-50 text-zinc-700"
-            }`}
-            title="Export GIF"
-          >
-            <Download className="w-4 h-4" />
-            <span className="text-sm">{isExporting ? "Recording..." : "GIF"}</span>
-          </button>
-        </div>
-
+    <div className="h-full overflow-y-auto overflow-x-hidden bg-white text-zinc-900 text-xs">
+      {/* Control Buttons */}
+      <div className="px-3 py-3 border-b border-zinc-100 flex gap-2">
         <button
-          onClick={onExportWallpapers}
-          className="w-full px-4 py-2 rounded transition-colors bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-medium flex items-center justify-center gap-2"
+          onClick={onToggleAnimation}
+          className="flex-1 px-3 py-1.5 bg-zinc-100 hover:bg-zinc-200 rounded-md flex items-center justify-center gap-1.5 transition-colors font-medium text-xs"
         >
-          <Monitor className="w-4 h-4" />
-          Export Wallpapers (6K+Mobile)
+          {params.isAnimating ? (
+            <>
+              <Pause className="w-3 h-3" />
+              Pause
+            </>
+          ) : (
+            <>
+              <Play className="w-3 h-3" />
+              Play
+            </>
+          )}
         </button>
-
-        <div className="flex gap-2">
-        </div>
-
-        {/* GIF Settings */}
-        <div className="space-y-2">
-          <div className="flex gap-2 items-center">
-            <Label className={`text-xs ${textClass} flex-shrink-0`}>Duration (s):</Label>
-            <input
-              type="number"
-              value={gifDuration}
-              onChange={(e) => setGifDuration(Number(e.target.value))}
-              min={1}
-              max={10}
-              className={`flex-1 px-2 py-1 text-xs border rounded ${borderClass} bg-white text-zinc-900`}
-            />
-            <Label className={`text-xs ${textClass} flex-shrink-0`}>FPS:</Label>
-            <input
-              type="number"
-              value={gifFps}
-              onChange={(e) => setGifFps(Number(e.target.value))}
-              min={10}
-              max={60}
-              className={`flex-1 px-2 py-1 text-xs border rounded ${borderClass} bg-white text-zinc-900`}
-            />
-          </div>
-        </div>
-
+        <button
+          onClick={onRegenerate}
+          className="flex-1 px-3 py-1.5 bg-zinc-100 hover:bg-zinc-200 rounded-md flex items-center justify-center gap-1.5 transition-colors font-medium text-xs"
+        >
+          <RefreshCw className="w-3 h-3" />
+          Regenerate
+        </button>
         <button
           onClick={onRandomize}
-          className={`w-full px-4 py-2 border rounded transition-colors ${borderClass} bg-white hover:bg-zinc-50 text-zinc-700`}
+          className="flex-1 px-3 py-1.5 bg-zinc-900 hover:bg-zinc-800 text-white rounded-md flex items-center justify-center gap-1.5 transition-colors font-medium text-xs"
         >
-          Randomize All
+          Randomize
         </button>
       </div>
 
-      {/* Tree Structure */}
-      <div className="space-y-3">
-        <Label className={textClass}>Tree Structure</Label>
-        
-        <div className="space-y-2">
-          <Label className={`text-xs ${textClass}`}>Initial Branches: {params.initialPaths}</Label>
-          <Slider
-            value={[params.initialPaths]}
-            onValueChange={(value) => onParamChange("initialPaths", value[0])}
-            min={1}
-            max={5}
-            step={1}
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label className={`text-xs ${textClass}`}>Initial Velocity: {params.initialVelocity.toFixed(1)}</Label>
-          <Slider
-            value={[params.initialVelocity]}
-            onValueChange={(value) => onParamChange("initialVelocity", value[0])}
-            min={5}
-            max={20}
-            step={0.5}
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label className={`text-xs ${textClass}`}>Branch Probability: {params.branchProbability.toFixed(2)}</Label>
-          <Slider
-            value={[params.branchProbability]}
-            onValueChange={(value) => onParamChange("branchProbability", value[0])}
-            min={0.05}
-            max={0.4}
-            step={0.01}
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label className={`text-xs ${textClass}`}>Diameter Shrink: {params.diameterShrink.toFixed(2)}</Label>
-          <Slider
-            value={[params.diameterShrink]}
-            onValueChange={(value) => onParamChange("diameterShrink", value[0])}
-            min={0.5}
-            max={0.8}
-            step={0.01}
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label className={`text-xs ${textClass}`}>Min Diameter: {params.minDiameter.toFixed(2)}</Label>
-          <Slider
-            value={[params.minDiameter]}
-            onValueChange={(value) => onParamChange("minDiameter", value[0])}
-            min={0.1}
-            max={1.0}
-            step={0.05}
-          />
-        </div>
-      </div>
-
-      {/* Movement Settings */}
-      <div className="space-y-3">
-        <Label className={textClass}>Movement</Label>
-        
-        <div className="space-y-2">
-          <Label className={`text-xs ${textClass}`}>Bump Strength: {params.bumpMultiplier.toFixed(2)}</Label>
-          <Slider
-            value={[params.bumpMultiplier]}
-            onValueChange={(value) => onParamChange("bumpMultiplier", value[0])}
-            min={0.1}
-            max={0.5}
-            step={0.01}
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label className={`text-xs ${textClass}`}>Velocity Retention: {params.velocityRetention.toFixed(2)}</Label>
-          <Slider
-            value={[params.velocityRetention]}
-            onValueChange={(value) => onParamChange("velocityRetention", value[0])}
-            min={0.5}
-            max={0.95}
-            step={0.01}
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label className={`text-xs ${textClass}`}>Speed Min: {params.speedMin.toFixed(1)}</Label>
-          <Slider
-            value={[params.speedMin]}
-            onValueChange={(value) => onParamChange("speedMin", value[0])}
-            min={3}
-            max={8}
-            step={0.5}
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label className={`text-xs ${textClass}`}>Speed Max: {params.speedMax.toFixed(1)}</Label>
-          <Slider
-            value={[params.speedMax]}
-            onValueChange={(value) => onParamChange("speedMax", value[0])}
-            min={8}
-            max={15}
-            step={0.5}
-          />
-        </div>
-      </div>
-
-      {/* Visual Settings */}
-      <div className="space-y-3">
-        <Label className={textClass}>Visual</Label>
-        
-        <div className="space-y-2">
-          <Label className={`text-xs ${textClass}`}>Tip Circle Size: {params.finishedCircleSize.toFixed(1)}</Label>
-          <Slider
-            value={[params.finishedCircleSize]}
-            onValueChange={(value) => onParamChange("finishedCircleSize", value[0])}
-            min={5}
-            max={20}
-            step={0.5}
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label className={`text-xs ${textClass}`}>Stroke Weight: {params.strokeWeightMultiplier.toFixed(2)}</Label>
-          <Slider
-            value={[params.strokeWeightMultiplier]}
-            onValueChange={(value) => onParamChange("strokeWeightMultiplier", value[0])}
-            min={0.5}
-            max={2.0}
-            step={0.05}
-          />
-        </div>
-      </div>
-
-      {/* Stem Colors (Darker) */}
-      <div className="space-y-3">
-        <Label className={textClass}>Stem Colors (Base/Dark)</Label>
-        <div className="grid grid-cols-3 gap-2">
-          {[1, 2, 3].map((i) => {
-            const paramKey = `stemColor${i}` as keyof TreeArtworkParams;
-            return (
-              <input
-                key={paramKey}
-                type="color"
-                value={params[paramKey] as string}
-                onChange={(e) => onColorChange(paramKey, e.target.value)}
-                className="w-full h-10 rounded cursor-pointer"
-              />
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Tip Colors (Lighter) */}
-      <div className="space-y-3">
-        <Label className={textClass}>Tip Colors (Branch/Light)</Label>
-        <div className="grid grid-cols-3 gap-2">
-          {[1, 2, 3].map((i) => {
-            const paramKey = `tipColor${i}` as keyof TreeArtworkParams;
-            return (
-              <input
-                key={paramKey}
-                type="color"
-                value={params[paramKey] as string}
-                onChange={(e) => onColorChange(paramKey, e.target.value)}
-                className="w-full h-10 rounded cursor-pointer"
-              />
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Background Color */}
-      <div className="space-y-3">
-        <Label className={textClass}>Background Color</Label>
-        <input
-          type="color"
-          value={params.backgroundColor}
-          onChange={(e) => onColorChange("backgroundColor", e.target.value)}
-          className="w-full h-10 rounded cursor-pointer"
-        />
-      </div>
-
-      {/* Text/Poem Section */}
-      <div className="space-y-3 border-t border-zinc-200 pt-6">
-        <div className="flex items-center justify-between">
-          <Label className={textClass}>Poem / Letter Overlay</Label>
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={params.textEnabled}
-              onChange={(e) => onParamChange("textEnabled", e.target.checked ? 1 : 0)}
-              className="w-4 h-4"
-            />
-            <span className="text-xs text-zinc-600">Enable</span>
-          </label>
-        </div>
-
-        {params.textEnabled && (
-          <>
-            <div className="space-y-2">
-              <Label className={`text-xs ${textClass}`}>Your Text</Label>
-              <textarea
-                value={params.textContent}
-                onChange={(e) => {
-                  const newParams = { ...params, textContent: e.target.value };
-                  onColorChange("textContent" as any, e.target.value);
-                }}
-                placeholder="Enter your poem or letter here...&#10;Line breaks will be preserved"
-                className="w-full h-32 px-3 py-2 border border-zinc-300 rounded resize-none text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500"
-                style={{ fontFamily: params.fontFamily }}
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-2">
-                <Label className={`text-xs ${textClass}`}>Font Size: {params.fontSize}px</Label>
+      {/* Tree Structure Section */}
+      <div className="border-b border-zinc-100">
+        <button
+          onClick={() => toggleSection("Tree Structure")}
+          className="w-full px-3 py-2 flex items-center justify-between hover:bg-zinc-50 transition-colors"
+        >
+          <span className="font-semibold text-xs uppercase tracking-wider text-zinc-500">Tree Structure</span>
+          {expandedSections.has("Tree Structure") ? (
+            <ChevronDown className="w-3 h-3 text-zinc-400" />
+          ) : (
+            <ChevronRight className="w-3 h-3 text-zinc-400" />
+          )}
+        </button>
+        {expandedSections.has("Tree Structure") && (
+          <div className="px-3 pb-3 space-y-3">
+            {[
+              { key: 'initialPaths' as keyof TreeArtworkParams, label: 'Initial Branches', min: 1, max: 5, step: 1 },
+              { key: 'initialVelocity' as keyof TreeArtworkParams, label: 'Initial Velocity', min: 5, max: 20, step: 0.5 },
+              { key: 'branchProbability' as keyof TreeArtworkParams, label: 'Branch Probability', min: 0.05, max: 0.4, step: 0.01 },
+              { key: 'diameterShrink' as keyof TreeArtworkParams, label: 'Diameter Shrink', min: 0.5, max: 0.8, step: 0.01 },
+              { key: 'minDiameter' as keyof TreeArtworkParams, label: 'Min Diameter', min: 0.1, max: 1.0, step: 0.05 },
+            ].map((config) => (
+              <div key={config.key} className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-zinc-700 font-medium">{config.label}</span>
+                  <input
+                    type="number"
+                    value={formatValue(params[config.key] as number, config.step)}
+                    onChange={(e) => onParamChange(config.key, parseFloat(e.target.value))}
+                    step={config.step}
+                    min={config.min}
+                    max={config.max}
+                    className="w-12 h-5 bg-transparent text-right font-mono text-zinc-500 focus:outline-none focus:text-zinc-900"
+                  />
+                </div>
                 <Slider
-                  value={[params.fontSize]}
-                  onValueChange={(value) => onParamChange("fontSize", value[0])}
-                  min={12}
-                  max={48}
-                  step={1}
+                  min={config.min}
+                  max={config.max}
+                  step={config.step}
+                  value={[params[config.key] as number]}
+                  onValueChange={(values) => onParamChange(config.key, values[0])}
+                  className="py-1"
                 />
               </div>
+            ))}
+          </div>
+        )}
+      </div>
 
-              <div className="space-y-2">
-                <Label className={`text-xs ${textClass}`}>Line Height: {params.lineHeight}</Label>
+      {/* Movement Section */}
+      <div className="border-b border-zinc-100">
+        <button
+          onClick={() => toggleSection("Movement")}
+          className="w-full px-3 py-2 flex items-center justify-between hover:bg-zinc-50 transition-colors"
+        >
+          <span className="font-semibold text-xs uppercase tracking-wider text-zinc-500">Movement</span>
+          {expandedSections.has("Movement") ? (
+            <ChevronDown className="w-3 h-3 text-zinc-400" />
+          ) : (
+            <ChevronRight className="w-3 h-3 text-zinc-400" />
+          )}
+        </button>
+        {expandedSections.has("Movement") && (
+          <div className="px-3 pb-3 space-y-3">
+            {[
+              { key: 'bumpMultiplier' as keyof TreeArtworkParams, label: 'Bump Strength', min: 0.1, max: 0.5, step: 0.01 },
+              { key: 'velocityRetention' as keyof TreeArtworkParams, label: 'Velocity Retention', min: 0.5, max: 0.95, step: 0.01 },
+              { key: 'speedMin' as keyof TreeArtworkParams, label: 'Speed Min', min: 3, max: 8, step: 0.5 },
+              { key: 'speedMax' as keyof TreeArtworkParams, label: 'Speed Max', min: 8, max: 15, step: 0.5 },
+            ].map((config) => (
+              <div key={config.key} className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-zinc-700 font-medium">{config.label}</span>
+                  <input
+                    type="number"
+                    value={formatValue(params[config.key] as number, config.step)}
+                    onChange={(e) => onParamChange(config.key, parseFloat(e.target.value))}
+                    step={config.step}
+                    min={config.min}
+                    max={config.max}
+                    className="w-12 h-5 bg-transparent text-right font-mono text-zinc-500 focus:outline-none focus:text-zinc-900"
+                  />
+                </div>
                 <Slider
-                  value={[params.lineHeight]}
-                  onValueChange={(value) => onParamChange("lineHeight", value[0])}
-                  min={1.0}
-                  max={2.5}
-                  step={0.1}
+                  min={config.min}
+                  max={config.max}
+                  step={config.step}
+                  value={[params[config.key] as number]}
+                  onValueChange={(values) => onParamChange(config.key, values[0])}
+                  className="py-1"
                 />
               </div>
-            </div>
+            ))}
+          </div>
+        )}
+      </div>
 
-            <div className="space-y-2">
-              <Label className={`text-xs ${textClass}`}>Font Family</Label>
-              <select
-                value={params.fontFamily}
-                onChange={(e) => onColorChange("fontFamily" as any, e.target.value)}
-                className="w-full px-3 py-2 border border-zinc-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500"
-              >
-                <option value="Georgia, serif">Georgia (Serif)</option>
-                <option value="'Times New Roman', serif">Times New Roman</option>
-                <option value="'Courier New', monospace">Courier (Typewriter)</option>
-                <option value="Arial, sans-serif">Arial (Sans-serif)</option>
-                <option value="'Brush Script MT', cursive">Brush Script (Handwritten)</option>
-                <option value="Garamond, serif">Garamond</option>
-              </select>
-            </div>
-
-            <div className="space-y-2">
-              <Label className={`text-xs ${textClass}`}>Text Alignment</Label>
-              <div className="flex gap-2">
-                {(['left', 'center', 'right'] as const).map((align) => (
-                  <button
-                    key={align}
-                    onClick={() => onColorChange("textAlign" as any, align)}
-                    className={`flex-1 px-3 py-2 border rounded text-xs transition-colors ${
-                      params.textAlign === align
-                        ? 'bg-cyan-500 text-white border-cyan-500'
-                        : 'bg-white text-zinc-700 border-zinc-300 hover:bg-zinc-50'
-                    }`}
-                  >
-                    {align.charAt(0).toUpperCase() + align.slice(1)}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-2">
-                <Label className={`text-xs ${textClass}`}>X Position: {params.textX}</Label>
+      {/* Visual Section */}
+      <div className="border-b border-zinc-100">
+        <button
+          onClick={() => toggleSection("Visual")}
+          className="w-full px-3 py-2 flex items-center justify-between hover:bg-zinc-50 transition-colors"
+        >
+          <span className="font-semibold text-xs uppercase tracking-wider text-zinc-500">Visual</span>
+          {expandedSections.has("Visual") ? (
+            <ChevronDown className="w-3 h-3 text-zinc-400" />
+          ) : (
+            <ChevronRight className="w-3 h-3 text-zinc-400" />
+          )}
+        </button>
+        {expandedSections.has("Visual") && (
+          <div className="px-3 pb-3 space-y-3">
+            {[
+              { key: 'finishedCircleSize' as keyof TreeArtworkParams, label: 'Tip Circle Size', min: 5, max: 20, step: 0.5 },
+              { key: 'strokeWeightMultiplier' as keyof TreeArtworkParams, label: 'Stroke Weight', min: 0.5, max: 2.0, step: 0.05 },
+            ].map((config) => (
+              <div key={config.key} className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-zinc-700 font-medium">{config.label}</span>
+                  <input
+                    type="number"
+                    value={formatValue(params[config.key] as number, config.step)}
+                    onChange={(e) => onParamChange(config.key, parseFloat(e.target.value))}
+                    step={config.step}
+                    min={config.min}
+                    max={config.max}
+                    className="w-12 h-5 bg-transparent text-right font-mono text-zinc-500 focus:outline-none focus:text-zinc-900"
+                  />
+                </div>
                 <Slider
-                  value={[params.textX]}
-                  onValueChange={(value) => onParamChange("textX", value[0])}
-                  min={50}
-                  max={750}
-                  step={10}
+                  min={config.min}
+                  max={config.max}
+                  step={config.step}
+                  value={[params[config.key] as number]}
+                  onValueChange={(values) => onParamChange(config.key, values[0])}
+                  className="py-1"
                 />
               </div>
+            ))}
+          </div>
+        )}
+      </div>
 
-              <div className="space-y-2">
-                <Label className={`text-xs ${textClass}`}>Y Position: {params.textY}</Label>
-                <Slider
-                  value={[params.textY]}
-                  onValueChange={(value) => onParamChange("textY", value[0])}
-                  min={30}
-                  max={500}
-                  step={10}
-                />
+      {/* Colors Section */}
+      <div className="border-b border-zinc-100">
+        <button
+          onClick={() => toggleSection("Colors")}
+          className="w-full px-3 py-2 flex items-center justify-between hover:bg-zinc-50 transition-colors"
+        >
+          <span className="font-semibold text-xs uppercase tracking-wider text-zinc-500">Colors</span>
+          {expandedSections.has("Colors") ? (
+            <ChevronDown className="w-3 h-3 text-zinc-400" />
+          ) : (
+            <ChevronRight className="w-3 h-3 text-zinc-400" />
+          )}
+        </button>
+        {expandedSections.has("Colors") && (
+          <div className="px-3 pb-3 space-y-3">
+            <div className="space-y-1">
+              <span className="text-[10px] text-zinc-500 uppercase tracking-wide">Background</span>
+              <div className="flex items-center gap-2">
+                <div className="w-full h-6 rounded border border-zinc-200 overflow-hidden" style={{ backgroundColor: params.backgroundColor }}>
+                  <input
+                    type="color"
+                    value={params.backgroundColor}
+                    onChange={(e) => onColorChange("backgroundColor", e.target.value)}
+                    className="w-full h-full opacity-0 cursor-pointer"
+                    style={{ backgroundColor: params.backgroundColor }}
+                  />
+                </div>
               </div>
             </div>
 
-            <div className="space-y-2">
-              <Label className={`text-xs ${textClass}`}>Text Color</Label>
-              <input
-                type="color"
-                value={params.textColor}
-                onChange={(e) => onColorChange("textColor", e.target.value)}
-                className="w-full h-10 rounded cursor-pointer"
-              />
+            <div className="space-y-1">
+              <span className="text-[10px] text-zinc-500 uppercase tracking-wide">Stem Colors</span>
+              <div className="grid grid-cols-3 gap-2">
+                {[1, 2, 3].map((i) => {
+                  const paramKey = `stemColor${i}` as keyof TreeArtworkParams;
+                  return (
+                    <div key={paramKey} className="h-6 rounded border border-zinc-200 overflow-hidden relative">
+                      <div className="absolute inset-0" style={{ backgroundColor: params[paramKey] as string }} />
+                      <input
+                        type="color"
+                        value={params[paramKey] as string}
+                        onChange={(e) => onColorChange(paramKey, e.target.value)}
+                        className="w-full h-full opacity-0 cursor-pointer relative z-10"
+                      />
+                    </div>
+                  );
+                })}
+              </div>
             </div>
 
-            <div className="flex items-center justify-between pt-2">
-              <Label className={`text-xs ${textClass}`}>Paper Grain Effect</Label>
-              <label className="flex items-center gap-2 cursor-pointer">
+            <div className="space-y-1">
+              <span className="text-[10px] text-zinc-500 uppercase tracking-wide">Tip Colors</span>
+              <div className="grid grid-cols-3 gap-2">
+                {[1, 2, 3].map((i) => {
+                  const paramKey = `tipColor${i}` as keyof TreeArtworkParams;
+                  return (
+                    <div key={paramKey} className="h-6 rounded border border-zinc-200 overflow-hidden relative">
+                      <div className="absolute inset-0" style={{ backgroundColor: params[paramKey] as string }} />
+                      <input
+                        type="color"
+                        value={params[paramKey] as string}
+                        onChange={(e) => onColorChange(paramKey, e.target.value)}
+                        className="w-full h-full opacity-0 cursor-pointer relative z-10"
+                      />
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Text Overlay Section */}
+      <div className="border-b border-zinc-100">
+        <button
+          onClick={() => toggleSection("Text Overlay")}
+          className="w-full px-3 py-2 flex items-center justify-between hover:bg-zinc-50 transition-colors"
+        >
+          <span className="font-semibold text-xs uppercase tracking-wider text-zinc-500">Text Overlay</span>
+          {expandedSections.has("Text Overlay") ? (
+            <ChevronDown className="w-3 h-3 text-zinc-400" />
+          ) : (
+            <ChevronRight className="w-3 h-3 text-zinc-400" />
+          )}
+        </button>
+        {expandedSections.has("Text Overlay") && (
+          <div className="px-3 pb-3 space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-zinc-700 font-medium">Enable Overlay</span>
+              <label className="relative inline-flex items-center cursor-pointer">
                 <input
                   type="checkbox"
-                  checked={params.paperGrain}
-                  onChange={(e) => onParamChange("paperGrain", e.target.checked ? 1 : 0)}
-                  className="w-4 h-4"
+                  checked={params.textEnabled}
+                  onChange={(e) => onParamChange("textEnabled", e.target.checked ? 1 : 0)}
+                  className="sr-only peer"
                 />
-                <span className="text-xs text-zinc-600">Enable</span>
+                <div className="w-9 h-5 bg-zinc-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-zinc-900"></div>
               </label>
             </div>
-          </>
+
+            {params.textEnabled && (
+              <>
+                <textarea
+                  value={params.textContent}
+                  onChange={(e) => onColorChange('textContent', e.target.value)}
+                  placeholder="Enter text..."
+                  className="w-full h-24 px-3 py-2 bg-zinc-50 border border-zinc-200 rounded-md resize-none text-xs focus:outline-none focus:border-zinc-400 font-sans"
+                />
+                {/* Font URL Input */}
+                <div className="space-y-1">
+                  <span className="text-[10px] text-zinc-500 uppercase tracking-wide">Font URL (Google Fonts, etc.)</span>
+                  <input
+                    type="text"
+                    value={params.fontUrl || ''}
+                    onChange={(e) => {
+                      const url = e.target.value;
+                      onColorChange('fontUrl', url);
+                      // Extract font family name from URL if possible
+                      const match = url.match(/family=([^&]*)/);
+                      const family = match ? decodeURIComponent(match[1].replace(/\+/g, ' ')) : '';
+                      onColorChange('customFontFamily', family);
+                    }}
+                    placeholder="https://fonts.googleapis.com/css2?family=..."
+                    className="w-full px-2 py-1 bg-zinc-50 border border-zinc-200 rounded text-xs focus:outline-none focus:border-zinc-400"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <span className="text-[10px] text-zinc-500 uppercase tracking-wide">Font Family</span>
+                    <select
+                      value={params.fontFamily}
+                      onChange={(e) => onColorChange("fontFamily" as any, e.target.value)}
+                      className="w-full px-2 py-1 bg-zinc-50 border border-zinc-200 rounded text-xs"
+                    >
+                      <option value="Georgia, serif">Georgia</option>
+                      <option value="'Times New Roman', serif">Times New Roman</option>
+                      <option value="'Courier New', monospace">Courier</option>
+                      <option value="Arial, sans-serif">Arial</option>
+                      <option value="Verdana, sans-serif">Verdana</option>
+                      {params.fontUrl && <option value="custom">Custom (from URL)</option>}
+                    </select>
+                  </div>
+                  <div className="space-y-1">
+                    <span className="text-[10px] text-zinc-500 uppercase tracking-wide">Text Color</span>
+                    <div className="flex items-center gap-2 h-[26px]">
+                      <div className="w-6 h-6 rounded border border-zinc-200 overflow-hidden flex-shrink-0 relative">
+                        <div className="absolute inset-0" style={{ backgroundColor: params.textColor }} />
+                        <input
+                          type="color"
+                          value={params.textColor}
+                          onChange={(e) => onColorChange("textColor" as any, e.target.value)}
+                          className="w-full h-full opacity-0 cursor-pointer relative z-10"
+                        />
+                      </div>
+                      <input
+                        type="text"
+                        value={params.textColor}
+                        onChange={(e) => onColorChange("textColor" as any, e.target.value)}
+                        className="w-full h-full px-2 bg-zinc-50 border border-zinc-200 rounded text-xs font-mono"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <span className="text-[10px] text-zinc-500 uppercase tracking-wide">Size</span>
+                    <input
+                      type="number"
+                      value={params.fontSize}
+                      onChange={(e) => onParamChange("fontSize", Number(e.target.value))}
+                      className="w-full px-2 py-1 bg-zinc-50 border border-zinc-200 rounded text-xs"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <span className="text-[10px] text-zinc-500 uppercase tracking-wide">Line Height</span>
+                    <input
+                      type="number"
+                      step="0.1"
+                      value={params.lineHeight}
+                      onChange={(e) => onParamChange("lineHeight", Number(e.target.value))}
+                      className="w-full px-2 py-1 bg-zinc-50 border border-zinc-200 rounded text-xs"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  <span className="text-[10px] text-zinc-500 uppercase tracking-wide">Alignment</span>
+                  <div className="flex bg-zinc-100 p-1 rounded-md">
+                    {['left', 'center', 'right'].map((align) => (
+                      <button
+                        key={align}
+                        onClick={() => onColorChange("textAlign" as any, align)}
+                        className={`flex-1 py-1 text-[10px] uppercase font-medium rounded-sm transition-colors ${params.textAlign === align
+                          ? 'bg-white shadow-sm text-zinc-900'
+                          : 'text-zinc-500 hover:text-zinc-700'
+                          }`}
+                      >
+                        {align}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  <div className="flex justify-between">
+                    <span className="text-[10px] text-zinc-500 uppercase tracking-wide">Position X</span>
+                    <span className="text-[10px] text-zinc-400 font-mono">{Math.round(params.textX)}</span>
+                  </div>
+                  <Slider
+                    min={0}
+                    max={800} // Assuming canvas width is 800
+                    step={1}
+                    value={[params.textX]}
+                    onValueChange={(values) => onParamChange("textX", values[0])}
+                    className="py-1"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <div className="flex justify-between">
+                    <span className="text-[10px] text-zinc-500 uppercase tracking-wide">Position Y</span>
+                    <span className="text-[10px] text-zinc-400 font-mono">{Math.round(params.textY)}</span>
+                  </div>
+                  <Slider
+                    min={0}
+                    max={1000} // Assuming canvas height is 1000
+                    step={1}
+                    value={[params.textY]}
+                    onValueChange={(values) => onParamChange("textY", values[0])}
+                    className="py-1"
+                  />
+                </div>
+
+                <div className="flex items-center justify-between pt-2 border-t border-zinc-50">
+                  <span className="text-zinc-700 font-medium">Paper Grain</span>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={params.paperGrain}
+                      onChange={(e) => onParamChange("paperGrain", e.target.checked ? 1 : 0)}
+                      className="sr-only peer"
+                    />
+                    <div className="w-9 h-5 bg-zinc-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-zinc-900"></div>
+                  </label>
+                </div>
+              </>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Export Section */}
+      <div className="border-b border-zinc-100">
+        <button
+          onClick={() => toggleSection("Export")}
+          className="w-full px-3 py-2 flex items-center justify-between hover:bg-zinc-50 transition-colors"
+        >
+          <span className="font-semibold text-xs uppercase tracking-wider text-zinc-500">Export</span>
+          {expandedSections.has("Export") ? (
+            <ChevronDown className="w-3 h-3 text-zinc-400" />
+          ) : (
+            <ChevronRight className="w-3 h-3 text-zinc-400" />
+          )}
+        </button>
+        {expandedSections.has("Export") && (
+          <div className="px-3 pb-3 space-y-2">
+            <button
+              onClick={onExportImage}
+              className="w-full px-3 py-2 bg-zinc-50 hover:bg-zinc-100 border border-zinc-200 rounded-md flex items-center justify-center gap-2 transition-colors text-xs font-medium text-zinc-700"
+            >
+              <ImageIcon className="w-3.5 h-3.5" />
+              Export Image
+            </button>
+
+            <div className="pt-2 border-t border-zinc-100">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-zinc-700 font-medium">GIF Duration (s)</span>
+                <input
+                  type="number"
+                  value={gifDuration}
+                  onChange={(e) => {
+                    const newVal = parseFloat(e.target.value);
+                    if (!isNaN(newVal) && newVal >= 1 && newVal <= 10) {
+                      setGifDuration(newVal);
+                    }
+                  }}
+                  step={0.5}
+                  min={1}
+                  max={10}
+                  className="w-12 h-5 bg-transparent text-right font-mono text-zinc-500 focus:outline-none focus:text-zinc-900"
+                />
+              </div>
+              <Slider
+                min={1}
+                max={10}
+                step={0.5}
+                value={[gifDuration]}
+                onValueChange={(v) => setGifDuration(v[0])}
+                className="mb-2"
+              />
+              <button
+                onClick={handleExportGif}
+                disabled={isExporting}
+                className="w-full px-3 py-2 bg-zinc-50 hover:bg-zinc-100 border border-zinc-200 rounded-md flex items-center justify-center gap-2 transition-colors disabled:opacity-50 text-xs font-medium text-zinc-700"
+              >
+                <Download className="w-3.5 h-3.5" />
+                {isExporting ? 'Recording...' : 'Export GIF'}
+              </button>
+            </div>
+
+            <button
+              onClick={onExportWallpapers}
+              className="w-full px-3 py-2 rounded-md flex items-center justify-center gap-2 transition-colors bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-medium mt-2"
+            >
+              <Monitor className="w-3.5 h-3.5" />
+              Export Wallpapers
+            </button>
+          </div>
         )}
       </div>
     </div>
