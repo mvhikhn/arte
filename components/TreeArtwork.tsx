@@ -518,6 +518,7 @@ const TreeArtwork = forwardRef<TreeArtworkRef, TreeArtworkProps>(
           sketchRef.current = null;
         }
       };
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     return (
