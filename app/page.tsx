@@ -664,25 +664,24 @@ export default function Home() {
         </div>
       </main>
 
-      {/* Next Artwork Button - Bottom Right */}
+      {/* Next Artwork Button - Minimal Circle */}
       <button
         onClick={handleNextArtwork}
-        className="fixed bottom-6 right-6 px-6 py-3 bg-zinc-900 hover:bg-zinc-800 text-white rounded-lg shadow-lg transition-all hover:shadow-xl flex items-center gap-2 z-40"
+        className="fixed bottom-6 right-6 w-12 h-12 flex items-center justify-center bg-zinc-900 hover:bg-zinc-800 text-white rounded-full shadow-lg transition-all hover:shadow-xl z-40"
         aria-label="Next artwork"
       >
-        <span className="text-sm font-medium">Next Artwork</span>
-        <ArrowRight className="w-5 h-5" />
+        <ArrowRight className="w-6 h-6" />
       </button>
 
       {/* Controls Toggle Button - Always Visible */}
       {!controlsVisible && (
         <button
           onClick={() => setControlsVisible(true)}
-          className="fixed top-6 right-6 px-4 py-3 bg-white hover:bg-zinc-50 border border-zinc-200 rounded-lg shadow-lg transition-all hover:shadow-xl flex items-center gap-2 z-40"
+          className="fixed top-6 right-0 w-[340px] py-4 bg-white hover:bg-zinc-50 border-l border-t border-b border-zinc-200 shadow-lg transition-all hover:shadow-xl flex items-center justify-between px-6 z-40"
           aria-label="Open controls"
         >
-          <span className="text-sm font-medium">Controls</span>
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <span className="text-sm font-medium text-zinc-700">Controls</span>
+          <svg className="w-5 h-5 text-zinc-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
           </svg>
         </button>
