@@ -6,11 +6,13 @@ import GridArtwork, { GridArtworkParams, GridArtworkRef } from "@/components/Gri
 import MosaicArtwork, { MosaicArtworkParams, MosaicArtworkRef } from "@/components/MosaicArtwork";
 import RotatedGridArtwork, { RotatedGridArtworkParams, RotatedGridArtworkRef } from "@/components/RotatedGridArtwork";
 import TreeArtwork, { TreeArtworkParams, TreeArtworkRef } from "@/components/TreeArtwork";
+import TextDesignArtwork, { TextDesignArtworkParams, TextDesignArtworkRef } from "@/components/TextDesignArtwork";
 import Controls from "@/components/Controls";
 import GridControls from "@/components/GridControls";
 import MosaicControls from "@/components/MosaicControls";
 import RotatedGridControls from "@/components/RotatedGridControls";
 import TreeControls from "@/components/TreeControls";
+import TextDesignControls from "@/components/TextDesignControls";
 import { ExportPopup } from "@/components/ExportPopup";
 import { PaymentModal } from "@/components/PaymentModal";
 import { EmailVerificationModal } from "@/components/EmailVerificationModal";
@@ -18,7 +20,7 @@ import { ArrowRight, SlidersHorizontal } from "lucide-react";
 import { getRandomColors } from "@/lib/colorPalettes";
 import { hasGifAccess, grantGifAccess } from "@/lib/paymentUtils";
 
-type ArtworkType = "flow" | "grid" | "mosaic" | "rotated" | "tree";
+type ArtworkType = "flow" | "grid" | "mosaic" | "rotated" | "tree" | "textdesign";
 
 // Helper to generate random value within range
 const randomInRange = (min: number, max: number) => Math.random() * (max - min) + min;
@@ -228,6 +230,71 @@ const generateRandomTreeParams = (): TreeArtworkParams => {
   };
 };
 
+// Generate random text design params
+const generateRandomTextDesignParams = (): TextDesignArtworkParams => {
+  return {
+    backgroundColor: "#3048ff",
+    canvasWidth: 850,
+    canvasHeight: 600,
+    fontUrl: "",
+    customFontFamily: "",
+    layer1: {
+      text: "জোহরান",
+      x: 0.5,
+      y: 0.38,
+      size: 280,
+      alignment: 'center',
+      fill: "#FF9900",
+      extrudeDepth: 25,
+      extrudeX: 1.0,
+      extrudeY: 1.0,
+      extrudeStart: "#D10000",
+      extrudeEnd: "#8A0000",
+      highlight: "#fff4b8",
+      showHighlight: false,
+      outlineThickness: 8,
+      outlineColor: "#D10000",
+    },
+    layer2: {
+      text: "এর জন্য",
+      x: 0.3,
+      y: 0.68,
+      size: 60,
+      alignment: 'center',
+      fill: "#FF9900",
+      extrudeDepth: 12,
+      extrudeX: 1.0,
+      extrudeY: 1.0,
+      extrudeStart: "#D10000",
+      extrudeEnd: "#8A0000",
+      highlight: "#fff4b8",
+      showHighlight: false,
+      outlineThickness: 4,
+      outlineColor: "#D10000",
+    },
+    layer3: {
+      text: "নিউ ইয়র্ক সিটি",
+      x: 0.55,
+      y: 0.68,
+      size: 100,
+      alignment: 'center',
+      fill: "#FF9900",
+      extrudeDepth: 12,
+      extrudeX: 1.0,
+      extrudeY: 1.0,
+      extrudeStart: "#D10000",
+      extrudeEnd: "#8A0000",
+      highlight: "#fff4b8",
+      showHighlight: false,
+      outlineThickness: 4,
+      outlineColor: "#D10000",
+    },
+    seed: Date.now(),
+    exportWidth: 1600,
+    exportHeight: 2000,
+  };
+};
+
 
 // Force dynamic rendering and prevent static generation
 export const dynamic = 'force-dynamic';
@@ -240,6 +307,7 @@ export default function Home() {
   const mosaicArtworkRef = useRef<MosaicArtworkRef>(null);
   const rotatedGridArtworkRef = useRef<RotatedGridArtworkRef>(null);
   const treeArtworkRef = useRef<TreeArtworkRef>(null);
+  const textDesignArtworkRef = useRef<TextDesignArtworkRef>(null);
   const [exportStatus, setExportStatus] = useState({ isExporting: false, message: "" });
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [showEmailVerification, setShowEmailVerification] = useState(false);
@@ -255,6 +323,8 @@ export default function Home() {
 
   const [treeParams, setTreeParams] = useState<TreeArtworkParams>(() => generateRandomTreeParams());
 
+  const [textDesignParams, setTextDesignParams] = useState<TextDesignArtworkParams>(() => generateRandomTextDesignParams());
+
   // Save current artwork state to localStorage
   const saveArtworkState = () => {
     const state = {
@@ -264,6 +334,7 @@ export default function Home() {
       mosaicParams,
       rotatedGridParams,
       treeParams,
+      textDesignParams,
       timestamp: Date.now(),
     };
     localStorage.setItem('artworkState', JSON.stringify(state));
@@ -283,6 +354,7 @@ export default function Home() {
           setMosaicParams(state.mosaicParams);
           setRotatedGridParams(state.rotatedGridParams);
           setTreeParams(state.treeParams);
+          setTextDesignParams(state.textDesignParams);
           localStorage.removeItem('artworkState'); // Clear after restore
           return true;
         }
@@ -419,6 +491,13 @@ export default function Home() {
     }));
   };
 
+  const handleTextDesignParamChange = (param: keyof TextDesignArtworkParams, value: any) => {
+    setTextDesignParams((prev) => ({
+      ...prev,
+      [param]: value,
+    }));
+  };
+
   const handleExportImage = () => {
     setExportStatus({ isExporting: true, message: "Exporting image..." });
     if (currentArtwork === "flow") {
@@ -431,6 +510,14 @@ export default function Home() {
       rotatedGridArtworkRef.current?.exportImage();
     } else if (currentArtwork === "tree") {
       treeArtworkRef.current?.exportImage();
+    } else if (currentArtwork === "textdesign") {
+      // Check paywall for textdesign
+      if (!hasGifAccess()) {
+        saveArtworkState();
+        setShowPaymentModal(true);
+        return;
+      }
+      textDesignArtworkRef.current?.exportImage();
     }
     setTimeout(() => {
       setExportStatus({ isExporting: false, message: "Image exported!" });
@@ -488,6 +575,8 @@ export default function Home() {
       rotatedGridArtworkRef.current?.exportWallpapers();
     } else if (currentArtwork === "tree") {
       treeArtworkRef.current?.exportWallpapers();
+    } else if (currentArtwork === "textdesign") {
+      textDesignArtworkRef.current?.exportWallpapers();
     }
     setTimeout(() => {
       setExportStatus({ isExporting: false, message: "Wallpapers exported!" });
@@ -665,6 +754,7 @@ export default function Home() {
       if (prev === "grid") return "mosaic";
       if (prev === "mosaic") return "rotated";
       if (prev === "rotated") return "tree";
+      if (prev === "tree") return "textdesign";
       return "flow";
     });
   };
@@ -709,8 +799,10 @@ export default function Home() {
               <MosaicArtwork ref={mosaicArtworkRef} params={mosaicParams} />
             ) : currentArtwork === "rotated" ? (
               <RotatedGridArtwork ref={rotatedGridArtworkRef} params={rotatedGridParams} />
-            ) : (
+            ) : currentArtwork === "tree" ? (
               <TreeArtwork ref={treeArtworkRef} params={treeParams} />
+            ) : (
+              <TextDesignArtwork ref={textDesignArtworkRef} params={textDesignParams} />
             )}
           </div>
         </div>
@@ -799,7 +891,7 @@ export default function Home() {
               onRandomize={handleRotatedGridRandomize}
               onRegenerate={handleRotatedGridRegenerate}
             />
-          ) : (
+          ) : currentArtwork === "tree" ? (
             <TreeControls
               params={treeParams}
               onParamChange={handleTreeParamChange}
@@ -810,6 +902,13 @@ export default function Home() {
               onToggleAnimation={handleToggleAnimation}
               onRandomize={handleTreeRandomize}
               onRegenerate={handleTreeRegenerate}
+            />
+          ) : (
+            <TextDesignControls
+              params={textDesignParams}
+              onParamChange={handleTextDesignParamChange}
+              onExportImage={handleExportImage}
+              onExportWallpapers={handleExportWallpapers}
             />
           )}
         </div>
