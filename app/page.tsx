@@ -830,7 +830,7 @@ export default function Home() {
 
       {/* Controls Dropdown Panel - Floating below button */}
       <div
-        className={`fixed top-20 right-6 w-[300px] max-h-[calc(100vh-6rem)] overflow-y-auto bg-white/90 backdrop-blur-md border border-zinc-200 shadow-2xl rounded-2xl transition-all duration-300 z-50 origin-top-right ${controlsVisible
+        className={`fixed top-20 right-6 w-[300px] max-h-[calc(100vh-6rem)] overflow-y-auto bg-white/90 backdrop-blur-md border border-zinc-200 shadow-2xl rounded-2xl transition-all duration-300 z-50 origin-top-right no-scrollbar ${controlsVisible
           ? 'opacity-100 scale-100 translate-y-0'
           : 'opacity-0 scale-95 -translate-y-2 pointer-events-none'
           }`}
@@ -848,7 +848,7 @@ export default function Home() {
         </button>
 
         {/* Controls Content - Scrollable */}
-        <div className="overflow-y-auto" style={{ maxHeight: 'calc(100vh - 73px)' }}>
+        <div className="overflow-y-auto no-scrollbar" style={{ maxHeight: 'calc(100vh - 73px)' }}>
           {currentArtwork === "flow" ? (
             <Controls
               params={flowParams}
