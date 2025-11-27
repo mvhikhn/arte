@@ -81,7 +81,7 @@ export default function GridControls({ params, onParamChange, onColorChange, onE
   };
 
   return (
-    <div className="h-full overflow-y-auto overflow-x-hidden bg-white text-zinc-900 text-xs">
+    <div className="h-full overflow-y-auto overflow-x-hidden bg-white text-zinc-900 text-xs no-scrollbar">
       {/* Control Buttons */}
       <div className="px-3 py-3 border-b border-zinc-100 flex gap-2">
         <button

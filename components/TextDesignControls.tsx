@@ -339,7 +339,7 @@ export default function TextDesignControls({
     };
 
     return (
-        <div className="h-full overflow-y-auto overflow-x-hidden bg-white text-zinc-900 text-xs">
+        <div className="h-full overflow-y-auto overflow-x-hidden bg-white text-zinc-900 text-xs no-scrollbar">
             {/* Export Buttons */}
             <div className="px-3 py-3 border-b border-zinc-100 space-y-2">
                 <button
