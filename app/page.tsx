@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useTransition } from "react";
 import Artwork, { ArtworkParams, ArtworkRef } from "@/components/Artwork";
 import GridArtwork, { GridArtworkParams, GridArtworkRef } from "@/components/GridArtwork";
 import MosaicArtwork, { MosaicArtworkParams, MosaicArtworkRef } from "@/components/MosaicArtwork";
@@ -312,6 +312,7 @@ export default function Home() {
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [showEmailVerification, setShowEmailVerification] = useState(false);
   const [pendingGifExport, setPendingGifExport] = useState<{ duration: number; fps: number } | null>(null);
+  const [isPending, startTransition] = useTransition();
 
   const [flowParams, setFlowParams] = useState<ArtworkParams>(() => generateRandomFlowParams());
 
@@ -749,13 +750,15 @@ export default function Home() {
   };
 
   const handleNextArtwork = () => {
-    setCurrentArtwork((prev) => {
-      if (prev === "flow") return "grid";
-      if (prev === "grid") return "mosaic";
-      if (prev === "mosaic") return "rotated";
-      if (prev === "rotated") return "tree";
-      if (prev === "tree") return "textdesign";
-      return "flow";
+    startTransition(() => {
+      setCurrentArtwork((prev) => {
+        if (prev === "flow") return "grid";
+        if (prev === "grid") return "mosaic";
+        if (prev === "mosaic") return "rotated";
+        if (prev === "rotated") return "tree";
+        if (prev === "tree") return "textdesign";
+        return "flow";
+      });
     });
   };
 
