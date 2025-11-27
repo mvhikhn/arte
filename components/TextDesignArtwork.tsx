@@ -279,16 +279,14 @@ const TextDesignArtwork = forwardRef<TextDesignArtworkRef, TextDesignArtworkProp
                         p.noLoop(); // Static artwork
                     };
 
-                    // Expose functions for external control
-                    (p as any).redraw = () => {
+                    // Expose function to trigger redraw
+                    (p as any).triggerRedraw = () => {
                         p.loop();
-                        p.redraw();
-                        p.noLoop();
                     };
 
                     (p as any).updateSize = (w: number, h: number) => {
                         p.resizeCanvas(w, h);
-                        p.redraw();
+                        p.loop(); // Trigger one draw cycle
                     };
                 };
 
@@ -311,7 +309,7 @@ const TextDesignArtwork = forwardRef<TextDesignArtworkRef, TextDesignArtworkProp
 
         // Trigger redraw when params change
         useEffect(() => {
-            if (sketchRef.current && sketchRef.current.redraw) {
+            if (sketchRef.current && sketchRef.current.triggerRedraw) {
                 // Update canvas size if changed
                 if (
                     sketchRef.current.width !== params.canvasWidth ||
@@ -319,7 +317,7 @@ const TextDesignArtwork = forwardRef<TextDesignArtworkRef, TextDesignArtworkProp
                 ) {
                     sketchRef.current.updateSize(params.canvasWidth, params.canvasHeight);
                 } else {
-                    sketchRef.current.redraw();
+                    sketchRef.current.triggerRedraw();
                 }
             }
         }, [params]);
