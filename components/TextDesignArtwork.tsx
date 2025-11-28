@@ -27,6 +27,9 @@ export interface TextDesignArtworkParams {
     backgroundColor: string;
     canvasWidth: number;
     canvasHeight: number;
+    backgroundImage?: string;
+    backgroundScale?: 'cover' | 'contain';
+    grainAmount?: number;
 
     // Font
     fontUrl: string;
@@ -93,6 +96,13 @@ const TextDesignArtwork = forwardRef<TextDesignArtworkRef, TextDesignArtworkProp
         useEffect(() => {
             loadFonts();
         }, [params.fontUrl, params.layer1.fontUrl, params.layer2.fontUrl, params.layer3.fontUrl]);
+
+        // Handle background image changes
+        useEffect(() => {
+            if (sketchRef.current && sketchRef.current.loadBackgroundImage) {
+                sketchRef.current.loadBackgroundImage(params.backgroundImage);
+            }
+        }, [params.backgroundImage]);
 
         useImperativeHandle(ref, () => ({
             exportImage: () => {
@@ -205,6 +215,8 @@ const TextDesignArtwork = forwardRef<TextDesignArtworkRef, TextDesignArtworkProp
                 if (cancelled || !containerRef.current) return;
 
                 const sketch = (p: any) => {
+                    let bgImage: any = null;
+
                     const drawTextLayer = (layer: TextLayer, layerId: string) => {
                         if (!layer.text) return;
 
@@ -287,17 +299,82 @@ const TextDesignArtwork = forwardRef<TextDesignArtworkRef, TextDesignArtworkProp
                         canvas.parent(containerRef.current!);
                         p.smooth();
 
+                        // Initial load if param exists
+                        if (paramsRef.current.backgroundImage) {
+                            p.loadImage(paramsRef.current.backgroundImage, (img: any) => {
+                                bgImage = img;
+                                if (sketchRef.current && sketchRef.current.triggerRedraw) {
+                                    sketchRef.current.triggerRedraw();
+                                }
+                            });
+                        }
+
                         // Trigger font loading now that p5 is ready
                         loadFonts();
                     };
 
                     p.draw = () => {
-                        p.background(paramsRef.current.backgroundColor);
+                        if (bgImage) {
+                            // Draw background image with cover logic
+                            const imgAspect = bgImage.width / bgImage.height;
+                            const canvasAspect = p.width / p.height;
+                            let drawW, drawH, x, y;
+
+                            // Default to cover
+                            const scaleMode = paramsRef.current.backgroundScale || 'cover';
+
+                            if (scaleMode === 'contain') {
+                                if (canvasAspect > imgAspect) {
+                                    drawH = p.height;
+                                    drawW = p.height * imgAspect;
+                                    x = (p.width - drawW) / 2;
+                                    y = 0;
+                                } else {
+                                    drawW = p.width;
+                                    drawH = p.width / imgAspect;
+                                    x = 0;
+                                    y = (p.height - drawH) / 2;
+                                }
+                                p.background(paramsRef.current.backgroundColor); // Fill gaps
+                                p.image(bgImage, x, y, drawW, drawH);
+                            } else {
+                                // Cover
+                                if (canvasAspect > imgAspect) {
+                                    drawW = p.width;
+                                    drawH = p.width / imgAspect;
+                                    x = 0;
+                                    y = (p.height - drawH) / 2;
+                                } else {
+                                    drawH = p.height;
+                                    drawW = p.height * imgAspect;
+                                    x = (p.width - drawW) / 2;
+                                    y = 0;
+                                }
+                                p.image(bgImage, x, y, drawW, drawH);
+                            }
+                        } else {
+                            p.background(paramsRef.current.backgroundColor);
+                        }
 
                         // Draw all layers
                         drawTextLayer(paramsRef.current.layer1, 'layer1');
                         drawTextLayer(paramsRef.current.layer2, 'layer2');
                         drawTextLayer(paramsRef.current.layer3, 'layer3');
+
+                        // Apply Grain
+                        if (paramsRef.current.grainAmount && paramsRef.current.grainAmount > 0) {
+                            p.loadPixels();
+                            const d = p.pixelDensity();
+                            const count = 4 * (p.width * d) * (p.height * d);
+                            const amount = paramsRef.current.grainAmount;
+                            for (let i = 0; i < count; i += 4) {
+                                const noise = p.random(-amount, amount);
+                                p.pixels[i] = p.constrain(p.pixels[i] + noise, 0, 255);
+                                p.pixels[i + 1] = p.constrain(p.pixels[i + 1] + noise, 0, 255);
+                                p.pixels[i + 2] = p.constrain(p.pixels[i + 2] + noise, 0, 255);
+                            }
+                            p.updatePixels();
+                        }
 
                         p.noLoop(); // Static artwork
                     };
@@ -310,6 +387,18 @@ const TextDesignArtwork = forwardRef<TextDesignArtworkRef, TextDesignArtworkProp
                     (p as any).updateSize = (w: number, h: number) => {
                         p.resizeCanvas(w, h);
                         p.loop(); // Trigger one draw cycle
+                    };
+
+                    (p as any).loadBackgroundImage = (url: string) => {
+                        if (!url) {
+                            bgImage = null;
+                            p.loop();
+                            return;
+                        }
+                        p.loadImage(url, (img: any) => {
+                            bgImage = img;
+                            p.loop();
+                        });
                     };
                 };
 

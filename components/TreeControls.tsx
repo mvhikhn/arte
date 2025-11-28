@@ -313,6 +313,97 @@ export default function TreeControls({
         )}
       </div>
 
+      {/* Background Section */}
+      <div className="border-b border-zinc-100">
+        <button
+          onClick={() => toggleSection("Background")}
+          className="w-full px-3 py-2 flex items-center justify-between hover:bg-zinc-50 transition-colors"
+        >
+          <span className="font-semibold text-xs uppercase tracking-wider text-zinc-500">Background</span>
+          {expandedSections.has("Background") ? (
+            <ChevronDown className="w-3 h-3 text-zinc-400" />
+          ) : (
+            <ChevronRight className="w-3 h-3 text-zinc-400" />
+          )}
+        </button>
+        {expandedSections.has("Background") && (
+          <div className="px-3 pb-3 space-y-3">
+            {/* Background Color */}
+            <div className="space-y-1">
+              <span className="text-[10px] text-zinc-500 uppercase tracking-wide">Background Color</span>
+              <div className="flex items-center gap-2">
+                <div className="w-full h-6 rounded border border-zinc-200 overflow-hidden relative">
+                  <div className="absolute inset-0" style={{ backgroundColor: params.backgroundColor }} />
+                  <input
+                    type="color"
+                    value={params.backgroundColor}
+                    onChange={(e) => onColorChange('backgroundColor', e.target.value)}
+                    className="w-full h-full cursor-pointer opacity-0 relative z-10"
+                  />
+                </div>
+                <input
+                  type="text"
+                  value={params.backgroundColor}
+                  onChange={(e) => onColorChange('backgroundColor', e.target.value)}
+                  className="w-20 px-2 py-1 bg-zinc-50 border border-zinc-200 rounded text-[10px] font-mono focus:outline-none focus:border-zinc-400"
+                />
+              </div>
+            </div>
+
+            {/* Background Image */}
+            <div className="space-y-1">
+              <span className="text-[10px] text-zinc-500 uppercase tracking-wide">Background Image</span>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                      if (event.target?.result) {
+                        onColorChange('backgroundImage', event.target.result as string);
+                      }
+                    };
+                    reader.readAsDataURL(file);
+                  }
+                }}
+                className="w-full text-[10px] text-zinc-500 file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-[10px] file:font-medium file:bg-zinc-100 file:text-zinc-700 hover:file:bg-zinc-200"
+              />
+              {params.backgroundImage && (
+                <button
+                  onClick={() => onColorChange('backgroundImage', '')}
+                  className="text-[10px] text-red-500 hover:text-red-600 underline"
+                >
+                  Remove Image
+                </button>
+              )}
+            </div>
+
+            {/* Background Scale */}
+            {params.backgroundImage && (
+              <div className="space-y-1">
+                <span className="text-[10px] text-zinc-500 uppercase tracking-wide">Image Scale</span>
+                <div className="flex gap-1">
+                  {['cover', 'contain'].map((mode) => (
+                    <button
+                      key={mode}
+                      onClick={() => onColorChange('backgroundScale', mode)}
+                      className={`flex-1 py-1 text-[10px] rounded border ${params.backgroundScale === mode
+                          ? 'bg-zinc-900 text-white border-zinc-900'
+                          : 'bg-white text-zinc-600 border-zinc-200 hover:border-zinc-300'
+                        }`}
+                    >
+                      {mode.charAt(0).toUpperCase() + mode.slice(1)}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
       {/* Text Overlay Section */}
       <div className="border-b border-zinc-100">
         <button

@@ -28,6 +28,8 @@ export interface TreeArtworkParams {
   tipColor2: string;
   tipColor3: string;
   backgroundColor: string;
+  backgroundImage?: string;
+  backgroundScale?: 'cover' | 'contain';
 
   // Text/Poem
   textContent: string;
@@ -100,11 +102,15 @@ const TreeArtwork = forwardRef<TreeArtworkRef, TreeArtworkProps>(
     useEffect(() => {
       if (sketchRef.current && sketchRef.current.resetSketch) {
         sketchRef.current.resetSketch();
-        // Always restart the loop when regenerating, regardless of isAnimating state
-        // The isAnimating useEffect will handle stopping it if needed
-        sketchRef.current.loop();
       }
-    }, [params.seed]);
+    }, [params.seed, params.initialPaths, params.initialVelocity, params.branchProbability, params.diameterShrink, params.minDiameter, params.bumpMultiplier, params.velocityRetention, params.speedMin, params.speedMax, params.finishedCircleSize, params.strokeWeightMultiplier, params.stemColor1, params.stemColor2, params.stemColor3, params.tipColor1, params.tipColor2, params.tipColor3, params.backgroundColor, params.backgroundScale]);
+
+    // Handle background image changes
+    useEffect(() => {
+      if (sketchRef.current && sketchRef.current.loadBackgroundImage) {
+        sketchRef.current.loadBackgroundImage(params.backgroundImage);
+      }
+    }, [params.backgroundImage]);
 
     useImperativeHandle(ref, () => ({
       exportImage: () => {
@@ -355,6 +361,7 @@ const TreeArtwork = forwardRef<TreeArtworkRef, TreeArtworkProps>(
           }
 
           let paths: Pathfinder[] = [];
+          let bgImage: any = null;
 
           p.setup = () => {
             p.pixelDensity(1);
@@ -363,7 +370,15 @@ const TreeArtwork = forwardRef<TreeArtworkRef, TreeArtworkProps>(
             p.randomSeed(paramsRef.current.seed);
             p.noiseSeed(paramsRef.current.seed);
 
-            resetSketch();
+            // Initial load if param exists
+            if (paramsRef.current.backgroundImage) {
+              p.loadImage(paramsRef.current.backgroundImage, (img: any) => {
+                bgImage = img;
+                resetSketch();
+              });
+            } else {
+              resetSketch();
+            }
 
             if (!paramsRef.current.isAnimating) {
               p.noLoop();
@@ -372,7 +387,49 @@ const TreeArtwork = forwardRef<TreeArtworkRef, TreeArtworkProps>(
 
           const resetSketch = () => {
             p.randomSeed(paramsRef.current.seed);
-            p.background(paramsRef.current.backgroundColor);
+
+            if (bgImage) {
+              // Draw background image with cover logic
+              const imgAspect = bgImage.width / bgImage.height;
+              const canvasAspect = p.width / p.height;
+              let drawW, drawH, x, y;
+
+              // Default to cover
+              const scaleMode = paramsRef.current.backgroundScale || 'cover';
+
+              if (scaleMode === 'contain') {
+                if (canvasAspect > imgAspect) {
+                  drawH = p.height;
+                  drawW = p.height * imgAspect;
+                  x = (p.width - drawW) / 2;
+                  y = 0;
+                } else {
+                  drawW = p.width;
+                  drawH = p.width / imgAspect;
+                  x = 0;
+                  y = (p.height - drawH) / 2;
+                }
+                p.background(paramsRef.current.backgroundColor); // Fill gaps
+                p.image(bgImage, x, y, drawW, drawH);
+              } else {
+                // Cover
+                if (canvasAspect > imgAspect) {
+                  drawW = p.width;
+                  drawH = p.width / imgAspect;
+                  x = 0;
+                  y = (p.height - drawH) / 2;
+                } else {
+                  drawH = p.height;
+                  drawW = p.height * imgAspect;
+                  x = (p.width - drawW) / 2;
+                  y = 0;
+                }
+                p.image(bgImage, x, y, drawW, drawH);
+              }
+            } else {
+              p.background(paramsRef.current.backgroundColor);
+            }
+
             p.ellipseMode(p.CENTER);
             p.smooth();
 
@@ -415,6 +472,18 @@ const TreeArtwork = forwardRef<TreeArtworkRef, TreeArtworkProps>(
               }
               p.noLoop();
             }
+          };
+
+          (p as any).loadBackgroundImage = (url: string) => {
+            if (!url) {
+              bgImage = null;
+              resetSketch();
+              return;
+            }
+            p.loadImage(url, (img: any) => {
+              bgImage = img;
+              resetSketch();
+            });
           };
 
           const renderText = () => {

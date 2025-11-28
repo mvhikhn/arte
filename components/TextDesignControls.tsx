@@ -405,6 +405,73 @@ export default function TextDesignControls({
                             </div>
                         </div>
 
+                        {/* Background Image */}
+                        <div className="space-y-1">
+                            <span className="text-[10px] text-zinc-500 uppercase tracking-wide">Background Image</span>
+                            <input
+                                type="file"
+                                accept="image/*"
+                                onChange={(e) => {
+                                    const file = e.target.files?.[0];
+                                    if (file) {
+                                        const reader = new FileReader();
+                                        reader.onload = (event) => {
+                                            if (event.target?.result) {
+                                                onParamChange('backgroundImage', event.target.result as string);
+                                            }
+                                        };
+                                        reader.readAsDataURL(file);
+                                    }
+                                }}
+                                className="w-full text-[10px] text-zinc-500 file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-[10px] file:font-medium file:bg-zinc-100 file:text-zinc-700 hover:file:bg-zinc-200"
+                            />
+                            {params.backgroundImage && (
+                                <button
+                                    onClick={() => onParamChange('backgroundImage', '')}
+                                    className="text-[10px] text-red-500 hover:text-red-600 underline"
+                                >
+                                    Remove Image
+                                </button>
+                            )}
+                        </div>
+
+                        {/* Background Scale */}
+                        {params.backgroundImage && (
+                            <div className="space-y-1">
+                                <span className="text-[10px] text-zinc-500 uppercase tracking-wide">Image Scale</span>
+                                <div className="flex gap-1">
+                                    {['cover', 'contain'].map((mode) => (
+                                        <button
+                                            key={mode}
+                                            onClick={() => onParamChange('backgroundScale', mode)}
+                                            className={`flex-1 py-1 text-[10px] rounded border ${params.backgroundScale === mode
+                                                    ? 'bg-zinc-900 text-white border-zinc-900'
+                                                    : 'bg-white text-zinc-600 border-zinc-200 hover:border-zinc-300'
+                                                }`}
+                                        >
+                                            {mode.charAt(0).toUpperCase() + mode.slice(1)}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Grain Amount */}
+                        <div className="space-y-1">
+                            <div className="flex justify-between items-center">
+                                <span className="text-[10px] text-zinc-500 uppercase tracking-wide">Grain Amount</span>
+                                <span className="text-[10px] font-mono text-zinc-600">{params.grainAmount || 0}</span>
+                            </div>
+                            <Slider
+                                value={[params.grainAmount || 0]}
+                                onValueChange={([value]) => onParamChange('grainAmount', value)}
+                                min={0}
+                                max={50}
+                                step={1}
+                                className="w-full"
+                            />
+                        </div>
+
                         <div className="grid grid-cols-2 gap-3">
                             <div className="space-y-1">
                                 <div className="flex justify-between items-center">
