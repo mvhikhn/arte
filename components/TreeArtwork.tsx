@@ -439,6 +439,7 @@ const TreeArtwork = forwardRef<TreeArtworkRef, TreeArtworkProps>(
             }
 
             grainApplied = false; // Reset grain flag
+            p.loop();
           };
 
           let grainApplied = false;
