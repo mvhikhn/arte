@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect, useTransition, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
+import Link from "next/link";
 import Artwork, { ArtworkParams, ArtworkRef } from "@/components/Artwork";
 import GridArtwork, { GridArtworkParams, GridArtworkRef } from "@/components/GridArtwork";
 import MosaicArtwork, { MosaicArtworkParams, MosaicArtworkRef } from "@/components/MosaicArtwork";
@@ -821,6 +822,17 @@ export default function StudioPage() {
           </div>
         </div>
       </main>
+
+      {/* Home Button - Top Left */}
+      <Link
+        href="/"
+        className="fixed top-6 left-6 w-12 h-12 flex items-center justify-center bg-zinc-900 hover:bg-zinc-800 text-white rounded-full shadow-lg transition-all hover:shadow-xl z-40"
+        aria-label="Return to home"
+      >
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+        </svg>
+      </Link>
 
       {/* Next Artwork Button - Minimal Circle */}
       <button
