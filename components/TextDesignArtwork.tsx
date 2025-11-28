@@ -19,6 +19,7 @@ interface TextLayer {
     showHighlight: boolean;
     outlineThickness: number;
     outlineColor: string;
+    fontUrl?: string;
 }
 
 export interface TextDesignArtworkParams {
@@ -56,30 +57,42 @@ const TextDesignArtwork = forwardRef<TextDesignArtworkRef, TextDesignArtworkProp
         const containerRef = useRef<HTMLDivElement>(null);
         const sketchRef = useRef<any>(null);
         const paramsRef = useRef(params);
-        const customFontRef = useRef<any>(null);
+        const customFontsRef = useRef<{ [key: string]: any }>({});
 
         useEffect(() => {
             paramsRef.current = params;
         }, [params]);
 
-        // Handle custom font loading
-        useEffect(() => {
-            if (params.fontUrl && params.fontUrl.toLowerCase().endsWith('.ttf')) {
-                // Load font via p5 if sketch is ready
-                if (sketchRef.current && sketchRef.current.loadFont) {
+        // Helper to load fonts
+        const loadFonts = () => {
+            if (!sketchRef.current || !sketchRef.current.loadFont) return;
+
+            const load = (url: string | undefined, id: string) => {
+                if (url && url.toLowerCase().endsWith('.ttf')) {
                     sketchRef.current.loadFont(
-                        params.fontUrl,
+                        url,
                         (font: any) => {
-                            customFontRef.current = font;
-                            console.log("Custom font loaded successfully");
+                            customFontsRef.current[id] = font;
+                            console.log(`Font loaded for ${id}`);
+                            if (sketchRef.current.triggerRedraw) {
+                                sketchRef.current.triggerRedraw();
+                            }
                         },
-                        (err: any) => {
-                            console.error("Failed to load font:", err);
-                        }
+                        (err: any) => console.error(`Failed to load font ${id}:`, err)
                     );
                 }
-            }
-        }, [params.fontUrl]);
+            };
+
+            load(params.fontUrl, 'global');
+            load(params.layer1.fontUrl, 'layer1');
+            load(params.layer2.fontUrl, 'layer2');
+            load(params.layer3.fontUrl, 'layer3');
+        };
+
+        // Load fonts when URLs change
+        useEffect(() => {
+            loadFonts();
+        }, [params.fontUrl, params.layer1.fontUrl, params.layer2.fontUrl, params.layer3.fontUrl]);
 
         useImperativeHandle(ref, () => ({
             exportImage: () => {
@@ -192,16 +205,23 @@ const TextDesignArtwork = forwardRef<TextDesignArtworkRef, TextDesignArtworkProp
                 if (cancelled || !containerRef.current) return;
 
                 const sketch = (p: any) => {
-                    const drawTextLayer = (layer: TextLayer) => {
+                    const drawTextLayer = (layer: TextLayer, layerId: string) => {
                         if (!layer.text) return;
 
                         p.push();
 
-                        // Font
-                        if (customFontRef.current) {
-                            p.textFont(customFontRef.current);
-                        } else if (params.customFontFamily) {
-                            p.textFont(params.customFontFamily);
+                        // Font Selection
+                        let fontToUse = null;
+                        if (customFontsRef.current[layerId]) {
+                            fontToUse = customFontsRef.current[layerId];
+                        } else if (customFontsRef.current['global']) {
+                            fontToUse = customFontsRef.current['global'];
+                        }
+
+                        if (fontToUse) {
+                            p.textFont(fontToUse);
+                        } else if (paramsRef.current.customFontFamily) {
+                            p.textFont(paramsRef.current.customFontFamily);
                         } else {
                             p.textFont("Noto Sans Bengali");
                         }
@@ -266,15 +286,18 @@ const TextDesignArtwork = forwardRef<TextDesignArtworkRef, TextDesignArtworkProp
                         );
                         canvas.parent(containerRef.current!);
                         p.smooth();
+
+                        // Trigger font loading now that p5 is ready
+                        loadFonts();
                     };
 
                     p.draw = () => {
                         p.background(paramsRef.current.backgroundColor);
 
                         // Draw all layers
-                        drawTextLayer(paramsRef.current.layer1);
-                        drawTextLayer(paramsRef.current.layer2);
-                        drawTextLayer(paramsRef.current.layer3);
+                        drawTextLayer(paramsRef.current.layer1, 'layer1');
+                        drawTextLayer(paramsRef.current.layer2, 'layer2');
+                        drawTextLayer(paramsRef.current.layer3, 'layer3');
 
                         p.noLoop(); // Static artwork
                     };

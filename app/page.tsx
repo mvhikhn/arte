@@ -236,7 +236,7 @@ const generateRandomTextDesignParams = (): TextDesignArtworkParams => {
     backgroundColor: "#001eff",
     canvasWidth: 850,
     canvasHeight: 850,
-    fontUrl: "https://db.onlinewebfonts.com/t/05772fcddb0048a8a7d2279736c5790a.ttf",
+    fontUrl: "",
     customFontFamily: "",
     layer1: {
       text: "ZOHRAN",
@@ -245,7 +245,7 @@ const generateRandomTextDesignParams = (): TextDesignArtworkParams => {
       size: 100,
       alignment: 'center',
       fill: "#FF9900",
-      extrudeDepth: 18,
+      extrudeDepth: 10,
       extrudeX: -1.2,
       extrudeY: 0.8,
       extrudeStart: "#ff0000",
@@ -254,6 +254,7 @@ const generateRandomTextDesignParams = (): TextDesignArtworkParams => {
       showHighlight: false,
       outlineThickness: 0,
       outlineColor: "#D10000",
+      fontUrl: "https://db.onlinewebfonts.com/t/05772fcddb0048a8a7d2279736c5790a.ttf",
     },
     layer2: {
       text: "",
@@ -271,6 +272,7 @@ const generateRandomTextDesignParams = (): TextDesignArtworkParams => {
       showHighlight: false,
       outlineThickness: 4,
       outlineColor: "#D10000",
+      fontUrl: "",
     },
     layer3: {
       text: "",
@@ -288,6 +290,7 @@ const generateRandomTextDesignParams = (): TextDesignArtworkParams => {
       showHighlight: false,
       outlineThickness: 4,
       outlineColor: "#D10000",
+      fontUrl: "",
     },
     seed: Date.now(),
     exportWidth: 1600,

@@ -78,6 +78,18 @@ export default function TextDesignControls({
                             />
                         </div>
 
+                        {/* Font URL */}
+                        <div className="space-y-1">
+                            <span className="text-[10px] text-zinc-500 uppercase tracking-wide">Font URL (TTF)</span>
+                            <input
+                                type="text"
+                                value={layer.fontUrl || ''}
+                                onChange={(e) => updateLayer(layerNum, 'fontUrl', e.target.value)}
+                                placeholder="https://.../font.ttf"
+                                className="w-full px-2 py-1 bg-zinc-50 border border-zinc-200 rounded text-xs focus:outline-none focus:border-zinc-400"
+                            />
+                        </div>
+
                         {/* Font Size */}
                         <div className="space-y-1">
                             <div className="flex justify-between items-center">
