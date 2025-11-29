@@ -61,13 +61,13 @@ const Artwork = forwardRef<ArtworkRef, ArtworkProps>(({ params }, ref) => {
       // WYSIWYG - Export at current canvas resolution
       const currentCanvas = sketchRef.current.canvas;
       const exportCanvas = document.createElement('canvas');
-      exportCanvas.width = currentCanvas.width;
-      exportCanvas.height = currentCanvas.height;
+      exportCanvas.width = params.canvasWidth;
+      exportCanvas.height = params.canvasHeight;
       const ctx = exportCanvas.getContext('2d');
 
       if (ctx) {
         // Draw the current canvas at its actual size (no scaling)
-        ctx.drawImage(currentCanvas, 0, 0);
+        ctx.drawImage(currentCanvas, 0, 0, exportCanvas.width, exportCanvas.height);
 
         // Trigger download
         exportCanvas.toBlob((blob) => {

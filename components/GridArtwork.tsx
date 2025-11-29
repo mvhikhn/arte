@@ -50,11 +50,11 @@ const GridArtwork = forwardRef<GridArtworkRef, GridArtworkProps>(({ params }, re
       if (!sketchRef.current) return;
       const currentCanvas = sketchRef.current.canvas;
       const exportCanvas = document.createElement('canvas');
-      exportCanvas.width = currentCanvas.width;
-      exportCanvas.height = currentCanvas.height;
+      exportCanvas.width = params.canvasWidth;
+      exportCanvas.height = params.canvasHeight;
       const ctx = exportCanvas.getContext('2d');
       if (ctx) {
-        ctx.drawImage(currentCanvas, 0, 0);
+        ctx.drawImage(currentCanvas, 0, 0, exportCanvas.width, exportCanvas.height);
         const link = document.createElement('a');
         link.download = `grid-arte-${Date.now()}.png`;
         link.href = exportCanvas.toDataURL();

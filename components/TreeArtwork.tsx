@@ -121,11 +121,11 @@ const TreeArtwork = forwardRef<TreeArtworkRef, TreeArtworkProps>(
         if (!sketchRef.current) return;
         const currentCanvas = sketchRef.current.canvas;
         const exportCanvas = document.createElement("canvas");
-        exportCanvas.width = currentCanvas.width;
-        exportCanvas.height = currentCanvas.height;
+        exportCanvas.width = params.canvasWidth;
+        exportCanvas.height = params.canvasHeight;
         const ctx = exportCanvas.getContext("2d");
         if (ctx) {
-          ctx.drawImage(currentCanvas, 0, 0);
+          ctx.drawImage(currentCanvas, 0, 0, exportCanvas.width, exportCanvas.height);
           exportCanvas.toBlob((blob) => {
             if (blob) {
               const url = URL.createObjectURL(blob);
@@ -391,6 +391,7 @@ const TreeArtwork = forwardRef<TreeArtworkRef, TreeArtworkProps>(
 
           const renderText = () => {
             p.push();
+            p.noStroke();
             p.fill(paramsRef.current.textColor);
             p.textFont(params.customFontFamily || params.fontFamily);
             p.textSize(paramsRef.current.fontSize);
@@ -573,12 +574,14 @@ const TreeArtwork = forwardRef<TreeArtworkRef, TreeArtworkProps>(
 
           const applyGrain = () => {
             p.loadPixels();
-            for (let i = 0; i < p.pixels.length; i += 4) {
-              const amount = paramsRef.current.grainAmount || 0;
+            const d = p.pixelDensity();
+            const count = 4 * (p.width * d) * (p.height * d);
+            const amount = paramsRef.current.grainAmount || 0;
+            for (let i = 0; i < count; i += 4) {
               const noise = p.random(-amount, amount);
-              p.pixels[i] += noise;     // R
-              p.pixels[i + 1] += noise; // G
-              p.pixels[i + 2] += noise; // B
+              p.pixels[i] = p.constrain(p.pixels[i] + noise, 0, 255);
+              p.pixels[i + 1] = p.constrain(p.pixels[i + 1] + noise, 0, 255);
+              p.pixels[i + 2] = p.constrain(p.pixels[i + 2] + noise, 0, 255);
             }
             p.updatePixels();
           };
