@@ -250,23 +250,26 @@ const generateRandomTreeParams = (): TreeArtworkParams => {
 
 // Generate random text design params
 const generateRandomTextDesignParams = (): TextDesignArtworkParams => {
+  // Detect if mobile (screen width < 768px)
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+
   return {
-    backgroundColor: "#001eff",
-    canvasWidth: 400,
-    canvasHeight: 400,
-    grainAmount: 40,
-    fontUrl: "",
-    customFontFamily: "",
+    backgroundColor: "#001ef1",
+    canvasWidth: isMobile ? 400 : 630,
+    canvasHeight: isMobile ? 500 : 790,
+    grainAmount: 30,
+    fontUrl: "https://example.com/font.ttf",
+    customFontFamily: "Noto Sans Bengali",
     layer1: {
       text: "ZOHRAN",
-      x: 0.5,
-      y: 0.5,
+      x: 0.500,
+      y: 0.500,
       size: 70,
       alignment: 'center',
       fill: "#FF9900",
-      extrudeDepth: 6,
-      extrudeX: -1.2,
-      extrudeY: 0.8,
+      extrudeDepth: 4,
+      extrudeX: -1.80,
+      extrudeY: 0.80,
       extrudeStart: "#ff0000",
       extrudeEnd: "#ff0000",
       highlight: "#fff4b8",
