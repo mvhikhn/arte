@@ -860,7 +860,6 @@ export default function StudioPage() {
         <span className="text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity -ml-2 group-hover:ml-0">Home</span>
       </Link>
 
-      {/* Next Artwork Button - Minimal Circle */}
       {/* Next Artwork Button - Minimal */}
       <button
         onClick={handleNextArtwork}
@@ -873,80 +872,94 @@ export default function StudioPage() {
         </div>
       </button>
 
-      {/* Controls Dropdown Panel - Always Visible */}
-      <div
-        className="fixed top-6 right-6 w-[300px] max-h-[calc(100vh-6rem)] overflow-y-auto bg-white/90 backdrop-blur-md border border-zinc-200 shadow-2xl rounded-2xl z-50 no-scrollbar"
+      {/* Controls Toggle Button */}
+      <button
+        onClick={() => setControlsVisible(!controlsVisible)}
+        className="group fixed top-6 right-6 flex items-center gap-2 text-zinc-400 hover:text-zinc-900 transition-colors z-50"
+        aria-label="Toggle controls"
       >
-        <div className="overflow-y-auto no-scrollbar" style={{ maxHeight: 'calc(100vh - 73px)' }}>
-          {currentArtwork === "flow" && (
-            <Controls
-              params={flowParams}
-              onParamChange={handleFlowParamChange}
-              onColorChange={handleFlowColorChange}
-              onExportImage={handleExportImage}
-              onExportGif={handleExportGif}
-              onExportWallpapers={handleExportWallpapers}
-              onToggleAnimation={handleToggleAnimation}
-              onRandomize={handleFlowRandomize}
-            />
-          )}
-          {currentArtwork === "grid" && (
-            <GridControls
-              params={gridParams}
-              onParamChange={handleGridParamChange}
-              onColorChange={handleGridColorChange}
-              onExportImage={handleExportImage}
-              onExportGif={handleExportGif}
-              onExportWallpapers={handleExportWallpapers}
-              onToggleAnimation={handleToggleAnimation}
-              onRandomize={handleGridRandomize}
-            />
-          )}
-          {currentArtwork === "mosaic" && (
-            <MosaicControls
-              params={mosaicParams}
-              onParamChange={handleMosaicParamChange}
-              onColorChange={handleMosaicColorChange}
-              onExportImage={handleExportImage}
-              onExportWallpapers={handleExportWallpapers}
-              onRandomize={handleMosaicRandomize}
-              onRegenerate={handleMosaicRegenerate}
-            />
-          )}
-          {currentArtwork === "rotated" && (
-            <RotatedGridControls
-              params={rotatedGridParams}
-              onParamChange={handleRotatedGridParamChange}
-              onColorChange={handleRotatedGridColorChange}
-              onExportImage={handleExportImage}
-              onExportWallpapers={handleExportWallpapers}
-              onRandomize={handleRotatedGridRandomize}
-              onRegenerate={handleRotatedGridRegenerate}
-            />
-          )}
-          {currentArtwork === "tree" && (
-            <TreeControls
-              params={treeParams}
-              onParamChange={handleTreeParamChange}
-              onColorChange={handleTreeColorChange}
-              onExportImage={handleExportImage}
-              onExportGif={handleExportGif}
-              onExportWallpapers={handleExportWallpapers}
-              onToggleAnimation={handleToggleAnimation}
-              onRandomize={handleTreeRandomize}
-              onRegenerate={handleTreeRegenerate}
-            />
-          )}
-          {currentArtwork === "textdesign" && (
-            <TextDesignControls
-              params={textDesignParams}
-              onParamChange={handleTextDesignParamChange}
-              onExportImage={handleExportImage}
-              onExportWallpapers={handleExportWallpapers}
-            />
-          )}
+        <span className="text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity -mr-2 group-hover:mr-0">Controls</span>
+        <div className="p-2 rounded-full group-hover:bg-zinc-100 transition-colors">
+          <SlidersHorizontal className="w-4 h-4" />
         </div>
-      </div>
+      </button>
+
+      {/* Controls Dropdown Panel */}
+      {controlsVisible && (
+        <div
+          className="fixed top-16 right-6 w-[300px] max-h-[calc(100vh-8rem)] overflow-y-auto bg-white/90 backdrop-blur-md border border-zinc-200 shadow-2xl rounded-2xl z-40 no-scrollbar"
+        >
+          <div className="overflow-y-auto no-scrollbar" style={{ maxHeight: 'calc(100vh - 73px)' }}>
+            {currentArtwork === "flow" && (
+              <Controls
+                params={flowParams}
+                onParamChange={handleFlowParamChange}
+                onColorChange={handleFlowColorChange}
+                onExportImage={handleExportImage}
+                onExportGif={handleExportGif}
+                onExportWallpapers={handleExportWallpapers}
+                onToggleAnimation={handleToggleAnimation}
+                onRandomize={handleFlowRandomize}
+              />
+            )}
+            {currentArtwork === "grid" && (
+              <GridControls
+                params={gridParams}
+                onParamChange={handleGridParamChange}
+                onColorChange={handleGridColorChange}
+                onExportImage={handleExportImage}
+                onExportGif={handleExportGif}
+                onExportWallpapers={handleExportWallpapers}
+                onToggleAnimation={handleToggleAnimation}
+                onRandomize={handleGridRandomize}
+              />
+            )}
+            {currentArtwork === "mosaic" && (
+              <MosaicControls
+                params={mosaicParams}
+                onParamChange={handleMosaicParamChange}
+                onColorChange={handleMosaicColorChange}
+                onExportImage={handleExportImage}
+                onExportWallpapers={handleExportWallpapers}
+                onRandomize={handleMosaicRandomize}
+                onRegenerate={handleMosaicRegenerate}
+              />
+            )}
+            {currentArtwork === "rotated" && (
+              <RotatedGridControls
+                params={rotatedGridParams}
+                onParamChange={handleRotatedGridParamChange}
+                onColorChange={handleRotatedGridColorChange}
+                onExportImage={handleExportImage}
+                onExportWallpapers={handleExportWallpapers}
+                onRandomize={handleRotatedGridRandomize}
+                onRegenerate={handleRotatedGridRegenerate}
+              />
+            )}
+            {currentArtwork === "tree" && (
+              <TreeControls
+                params={treeParams}
+                onParamChange={handleTreeParamChange}
+                onColorChange={handleTreeColorChange}
+                onExportImage={handleExportImage}
+                onExportGif={handleExportGif}
+                onExportWallpapers={handleExportWallpapers}
+                onToggleAnimation={handleToggleAnimation}
+                onRandomize={handleTreeRandomize}
+                onRegenerate={handleTreeRegenerate}
+              />
+            )}
+            {currentArtwork === "textdesign" && (
+              <TextDesignControls
+                params={textDesignParams}
+                onParamChange={handleTextDesignParamChange}
+                onExportImage={handleExportImage}
+                onExportWallpapers={handleExportWallpapers}
+              />
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

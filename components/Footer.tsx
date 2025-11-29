@@ -100,7 +100,7 @@ export default function Footer() {
 
                 {/* Bottom Right: Last Updated */}
                 <div className="text-[10px] text-zinc-500 tracking-wide font-mono text-left">
-                    Last Updated On {new Date().toLocaleDateString('en-GB').replace(/\//g, '.')} {new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })} GMT+6
+                    {new Date().toLocaleDateString('en-GB').replace(/\//g, '.')}
                 </div>
             </div>
         </footer>
