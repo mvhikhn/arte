@@ -106,8 +106,8 @@ export default function LastFmWidget() {
     if (loading || !track) return null;
 
     return (
-        <div className="flex items-center gap-4">
-            <div className="relative w-12 h-12 flex-shrink-0">
+        <div className="flex items-center gap-3 w-full">
+            <div className="relative w-10 h-10 flex-shrink-0">
                 {track.image ? (
                     <div className={`w-full h-full rounded-full overflow-hidden border border-zinc-900/10 ${track.nowPlaying ? 'animate-spin-slow' : ''}`}>
                         <img
@@ -116,26 +116,21 @@ export default function LastFmWidget() {
                             className="w-full h-full object-cover"
                         />
                         {/* Center hole for vinyl record look */}
-                        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-3 h-3 bg-zinc-900 rounded-full border-2 border-white/50"></div>
+                        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-2 h-2 bg-zinc-900 rounded-full border border-white/50"></div>
                     </div>
                 ) : (
                     <div className="w-full h-full rounded-full bg-zinc-200 flex items-center justify-center">
-                        <div className="w-3 h-3 bg-zinc-300 rounded-full"></div>
+                        <div className="w-2 h-2 bg-zinc-300 rounded-full"></div>
                     </div>
                 )}
             </div>
-            <div className="flex flex-col justify-center">
-                <span className="text-xs font-medium text-zinc-900 line-clamp-1">
+            <div className="flex flex-col justify-center min-w-0 flex-1">
+                <span className="text-xs font-medium text-zinc-900 truncate w-full block" title={track.name}>
                     {track.name}
                 </span>
-                <span className="text-[10px] text-zinc-500 line-clamp-1">
+                <span className="text-[10px] text-zinc-500 truncate w-full block" title={track.artist}>
                     {track.artist}
                 </span>
-                {track.nowPlaying && (
-                    <span className="text-[9px] text-emerald-500 font-medium uppercase tracking-wider mt-0.5">
-                        Listening Now
-                    </span>
-                )}
             </div>
             <style jsx global>{`
         @keyframes spin {

@@ -72,44 +72,35 @@ export default function Footer() {
 
     return (
         <footer
-            className="w-full min-h-[320px] p-8 md:p-12 flex flex-col justify-between transition-colors duration-1000 ease-in-out mt-auto"
+            className="w-full min-h-[320px] p-8 md:p-12 flex flex-col justify-between transition-colors duration-1000 ease-in-out mt-auto relative"
             style={{ backgroundColor: bgColor }}
         >
-            <div className="flex flex-col md:flex-row justify-between items-start gap-12 h-full">
-                {/* Left: Dhaka Info */}
-                <div className="space-y-2">
-                    <div className="text-xs font-medium uppercase tracking-wider text-zinc-500">
-                        Dhaka, Bangladesh
-                    </div>
-                    <div className="text-3xl md:text-4xl font-light text-zinc-800 tracking-tight">
-                        {dateTime}
-                    </div>
-                    {weather && (
-                        <div className="text-lg text-zinc-600 font-light">
-                            {weather.temp}°C — {weather.condition}
-                        </div>
-                    )}
+            {/* Top Section */}
+            <div className="flex justify-between items-start w-full">
+                {/* Top Left: Social Links */}
+                <div className="flex flex-col gap-2 text-sm">
+                    <a href="https://github.com/mvhikhn" target="_blank" rel="noopener noreferrer" className="text-zinc-600 hover:text-zinc-900 transition-colors">GitHub</a>
+                    <a href="https://linkedin.com/in/mvhikhn" target="_blank" rel="noopener noreferrer" className="text-zinc-600 hover:text-zinc-900 transition-colors">LinkedIn</a>
+                    <a href="https://x.com/mvhikhn" target="_blank" rel="noopener noreferrer" className="text-zinc-600 hover:text-zinc-900 transition-colors">X</a>
+                    <a href="mailto:mvhikhn@gmail.com" className="text-zinc-600 hover:text-zinc-900 transition-colors">Email</a>
                 </div>
 
-                {/* Right: Widgets & Links */}
-                <div className="flex flex-col items-start md:items-end gap-8">
-                    {/* Last.fm Widget */}
-                    <div className="bg-white/50 backdrop-blur-sm p-4 rounded-2xl border border-white/60 shadow-sm">
-                        <LastFmWidget />
-                    </div>
+                {/* Top Right: Last.fm Widget */}
+                <div className="bg-white/50 backdrop-blur-sm p-4 rounded-2xl border border-white/60 shadow-sm max-w-[200px]">
+                    <LastFmWidget />
+                </div>
+            </div>
 
-                    <div className="flex flex-col md:items-end gap-4">
-                        <div className="flex gap-6 text-sm">
-                            <a href="https://github.com/mvhikhn" target="_blank" rel="noopener noreferrer" className="text-zinc-600 hover:text-zinc-900 transition-colors">GitHub</a>
-                            <a href="https://linkedin.com/in/mvhikhn" target="_blank" rel="noopener noreferrer" className="text-zinc-600 hover:text-zinc-900 transition-colors">LinkedIn</a>
-                            <a href="https://x.com/mvhikhn" target="_blank" rel="noopener noreferrer" className="text-zinc-600 hover:text-zinc-900 transition-colors">X</a>
-                            <a href="mailto:mvhikhn@gmail.com" className="text-zinc-600 hover:text-zinc-900 transition-colors">Email</a>
-                        </div>
+            {/* Bottom Section */}
+            <div className="flex flex-col md:flex-row justify-between items-end w-full mt-12 gap-4">
+                {/* Bottom Left: Date | Location | Weather */}
+                <div className="text-sm font-light text-zinc-800 tracking-tight">
+                    {new Date().toLocaleDateString('en-GB').replace(/\//g, '.')} | 📍DHK | {weather ? `${weather.temp} C- ${weather.condition}` : 'Loading...'}
+                </div>
 
-                        <div className="text-[10px] text-zinc-500 uppercase tracking-widest">
-                            Last updated: {lastUpdate}
-                        </div>
-                    </div>
+                {/* Bottom Right: Last Updated */}
+                <div className="text-[10px] text-zinc-500 tracking-wide font-mono">
+                    Last Updated On {new Date().toLocaleDateString('en-GB').replace(/\//g, '.')} {new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })} GMT+6
                 </div>
             </div>
         </footer>
