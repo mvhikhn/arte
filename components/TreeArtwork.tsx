@@ -392,6 +392,11 @@ const TreeArtwork = forwardRef<TreeArtworkRef, TreeArtworkProps>(
           const resetSketch = () => {
             p.randomSeed(paramsRef.current.seed);
 
+            // Resize canvas if dimensions changed
+            if (p.width !== paramsRef.current.canvasWidth || p.height !== paramsRef.current.canvasHeight) {
+              p.resizeCanvas(paramsRef.current.canvasWidth, paramsRef.current.canvasHeight);
+            }
+
             if (bgImage) {
               // Draw background image with cover logic
               const imgAspect = bgImage.width / bgImage.height;

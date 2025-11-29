@@ -470,6 +470,46 @@ export default function TextDesignControls({
                             />
                         </div>
 
+                        <div className="space-y-1 pt-2 border-t border-zinc-100">
+                            <span className="text-[10px] text-zinc-500 tracking-wide">Font URL (.ttf)</span>
+                            <input
+                                type="text"
+                                value={params.fontUrl || ''}
+                                onChange={(e) => onParamChange('fontUrl', e.target.value)}
+                                placeholder="https://example.com/font.ttf"
+                                className="w-full px-2 py-1 bg-zinc-50 border border-zinc-200 rounded text-xs focus:outline-none focus:border-zinc-400"
+                            />
+                        </div>
+
+                        <div className="space-y-1">
+                            <span className="text-[10px] text-zinc-500 tracking-wide">Custom Font Family</span>
+                            <input
+                                type="text"
+                                value={params.customFontFamily || ''}
+                                onChange={(e) => onParamChange('customFontFamily', e.target.value)}
+                                placeholder="Noto Sans Bengali"
+                                className="w-full px-2 py-1 bg-zinc-50 border border-zinc-200 rounded text-xs focus:outline-none focus:border-zinc-400"
+                            />
+                        </div>
+                    </div>
+                )}
+            </div>
+
+            {/* Canvas Section */}
+            <div className="border-b border-zinc-100">
+                <button
+                    onClick={() => toggleSection("Canvas")}
+                    className="w-full px-3 py-2 flex items-center justify-between hover:bg-zinc-50 transition-colors"
+                >
+                    <span className="font-semibold text-xs tracking-wider text-zinc-500">Canvas</span>
+                    {expandedSections.has("Canvas") ? (
+                        <ChevronDown className="w-3 h-3 text-zinc-400" />
+                    ) : (
+                        <ChevronRight className="w-3 h-3 text-zinc-400" />
+                    )}
+                </button>
+                {expandedSections.has("Canvas") && (
+                    <div className="px-3 pb-3">
                         <div className="grid grid-cols-2 gap-3">
                             <div className="space-y-1">
                                 <div className="flex justify-between items-center">
@@ -499,28 +539,6 @@ export default function TextDesignControls({
                                     className="w-full"
                                 />
                             </div>
-                        </div>
-
-                        <div className="space-y-1 pt-2 border-t border-zinc-100">
-                            <span className="text-[10px] text-zinc-500 tracking-wide">Font URL (.ttf)</span>
-                            <input
-                                type="text"
-                                value={params.fontUrl || ''}
-                                onChange={(e) => onParamChange('fontUrl', e.target.value)}
-                                placeholder="https://example.com/font.ttf"
-                                className="w-full px-2 py-1 bg-zinc-50 border border-zinc-200 rounded text-xs focus:outline-none focus:border-zinc-400"
-                            />
-                        </div>
-
-                        <div className="space-y-1">
-                            <span className="text-[10px] text-zinc-500 tracking-wide">Custom Font Family</span>
-                            <input
-                                type="text"
-                                value={params.customFontFamily || ''}
-                                onChange={(e) => onParamChange('customFontFamily', e.target.value)}
-                                placeholder="Noto Sans Bengali"
-                                className="w-full px-2 py-1 bg-zinc-50 border border-zinc-200 rounded text-xs focus:outline-none focus:border-zinc-400"
-                            />
                         </div>
                     </div>
                 )}
