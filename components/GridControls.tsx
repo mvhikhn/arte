@@ -55,7 +55,7 @@ export default function GridControls({ params, onParamChange, onColorChange, onE
   const [gifDuration, setGifDuration] = useState(3);
   const [gifFps, setGifFps] = useState(30);
   const [isExporting, setIsExporting] = useState(false);
-  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(["Grid Settings", "Colors"]));
+  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
 
   const toggleSection = (title: string) => {
     const newExpanded = new Set(expandedSections);
@@ -118,7 +118,7 @@ export default function GridControls({ params, onParamChange, onColorChange, onE
               onClick={() => toggleSection(section.title)}
               className="w-full px-3 py-2 flex items-center justify-between hover:bg-zinc-50 transition-colors"
             >
-              <span className="font-semibold text-xs uppercase tracking-wider text-zinc-500">{section.title}</span>
+              <span className="font-semibold text-xs tracking-wider text-zinc-500">{section.title}</span>
               {isExpanded ? (
                 <ChevronDown className="w-3 h-3 text-zinc-400" />
               ) : (
@@ -172,7 +172,7 @@ export default function GridControls({ params, onParamChange, onColorChange, onE
           onClick={() => toggleSection("Colors")}
           className="w-full px-3 py-2 flex items-center justify-between hover:bg-zinc-50 transition-colors"
         >
-          <span className="font-semibold text-xs uppercase tracking-wider text-zinc-500">Colors</span>
+          <span className="font-semibold text-xs tracking-wider text-zinc-500">Colors</span>
           {expandedSections.has("Colors") ? (
             <ChevronDown className="w-3 h-3 text-zinc-400" />
           ) : (
@@ -192,7 +192,7 @@ export default function GridControls({ params, onParamChange, onColorChange, onE
               const value = params[key] as string;
               return (
                 <div key={key} className="flex flex-col gap-1">
-                  <span className="text-[10px] text-zinc-500 uppercase tracking-wide">{label}</span>
+                  <span className="text-[10px] text-zinc-500 tracking-wide">{label}</span>
                   <div className="flex items-center gap-2">
                     <div className="w-6 h-6 rounded-full overflow-hidden border border-zinc-200 flex-shrink-0">
                       <ColorPicker
@@ -209,7 +209,7 @@ export default function GridControls({ params, onParamChange, onColorChange, onE
                           onColorChange(key, newVal);
                         }
                       }}
-                      className="w-full h-6 bg-transparent font-mono text-[10px] text-zinc-700 focus:outline-none uppercase"
+                      className="w-full h-6 bg-transparent font-mono text-[10px] text-zinc-700 focus:outline-none"
                       placeholder="#000000"
                     />
                   </div>
@@ -226,7 +226,7 @@ export default function GridControls({ params, onParamChange, onColorChange, onE
           onClick={() => toggleSection("Canvas")}
           className="w-full px-3 py-2 flex items-center justify-between hover:bg-zinc-50 transition-colors"
         >
-          <span className="font-semibold text-xs uppercase tracking-wider text-zinc-500">Canvas</span>
+          <span className="font-semibold text-xs tracking-wider text-zinc-500">Canvas</span>
           {expandedSections.has("Canvas") ? (
             <ChevronDown className="w-3 h-3 text-zinc-400" />
           ) : (
@@ -238,7 +238,7 @@ export default function GridControls({ params, onParamChange, onColorChange, onE
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1">
                 <div className="flex justify-between items-center">
-                  <span className="text-[10px] text-zinc-500 uppercase tracking-wide">Width</span>
+                  <span className="text-[10px] text-zinc-500 tracking-wide">Width</span>
                   <span className="text-[10px] font-mono text-zinc-600">{params.canvasWidth}</span>
                 </div>
                 <Slider
@@ -252,7 +252,7 @@ export default function GridControls({ params, onParamChange, onColorChange, onE
               </div>
               <div className="space-y-1">
                 <div className="flex justify-between items-center">
-                  <span className="text-[10px] text-zinc-500 uppercase tracking-wide">Height</span>
+                  <span className="text-[10px] text-zinc-500 tracking-wide">Height</span>
                   <span className="text-[10px] font-mono text-zinc-600">{params.canvasHeight}</span>
                 </div>
                 <Slider
@@ -275,7 +275,7 @@ export default function GridControls({ params, onParamChange, onColorChange, onE
           onClick={() => toggleSection("Export")}
           className="w-full px-3 py-2 flex items-center justify-between hover:bg-zinc-50 transition-colors"
         >
-          <span className="font-semibold text-xs uppercase tracking-wider text-zinc-500">Export</span>
+          <span className="font-semibold text-xs tracking-wider text-zinc-500">Export</span>
           {expandedSections.has("Export") ? (
             <ChevronDown className="w-3 h-3 text-zinc-400" />
           ) : (

@@ -32,7 +32,7 @@ export default function TreeControls({
   const [gifDuration, setGifDuration] = useState(5);
   const [gifFps, setGifFps] = useState(30);
   const [isExporting, setIsExporting] = useState(false);
-  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(["Tree Structure", "Visual"]));
+  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
 
   const toggleSection = (title: string) => {
     const newExpanded = new Set(expandedSections);
@@ -103,7 +103,7 @@ export default function TreeControls({
           onClick={() => toggleSection("Tree Structure")}
           className="w-full px-3 py-2 flex items-center justify-between hover:bg-zinc-50 transition-colors"
         >
-          <span className="font-semibold text-xs uppercase tracking-wider text-zinc-500">Tree Structure</span>
+          <span className="font-semibold text-xs tracking-wider text-zinc-500">Tree Structure</span>
           {expandedSections.has("Tree Structure") ? (
             <ChevronDown className="w-3 h-3 text-zinc-400" />
           ) : (
@@ -152,7 +152,7 @@ export default function TreeControls({
           onClick={() => toggleSection("Movement")}
           className="w-full px-3 py-2 flex items-center justify-between hover:bg-zinc-50 transition-colors"
         >
-          <span className="font-semibold text-xs uppercase tracking-wider text-zinc-500">Movement</span>
+          <span className="font-semibold text-xs tracking-wider text-zinc-500">Movement</span>
           {expandedSections.has("Movement") ? (
             <ChevronDown className="w-3 h-3 text-zinc-400" />
           ) : (
@@ -200,7 +200,7 @@ export default function TreeControls({
           onClick={() => toggleSection("Visual")}
           className="w-full px-3 py-2 flex items-center justify-between hover:bg-zinc-50 transition-colors"
         >
-          <span className="font-semibold text-xs uppercase tracking-wider text-zinc-500">Visual</span>
+          <span className="font-semibold text-xs tracking-wider text-zinc-500">Visual</span>
           {expandedSections.has("Visual") ? (
             <ChevronDown className="w-3 h-3 text-zinc-400" />
           ) : (
@@ -246,7 +246,7 @@ export default function TreeControls({
           onClick={() => toggleSection("Colors")}
           className="w-full px-3 py-2 flex items-center justify-between hover:bg-zinc-50 transition-colors"
         >
-          <span className="font-semibold text-xs uppercase tracking-wider text-zinc-500">Colors</span>
+          <span className="font-semibold text-xs tracking-wider text-zinc-500">Colors</span>
           {expandedSections.has("Colors") ? (
             <ChevronDown className="w-3 h-3 text-zinc-400" />
           ) : (
@@ -256,7 +256,7 @@ export default function TreeControls({
         {expandedSections.has("Colors") && (
           <div className="px-3 pb-3 space-y-3">
             <div className="space-y-1">
-              <span className="text-[10px] text-zinc-500 uppercase tracking-wide">Background</span>
+              <span className="text-[10px] text-zinc-500 tracking-wide">Background</span>
               <div className="flex items-center gap-2">
                 <div className="w-full h-6 rounded border border-zinc-200 overflow-hidden" style={{ backgroundColor: params.backgroundColor }}>
                   <input
@@ -271,7 +271,7 @@ export default function TreeControls({
             </div>
 
             <div className="space-y-1">
-              <span className="text-[10px] text-zinc-500 uppercase tracking-wide">Stem Colors</span>
+              <span className="text-[10px] text-zinc-500 tracking-wide">Stem Colors</span>
               <div className="grid grid-cols-3 gap-2">
                 {[1, 2, 3].map((i) => {
                   const paramKey = `stemColor${i}` as keyof TreeArtworkParams;
@@ -291,7 +291,7 @@ export default function TreeControls({
             </div>
 
             <div className="space-y-1">
-              <span className="text-[10px] text-zinc-500 uppercase tracking-wide">Tip Colors</span>
+              <span className="text-[10px] text-zinc-500 tracking-wide">Tip Colors</span>
               <div className="grid grid-cols-3 gap-2">
                 {[1, 2, 3].map((i) => {
                   const paramKey = `tipColor${i}` as keyof TreeArtworkParams;
@@ -319,7 +319,7 @@ export default function TreeControls({
           onClick={() => toggleSection("Background")}
           className="w-full px-3 py-2 flex items-center justify-between hover:bg-zinc-50 transition-colors"
         >
-          <span className="font-semibold text-xs uppercase tracking-wider text-zinc-500">Background</span>
+          <span className="font-semibold text-xs tracking-wider text-zinc-500">Background</span>
           {expandedSections.has("Background") ? (
             <ChevronDown className="w-3 h-3 text-zinc-400" />
           ) : (
@@ -330,7 +330,7 @@ export default function TreeControls({
           <div className="px-3 pb-3 space-y-3">
             {/* Background Color */}
             <div className="space-y-1">
-              <span className="text-[10px] text-zinc-500 uppercase tracking-wide">Background Color</span>
+              <span className="text-[10px] text-zinc-500 tracking-wide">Background Color</span>
               <div className="flex items-center gap-2">
                 <div className="w-full h-6 rounded border border-zinc-200 overflow-hidden relative">
                   <div className="absolute inset-0" style={{ backgroundColor: params.backgroundColor }} />
@@ -352,7 +352,7 @@ export default function TreeControls({
 
             {/* Background Image */}
             <div className="space-y-1">
-              <span className="text-[10px] text-zinc-500 uppercase tracking-wide">Background Image</span>
+              <span className="text-[10px] text-zinc-500 tracking-wide">Background Image</span>
               <input
                 type="file"
                 accept="image/*"
@@ -383,7 +383,7 @@ export default function TreeControls({
             {/* Background Scale */}
             {params.backgroundImage && (
               <div className="space-y-1">
-                <span className="text-[10px] text-zinc-500 uppercase tracking-wide">Image Scale</span>
+                <span className="text-[10px] text-zinc-500 tracking-wide">Image Scale</span>
                 <div className="flex gap-1">
                   {['cover', 'contain'].map((mode) => (
                     <button
@@ -410,7 +410,7 @@ export default function TreeControls({
           onClick={() => toggleSection("Text Overlay")}
           className="w-full px-3 py-2 flex items-center justify-between hover:bg-zinc-50 transition-colors"
         >
-          <span className="font-semibold text-xs uppercase tracking-wider text-zinc-500">Text Overlay</span>
+          <span className="font-semibold text-xs tracking-wider text-zinc-500">Text Overlay</span>
           {expandedSections.has("Text Overlay") ? (
             <ChevronDown className="w-3 h-3 text-zinc-400" />
           ) : (
@@ -442,7 +442,7 @@ export default function TreeControls({
                 />
                 {/* Font URL Input */}
                 <div className="space-y-1">
-                  <span className="text-[10px] text-zinc-500 uppercase tracking-wide">Font URL (Google Fonts, etc.)</span>
+                  <span className="text-[10px] text-zinc-500 tracking-wide">Font URL (Google Fonts, etc.)</span>
                   <input
                     type="text"
                     value={params.fontUrl || ''}
@@ -461,7 +461,7 @@ export default function TreeControls({
 
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1">
-                    <span className="text-[10px] text-zinc-500 uppercase tracking-wide">Font Family</span>
+                    <span className="text-[10px] text-zinc-500 tracking-wide">Font Family</span>
                     <select
                       value={params.fontFamily}
                       onChange={(e) => onColorChange("fontFamily" as any, e.target.value)}
@@ -476,7 +476,7 @@ export default function TreeControls({
                     </select>
                   </div>
                   <div className="space-y-1">
-                    <span className="text-[10px] text-zinc-500 uppercase tracking-wide">Text Color</span>
+                    <span className="text-[10px] text-zinc-500 tracking-wide">Text Color</span>
                     <div className="flex items-center gap-2 h-[26px]">
                       <div className="w-6 h-6 rounded border border-zinc-200 overflow-hidden flex-shrink-0 relative">
                         <div className="absolute inset-0" style={{ backgroundColor: params.textColor }} />
@@ -499,7 +499,7 @@ export default function TreeControls({
 
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1">
-                    <span className="text-[10px] text-zinc-500 uppercase tracking-wide">Size</span>
+                    <span className="text-[10px] text-zinc-500 tracking-wide">Size</span>
                     <input
                       type="number"
                       value={params.fontSize}
@@ -508,7 +508,7 @@ export default function TreeControls({
                     />
                   </div>
                   <div className="space-y-1">
-                    <span className="text-[10px] text-zinc-500 uppercase tracking-wide">Line Height</span>
+                    <span className="text-[10px] text-zinc-500 tracking-wide">Line Height</span>
                     <input
                       type="number"
                       step="0.1"
@@ -520,13 +520,13 @@ export default function TreeControls({
                 </div>
 
                 <div className="space-y-1">
-                  <span className="text-[10px] text-zinc-500 uppercase tracking-wide">Alignment</span>
+                  <span className="text-[10px] text-zinc-500 tracking-wide">Alignment</span>
                   <div className="flex bg-zinc-100 p-1 rounded-md">
                     {['left', 'center', 'right'].map((align) => (
                       <button
                         key={align}
                         onClick={() => onColorChange("textAlign" as any, align)}
-                        className={`flex-1 py-1 text-[10px] uppercase font-medium rounded-sm transition-colors ${params.textAlign === align
+                        className={`flex-1 py-1 text-[10px] font-medium rounded-sm transition-colors ${params.textAlign === align
                           ? 'bg-white shadow-sm text-zinc-900'
                           : 'text-zinc-500 hover:text-zinc-700'
                           }`}
@@ -539,7 +539,7 @@ export default function TreeControls({
 
                 <div className="space-y-1">
                   <div className="flex justify-between">
-                    <span className="text-[10px] text-zinc-500 uppercase tracking-wide">Position X</span>
+                    <span className="text-[10px] text-zinc-500 tracking-wide">Position X</span>
                     <span className="text-[10px] text-zinc-400 font-mono">{Math.round(params.textX)}</span>
                   </div>
                   <Slider
@@ -554,7 +554,7 @@ export default function TreeControls({
 
                 <div className="space-y-1">
                   <div className="flex justify-between">
-                    <span className="text-[10px] text-zinc-500 uppercase tracking-wide">Position Y</span>
+                    <span className="text-[10px] text-zinc-500 tracking-wide">Position Y</span>
                     <span className="text-[10px] text-zinc-400 font-mono">{Math.round(params.textY)}</span>
                   </div>
                   <Slider
@@ -591,7 +591,7 @@ export default function TreeControls({
           onClick={() => toggleSection("Canvas")}
           className="w-full px-3 py-2 flex items-center justify-between hover:bg-zinc-50 transition-colors"
         >
-          <span className="font-semibold text-xs uppercase tracking-wider text-zinc-500">Canvas</span>
+          <span className="font-semibold text-xs tracking-wider text-zinc-500">Canvas</span>
           {expandedSections.has("Canvas") ? (
             <ChevronDown className="w-3 h-3 text-zinc-400" />
           ) : (
@@ -603,7 +603,7 @@ export default function TreeControls({
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1">
                 <div className="flex justify-between items-center">
-                  <span className="text-[10px] text-zinc-500 uppercase tracking-wide">Width</span>
+                  <span className="text-[10px] text-zinc-500 tracking-wide">Width</span>
                   <span className="text-[10px] font-mono text-zinc-600">{params.canvasWidth}</span>
                 </div>
                 <Slider
@@ -617,7 +617,7 @@ export default function TreeControls({
               </div>
               <div className="space-y-1">
                 <div className="flex justify-between items-center">
-                  <span className="text-[10px] text-zinc-500 uppercase tracking-wide">Height</span>
+                  <span className="text-[10px] text-zinc-500 tracking-wide">Height</span>
                   <span className="text-[10px] font-mono text-zinc-600">{params.canvasHeight}</span>
                 </div>
                 <Slider
@@ -640,7 +640,7 @@ export default function TreeControls({
           onClick={() => toggleSection("Export")}
           className="w-full px-3 py-2 flex items-center justify-between hover:bg-zinc-50 transition-colors"
         >
-          <span className="font-semibold text-xs uppercase tracking-wider text-zinc-500">Export</span>
+          <span className="font-semibold text-xs tracking-wider text-zinc-500">Export</span>
           {expandedSections.has("Export") ? (
             <ChevronDown className="w-3 h-3 text-zinc-400" />
           ) : (

@@ -19,9 +19,7 @@ export default function TextDesignControls({
     onExportImage,
     onExportWallpapers,
 }: TextDesignControlsProps) {
-    const [expandedSections, setExpandedSections] = useState<Set<string>>(
-        new Set(["Global Settings", "Layer 1"])
-    );
+    const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
 
     const toggleSection = (title: string) => {
         const newExpanded = new Set(expandedSections);
@@ -61,14 +59,14 @@ export default function TextDesignControls({
                     onClick={() => toggleSection(title)}
                     className="w-full px-3 py-2 flex items-center justify-between hover:bg-zinc-50 transition-colors"
                 >
-                    <span className="font-medium text-xs uppercase tracking-wide text-zinc-700">{title}</span>
+                    <span className="font-medium text-xs tracking-wide text-zinc-700">{title}</span>
                     {isExpanded ? <ChevronDown className="w-3 h-3 text-zinc-500" /> : <ChevronRight className="w-3 h-3 text-zinc-500" />}
                 </button>
                 {isExpanded && (
                     <div className="px-3 pb-3 space-y-3">
                         {/* Text Content */}
                         <div className="space-y-1">
-                            <span className="text-[10px] text-zinc-500 uppercase tracking-wide">Text Content</span>
+                            <span className="text-[10px] text-zinc-500 tracking-wide">Text Content</span>
                             <input
                                 type="text"
                                 value={layer.text}
@@ -80,7 +78,7 @@ export default function TextDesignControls({
 
                         {/* Font URL */}
                         <div className="space-y-1">
-                            <span className="text-[10px] text-zinc-500 uppercase tracking-wide">Font URL (TTF)</span>
+                            <span className="text-[10px] text-zinc-500 tracking-wide">Font URL (TTF)</span>
                             <input
                                 type="text"
                                 value={layer.fontUrl || ''}
@@ -93,7 +91,7 @@ export default function TextDesignControls({
                         {/* Font Size */}
                         <div className="space-y-1">
                             <div className="flex justify-between items-center">
-                                <span className="text-[10px] text-zinc-500 uppercase tracking-wide">Font Size</span>
+                                <span className="text-[10px] text-zinc-500 tracking-wide">Font Size</span>
                                 <span className="text-[10px] font-mono text-zinc-600">{layer.size}</span>
                             </div>
                             <Slider
@@ -108,7 +106,7 @@ export default function TextDesignControls({
 
                         {/* Alignment */}
                         <div className="space-y-1">
-                            <span className="text-[10px] text-zinc-500 uppercase tracking-wide">Alignment</span>
+                            <span className="text-[10px] text-zinc-500 tracking-wide">Alignment</span>
                             <div className="flex gap-1">
                                 {(['left', 'center', 'right'] as const).map((align) => (
                                     <button
@@ -129,7 +127,7 @@ export default function TextDesignControls({
                         <div className="grid grid-cols-2 gap-3">
                             <div className="space-y-1">
                                 <div className="flex justify-between items-center">
-                                    <span className="text-[10px] text-zinc-500 uppercase tracking-wide">Position X</span>
+                                    <span className="text-[10px] text-zinc-500 tracking-wide">Position X</span>
                                     <span className="text-[10px] font-mono text-zinc-600">{formatValue(layer.x, 0.001)}</span>
                                 </div>
                                 <Slider
@@ -143,7 +141,7 @@ export default function TextDesignControls({
                             </div>
                             <div className="space-y-1">
                                 <div className="flex justify-between items-center">
-                                    <span className="text-[10px] text-zinc-500 uppercase tracking-wide">Position Y</span>
+                                    <span className="text-[10px] text-zinc-500 tracking-wide">Position Y</span>
                                     <span className="text-[10px] font-mono text-zinc-600">{formatValue(layer.y, 0.001)}</span>
                                 </div>
                                 <Slider
@@ -160,7 +158,7 @@ export default function TextDesignControls({
                         {/* Colors */}
                         <div className="space-y-2">
                             <div className="space-y-1">
-                                <span className="text-[10px] text-zinc-500 uppercase tracking-wide">Face Color</span>
+                                <span className="text-[10px] text-zinc-500 tracking-wide">Face Color</span>
                                 <div className="flex items-center gap-2">
                                     <div className="w-full h-6 rounded border border-zinc-200 overflow-hidden" style={{ backgroundColor: layer.fill }}>
                                         <input
@@ -180,7 +178,7 @@ export default function TextDesignControls({
                             </div>
 
                             <div className="space-y-1">
-                                <span className="text-[10px] text-zinc-500 uppercase tracking-wide">Outline Color</span>
+                                <span className="text-[10px] text-zinc-500 tracking-wide">Outline Color</span>
                                 <div className="flex items-center gap-2">
                                     <div className="w-full h-6 rounded border border-zinc-200 overflow-hidden" style={{ backgroundColor: layer.outlineColor }}>
                                         <input
@@ -203,7 +201,7 @@ export default function TextDesignControls({
                         {/* Outline Thickness */}
                         <div className="space-y-1">
                             <div className="flex justify-between items-center">
-                                <span className="text-[10px] text-zinc-500 uppercase tracking-wide">Outline Thickness</span>
+                                <span className="text-[10px] text-zinc-500 tracking-wide">Outline Thickness</span>
                                 <span className="text-[10px] font-mono text-zinc-600">{layer.outlineThickness}</span>
                             </div>
                             <Slider
@@ -219,7 +217,7 @@ export default function TextDesignControls({
                         {/* Highlight */}
                         <div className="space-y-2">
                             <div className="flex items-center justify-between">
-                                <span className="text-[10px] text-zinc-500 uppercase tracking-wide">Show Highlight</span>
+                                <span className="text-[10px] text-zinc-500 tracking-wide">Show Highlight</span>
                                 <label className="relative inline-flex items-center cursor-pointer">
                                     <input
                                         type="checkbox"
@@ -233,7 +231,7 @@ export default function TextDesignControls({
 
                             {layer.showHighlight && (
                                 <div className="space-y-1">
-                                    <span className="text-[10px] text-zinc-500 uppercase tracking-wide">Highlight Color</span>
+                                    <span className="text-[10px] text-zinc-500 tracking-wide">Highlight Color</span>
                                     <div className="flex items-center gap-2">
                                         <div className="w-full h-6 rounded border border-zinc-200 overflow-hidden" style={{ backgroundColor: layer.highlight }}>
                                             <input
@@ -256,11 +254,11 @@ export default function TextDesignControls({
 
                         {/* 3D Extrusion */}
                         <div className="space-y-2 pt-2 border-t border-zinc-100">
-                            <span className="text-[10px] text-zinc-500 uppercase tracking-wide font-semibold">3D Extrusion</span>
+                            <span className="text-[10px] text-zinc-500 tracking-wide font-semibold">3D Extrusion</span>
 
                             <div className="space-y-1">
                                 <div className="flex justify-between items-center">
-                                    <span className="text-[10px] text-zinc-500 uppercase tracking-wide">Depth</span>
+                                    <span className="text-[10px] text-zinc-500 tracking-wide">Depth</span>
                                     <span className="text-[10px] font-mono text-zinc-600">{layer.extrudeDepth}</span>
                                 </div>
                                 <Slider
@@ -276,7 +274,7 @@ export default function TextDesignControls({
                             <div className="grid grid-cols-2 gap-3">
                                 <div className="space-y-1">
                                     <div className="flex justify-between items-center">
-                                        <span className="text-[10px] text-zinc-500 uppercase tracking-wide">Angle X</span>
+                                        <span className="text-[10px] text-zinc-500 tracking-wide">Angle X</span>
                                         <span className="text-[10px] font-mono text-zinc-600">{formatValue(layer.extrudeX, 0.1)}</span>
                                     </div>
                                     <Slider
@@ -290,7 +288,7 @@ export default function TextDesignControls({
                                 </div>
                                 <div className="space-y-1">
                                     <div className="flex justify-between items-center">
-                                        <span className="text-[10px] text-zinc-500 uppercase tracking-wide">Angle Y</span>
+                                        <span className="text-[10px] text-zinc-500 tracking-wide">Angle Y</span>
                                         <span className="text-[10px] font-mono text-zinc-600">{formatValue(layer.extrudeY, 0.1)}</span>
                                     </div>
                                     <Slider
@@ -305,7 +303,7 @@ export default function TextDesignControls({
                             </div>
 
                             <div className="space-y-1">
-                                <span className="text-[10px] text-zinc-500 uppercase tracking-wide">Depth Start Color</span>
+                                <span className="text-[10px] text-zinc-500 tracking-wide">Depth Start Color</span>
                                 <div className="flex items-center gap-2">
                                     <div className="w-full h-6 rounded border border-zinc-200 overflow-hidden" style={{ backgroundColor: layer.extrudeStart }}>
                                         <input
@@ -325,7 +323,7 @@ export default function TextDesignControls({
                             </div>
 
                             <div className="space-y-1">
-                                <span className="text-[10px] text-zinc-500 uppercase tracking-wide">Depth End Color</span>
+                                <span className="text-[10px] text-zinc-500 tracking-wide">Depth End Color</span>
                                 <div className="flex items-center gap-2">
                                     <div className="w-full h-6 rounded border border-zinc-200 overflow-hidden" style={{ backgroundColor: layer.extrudeEnd }}>
                                         <input
@@ -376,7 +374,7 @@ export default function TextDesignControls({
                     onClick={() => toggleSection("Global Settings")}
                     className="w-full px-3 py-2 flex items-center justify-between hover:bg-zinc-50 transition-colors"
                 >
-                    <span className="font-medium text-xs uppercase tracking-wide text-zinc-700">Global Settings</span>
+                    <span className="font-medium text-xs tracking-wide text-zinc-700">Global Settings</span>
                     {expandedSections.has("Global Settings") ? (
                         <ChevronDown className="w-3 h-3 text-zinc-500" />
                     ) : (
@@ -386,7 +384,7 @@ export default function TextDesignControls({
                 {expandedSections.has("Global Settings") && (
                     <div className="px-3 pb-3 space-y-3">
                         <div className="space-y-1">
-                            <span className="text-[10px] text-zinc-500 uppercase tracking-wide">Background Color</span>
+                            <span className="text-[10px] text-zinc-500 tracking-wide">Background Color</span>
                             <div className="flex items-center gap-2">
                                 <div className="w-full h-6 rounded border border-zinc-200 overflow-hidden" style={{ backgroundColor: params.backgroundColor }}>
                                     <input
@@ -407,7 +405,7 @@ export default function TextDesignControls({
 
                         {/* Background Image */}
                         <div className="space-y-1">
-                            <span className="text-[10px] text-zinc-500 uppercase tracking-wide">Background Image</span>
+                            <span className="text-[10px] text-zinc-500 tracking-wide">Background Image</span>
                             <input
                                 type="file"
                                 accept="image/*"
@@ -438,15 +436,15 @@ export default function TextDesignControls({
                         {/* Background Scale */}
                         {params.backgroundImage && (
                             <div className="space-y-1">
-                                <span className="text-[10px] text-zinc-500 uppercase tracking-wide">Image Scale</span>
+                                <span className="text-[10px] text-zinc-500 tracking-wide">Image Scale</span>
                                 <div className="flex gap-1">
                                     {['cover', 'contain'].map((mode) => (
                                         <button
                                             key={mode}
                                             onClick={() => onParamChange('backgroundScale', mode)}
                                             className={`flex-1 py-1 text-[10px] rounded border ${params.backgroundScale === mode
-                                                    ? 'bg-zinc-900 text-white border-zinc-900'
-                                                    : 'bg-white text-zinc-600 border-zinc-200 hover:border-zinc-300'
+                                                ? 'bg-zinc-900 text-white border-zinc-900'
+                                                : 'bg-white text-zinc-600 border-zinc-200 hover:border-zinc-300'
                                                 }`}
                                         >
                                             {mode.charAt(0).toUpperCase() + mode.slice(1)}
@@ -459,7 +457,7 @@ export default function TextDesignControls({
                         {/* Grain Amount */}
                         <div className="space-y-1">
                             <div className="flex justify-between items-center">
-                                <span className="text-[10px] text-zinc-500 uppercase tracking-wide">Grain Amount</span>
+                                <span className="text-[10px] text-zinc-500 tracking-wide">Grain Amount</span>
                                 <span className="text-[10px] font-mono text-zinc-600">{params.grainAmount || 0}</span>
                             </div>
                             <Slider
@@ -475,7 +473,7 @@ export default function TextDesignControls({
                         <div className="grid grid-cols-2 gap-3">
                             <div className="space-y-1">
                                 <div className="flex justify-between items-center">
-                                    <span className="text-[10px] text-zinc-500 uppercase tracking-wide">Width</span>
+                                    <span className="text-[10px] text-zinc-500 tracking-wide">Width</span>
                                     <span className="text-[10px] font-mono text-zinc-600">{params.canvasWidth}</span>
                                 </div>
                                 <Slider
@@ -489,7 +487,7 @@ export default function TextDesignControls({
                             </div>
                             <div className="space-y-1">
                                 <div className="flex justify-between items-center">
-                                    <span className="text-[10px] text-zinc-500 uppercase tracking-wide">Height</span>
+                                    <span className="text-[10px] text-zinc-500 tracking-wide">Height</span>
                                     <span className="text-[10px] font-mono text-zinc-600">{params.canvasHeight}</span>
                                 </div>
                                 <Slider
@@ -504,7 +502,7 @@ export default function TextDesignControls({
                         </div>
 
                         <div className="space-y-1 pt-2 border-t border-zinc-100">
-                            <span className="text-[10px] text-zinc-500 uppercase tracking-wide">Font URL (.ttf)</span>
+                            <span className="text-[10px] text-zinc-500 tracking-wide">Font URL (.ttf)</span>
                             <input
                                 type="text"
                                 value={params.fontUrl || ''}
@@ -515,7 +513,7 @@ export default function TextDesignControls({
                         </div>
 
                         <div className="space-y-1">
-                            <span className="text-[10px] text-zinc-500 uppercase tracking-wide">Custom Font Family</span>
+                            <span className="text-[10px] text-zinc-500 tracking-wide">Custom Font Family</span>
                             <input
                                 type="text"
                                 value={params.customFontFamily || ''}
