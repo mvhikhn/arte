@@ -22,9 +22,11 @@ export interface MosaicArtworkParams {
   detailGridMax: number;
   noiseDensity: number;
   minRecursionSize: number;
+  canvasWidth: number;
+  canvasHeight: number;
   seed: number;
-  exportWidth: number;
-  exportHeight: number;
+  exportWidth: number; // Deprecated
+  exportHeight: number; // Deprecated
 }
 
 export interface MosaicArtworkRef {
@@ -51,11 +53,11 @@ const MosaicArtwork = forwardRef<MosaicArtworkRef, MosaicArtworkProps>(({ params
       if (!sketchRef.current) return;
       const currentCanvas = sketchRef.current.canvas;
       const exportCanvas = document.createElement('canvas');
-      exportCanvas.width = params.exportWidth;
-      exportCanvas.height = params.exportHeight;
+      exportCanvas.width = currentCanvas.width;
+      exportCanvas.height = currentCanvas.height;
       const ctx = exportCanvas.getContext('2d');
       if (ctx) {
-        ctx.drawImage(currentCanvas, 0, 0, exportCanvas.width, exportCanvas.height);
+        ctx.drawImage(currentCanvas, 0, 0);
         const link = document.createElement('a');
         link.download = `mosaic-arte-${Date.now()}.png`;
         link.href = exportCanvas.toDataURL();
@@ -66,19 +68,19 @@ const MosaicArtwork = forwardRef<MosaicArtworkRef, MosaicArtworkProps>(({ params
       if (!sketchRef.current) return;
       const currentCanvas = sketchRef.current.canvas;
       const timestamp = Date.now();
-      
+
       const centerArtwork = (canvas: HTMLCanvasElement, targetWidth: number, targetHeight: number) => {
         const ctx = canvas.getContext('2d');
         if (!ctx) return;
-        
+
         ctx.fillStyle = '#FFFFFF';
         ctx.fillRect(0, 0, targetWidth, targetHeight);
-        
+
         const sourceAspect = currentCanvas.width / currentCanvas.height;
         const targetAspect = targetWidth / targetHeight;
-        
+
         let drawWidth, drawHeight, offsetX, offsetY;
-        
+
         if (sourceAspect > targetAspect) {
           drawWidth = targetWidth;
           drawHeight = targetWidth / sourceAspect;
@@ -90,10 +92,10 @@ const MosaicArtwork = forwardRef<MosaicArtworkRef, MosaicArtworkProps>(({ params
           offsetX = (targetWidth - drawWidth) / 2;
           offsetY = 0;
         }
-        
+
         ctx.drawImage(currentCanvas, offsetX, offsetY, drawWidth, drawHeight);
       };
-      
+
       // Desktop 6K
       const desktopCanvas = document.createElement('canvas');
       desktopCanvas.width = 6144;
@@ -103,7 +105,7 @@ const MosaicArtwork = forwardRef<MosaicArtworkRef, MosaicArtworkProps>(({ params
       link.download = `mosaic-desktop-wallpaper-${timestamp}.png`;
       link.href = desktopCanvas.toDataURL();
       link.click();
-      
+
       // iPhone 17 Pro
       setTimeout(() => {
         const mobileCanvas = document.createElement('canvas');
@@ -175,7 +177,7 @@ const MosaicArtwork = forwardRef<MosaicArtworkRef, MosaicArtworkProps>(({ params
         let bgColor: string = '';
 
         p.setup = () => {
-          const canvas = p.createCanvas(800, 1000);
+          const canvas = p.createCanvas(paramsRef.current.canvasWidth, paramsRef.current.canvasHeight);
           canvas.parent(containerRef.current!);
           p.noStroke();
           p.noLoop();
@@ -188,14 +190,14 @@ const MosaicArtwork = forwardRef<MosaicArtworkRef, MosaicArtworkProps>(({ params
         const generateArtwork = (p: any) => {
           p.randomSeed(paramsRef.current.seed);
           p.noiseSeed(paramsRef.current.seed);
-          
+
           COLORS = [
             paramsRef.current.color1,
             paramsRef.current.color2,
             paramsRef.current.color3,
             paramsRef.current.color4
           ];
-          
+
           p.background(255);
           bgColor = '#ffffff';
 
@@ -263,8 +265,8 @@ const MosaicArtwork = forwardRef<MosaicArtworkRef, MosaicArtworkProps>(({ params
         const createUnit = (p: any, x: number, y: number, w: number, h: number) => {
           let margin = p.random(5, p.min(w, h) * paramsRef.current.marginMultiplier);
 
-          if (p.random() > paramsRef.current.recursionChance && 
-              p.min(w, h) > paramsRef.current.minRecursionSize) {
+          if (p.random() > paramsRef.current.recursionChance &&
+            p.min(w, h) > paramsRef.current.minRecursionSize) {
             divideRectangle(p, x, y, w, h);
           } else {
             drawRectangle(p, x + margin / 2, y + margin / 2, w - margin, h - margin);
@@ -331,11 +333,11 @@ const MosaicArtwork = forwardRef<MosaicArtworkRef, MosaicArtworkProps>(({ params
         sketchRef.current = null;
       }
     };
-  }, [params.seed]);
+  }, [params.seed, params.canvasWidth, params.canvasHeight]);
 
   return (
-    <div 
-      ref={containerRef} 
+    <div
+      ref={containerRef}
       className="w-full h-full flex items-center justify-center"
     />
   );

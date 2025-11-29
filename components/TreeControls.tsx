@@ -390,8 +390,8 @@ export default function TreeControls({
                       key={mode}
                       onClick={() => onColorChange('backgroundScale', mode)}
                       className={`flex-1 py-1 text-[10px] rounded border ${params.backgroundScale === mode
-                          ? 'bg-zinc-900 text-white border-zinc-900'
-                          : 'bg-white text-zinc-600 border-zinc-200 hover:border-zinc-300'
+                        ? 'bg-zinc-900 text-white border-zinc-900'
+                        : 'bg-white text-zinc-600 border-zinc-200 hover:border-zinc-300'
                         }`}
                     >
                       {mode.charAt(0).toUpperCase() + mode.slice(1)}
@@ -581,6 +581,55 @@ export default function TreeControls({
                 </div>
               </>
             )}
+          </div>
+        )}
+      </div>
+
+      {/* Canvas Section */}
+      <div className="border-b border-zinc-100">
+        <button
+          onClick={() => toggleSection("Canvas")}
+          className="w-full px-3 py-2 flex items-center justify-between hover:bg-zinc-50 transition-colors"
+        >
+          <span className="font-semibold text-xs uppercase tracking-wider text-zinc-500">Canvas</span>
+          {expandedSections.has("Canvas") ? (
+            <ChevronDown className="w-3 h-3 text-zinc-400" />
+          ) : (
+            <ChevronRight className="w-3 h-3 text-zinc-400" />
+          )}
+        </button>
+        {expandedSections.has("Canvas") && (
+          <div className="px-3 pb-3 space-y-3">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <div className="flex justify-between items-center">
+                  <span className="text-[10px] text-zinc-500 uppercase tracking-wide">Width</span>
+                  <span className="text-[10px] font-mono text-zinc-600">{params.canvasWidth}</span>
+                </div>
+                <Slider
+                  value={[params.canvasWidth]}
+                  onValueChange={([value]) => onParamChange('canvasWidth', value)}
+                  min={400}
+                  max={2500}
+                  step={10}
+                  className="w-full"
+                />
+              </div>
+              <div className="space-y-1">
+                <div className="flex justify-between items-center">
+                  <span className="text-[10px] text-zinc-500 uppercase tracking-wide">Height</span>
+                  <span className="text-[10px] font-mono text-zinc-600">{params.canvasHeight}</span>
+                </div>
+                <Slider
+                  value={[params.canvasHeight]}
+                  onValueChange={([value]) => onParamChange('canvasHeight', value)}
+                  min={400}
+                  max={2500}
+                  step={10}
+                  className="w-full"
+                />
+              </div>
+            </div>
           </div>
         )}
       </div>

@@ -16,10 +16,12 @@ export interface GridArtworkParams {
   crossSize: number;
   minColumns: number;
   maxColumns: number;
+  canvasWidth: number;
+  canvasHeight: number;
   isAnimating: boolean;
   seed: number;
-  exportWidth: number;
-  exportHeight: number;
+  exportWidth: number; // Deprecated
+  exportHeight: number; // Deprecated
 }
 
 export interface GridArtworkRef {
@@ -48,11 +50,11 @@ const GridArtwork = forwardRef<GridArtworkRef, GridArtworkProps>(({ params }, re
       if (!sketchRef.current) return;
       const currentCanvas = sketchRef.current.canvas;
       const exportCanvas = document.createElement('canvas');
-      exportCanvas.width = params.exportWidth;
-      exportCanvas.height = params.exportHeight;
+      exportCanvas.width = currentCanvas.width;
+      exportCanvas.height = currentCanvas.height;
       const ctx = exportCanvas.getContext('2d');
       if (ctx) {
-        ctx.drawImage(currentCanvas, 0, 0, exportCanvas.width, exportCanvas.height);
+        ctx.drawImage(currentCanvas, 0, 0);
         const link = document.createElement('a');
         link.download = `grid-arte-${Date.now()}.png`;
         link.href = exportCanvas.toDataURL();
@@ -63,19 +65,19 @@ const GridArtwork = forwardRef<GridArtworkRef, GridArtworkProps>(({ params }, re
       if (!sketchRef.current) return;
       const currentCanvas = sketchRef.current.canvas;
       const timestamp = Date.now();
-      
+
       const centerArtwork = (canvas: HTMLCanvasElement, targetWidth: number, targetHeight: number) => {
         const ctx = canvas.getContext('2d');
         if (!ctx) return;
-        
+
         ctx.fillStyle = '#FFFFFF';
         ctx.fillRect(0, 0, targetWidth, targetHeight);
-        
+
         const sourceAspect = currentCanvas.width / currentCanvas.height;
         const targetAspect = targetWidth / targetHeight;
-        
+
         let drawWidth, drawHeight, offsetX, offsetY;
-        
+
         if (sourceAspect > targetAspect) {
           drawWidth = targetWidth;
           drawHeight = targetWidth / sourceAspect;
@@ -87,10 +89,10 @@ const GridArtwork = forwardRef<GridArtworkRef, GridArtworkProps>(({ params }, re
           offsetX = (targetWidth - drawWidth) / 2;
           offsetY = 0;
         }
-        
+
         ctx.drawImage(currentCanvas, offsetX, offsetY, drawWidth, drawHeight);
       };
-      
+
       // Desktop 6K
       const desktopCanvas = document.createElement('canvas');
       desktopCanvas.width = 6144;
@@ -100,7 +102,7 @@ const GridArtwork = forwardRef<GridArtworkRef, GridArtworkProps>(({ params }, re
       link.download = `grid-desktop-wallpaper-${timestamp}.png`;
       link.href = desktopCanvas.toDataURL();
       link.click();
-      
+
       // iPhone 17 Pro
       setTimeout(() => {
         const mobileCanvas = document.createElement('canvas');
@@ -117,7 +119,7 @@ const GridArtwork = forwardRef<GridArtworkRef, GridArtworkProps>(({ params }, re
       if (!sketchRef.current) return;
       try {
         const filename = `grid-arte-${Date.now()}.gif`;
-        
+
         // Use p5's saveGif with proper options
         await sketchRef.current.saveGif(filename, duration, {
           units: 'seconds',
@@ -170,11 +172,11 @@ const GridArtwork = forwardRef<GridArtworkRef, GridArtworkProps>(({ params }, re
 
       const sketch = (p: any) => {
         p.setup = () => {
-          const canvas = p.createCanvas(800, 1000);
+          const canvas = p.createCanvas(paramsRef.current.canvasWidth, paramsRef.current.canvasHeight);
           canvas.parent(containerRef.current!);
           p.strokeJoin(p.ROUND);
           p.frameRate(60);
-          
+
           // Initialize grid
           p.randomSeed(paramsRef.current.seed);
           grid.columns = p.floor(p.random(paramsRef.current.minColumns, paramsRef.current.maxColumns + 1));
@@ -192,7 +194,7 @@ const GridArtwork = forwardRef<GridArtworkRef, GridArtworkProps>(({ params }, re
           p.stroke(paramsRef.current.borderColor);
           p.strokeWeight(2);
           p.randomSeed(grid.seed);
-          
+
           const movement = (p.sin(p.frameCount * paramsRef.current.animationSpeed) + 1) / 2;
           grid.depth = 0;
           drawGrid(p, 0, 0, grid.columns, grid.rows, p.width, movement);
@@ -235,8 +237,8 @@ const GridArtwork = forwardRef<GridArtworkRef, GridArtworkProps>(({ params }, re
 
         const shouldSubdivide = (p: any, size: number) => {
           return p.random() < paramsRef.current.subdivideChance &&
-                 grid.depth < paramsRef.current.maxDepth &&
-                 size > paramsRef.current.minModuleSize;
+            grid.depth < paramsRef.current.maxDepth &&
+            size > paramsRef.current.minModuleSize;
         };
 
         const drawShape = (p: any, type: number, x: number, y: number, size: number, movement: number) => {
@@ -313,7 +315,7 @@ const GridArtwork = forwardRef<GridArtworkRef, GridArtworkProps>(({ params }, re
         sketchRef.current = null;
       }
     };
-  }, [params.seed]);
+  }, [params.seed, params.canvasWidth, params.canvasHeight]);
 
   useEffect(() => {
     if (sketchRef.current) {
@@ -326,8 +328,8 @@ const GridArtwork = forwardRef<GridArtworkRef, GridArtworkProps>(({ params }, re
   }, [params.isAnimating]);
 
   return (
-    <div 
-      ref={containerRef} 
+    <div
+      ref={containerRef}
       className="w-full h-full flex items-center justify-center"
     />
   );

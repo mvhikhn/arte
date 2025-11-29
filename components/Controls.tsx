@@ -245,6 +245,55 @@ export default function Controls({ params, onParamChange, onColorChange, onExpor
         )}
       </div>
 
+      {/* Canvas Section */}
+      <div className="border-b border-zinc-100">
+        <button
+          onClick={() => toggleSection("Canvas")}
+          className="w-full px-3 py-2 flex items-center justify-between hover:bg-zinc-50 transition-colors"
+        >
+          <span className="font-semibold text-xs uppercase tracking-wider text-zinc-500">Canvas</span>
+          {expandedSections.has("Canvas") ? (
+            <ChevronDown className="w-3 h-3 text-zinc-400" />
+          ) : (
+            <ChevronRight className="w-3 h-3 text-zinc-400" />
+          )}
+        </button>
+        {expandedSections.has("Canvas") && (
+          <div className="px-3 pb-3 space-y-3">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <div className="flex justify-between items-center">
+                  <span className="text-[10px] text-zinc-500 uppercase tracking-wide">Width</span>
+                  <span className="text-[10px] font-mono text-zinc-600">{params.canvasWidth}</span>
+                </div>
+                <Slider
+                  value={[params.canvasWidth]}
+                  onValueChange={([value]) => onParamChange('canvasWidth', value)}
+                  min={400}
+                  max={2500}
+                  step={10}
+                  className="w-full"
+                />
+              </div>
+              <div className="space-y-1">
+                <div className="flex justify-between items-center">
+                  <span className="text-[10px] text-zinc-500 uppercase tracking-wide">Height</span>
+                  <span className="text-[10px] font-mono text-zinc-600">{params.canvasHeight}</span>
+                </div>
+                <Slider
+                  value={[params.canvasHeight]}
+                  onValueChange={([value]) => onParamChange('canvasHeight', value)}
+                  min={400}
+                  max={2500}
+                  step={10}
+                  className="w-full"
+                />
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
       {/* Export Section */}
       <div className="border-b border-zinc-100">
         <button

@@ -45,10 +45,14 @@ export interface TreeArtworkParams {
   customFontFamily: string;
   paperGrain: boolean;
 
+  // Canvas
+  canvasWidth: number;
+  canvasHeight: number;
+
   // Technical
   seed: number;
-  exportWidth: number;
-  exportHeight: number;
+  exportWidth: number; // Deprecated
+  exportHeight: number; // Deprecated
   isAnimating: boolean;
 }
 
@@ -103,7 +107,7 @@ const TreeArtwork = forwardRef<TreeArtworkRef, TreeArtworkProps>(
       if (sketchRef.current && sketchRef.current.resetSketch) {
         sketchRef.current.resetSketch();
       }
-    }, [params.seed, params.initialPaths, params.initialVelocity, params.branchProbability, params.diameterShrink, params.minDiameter, params.bumpMultiplier, params.velocityRetention, params.speedMin, params.speedMax, params.finishedCircleSize, params.strokeWeightMultiplier, params.stemColor1, params.stemColor2, params.stemColor3, params.tipColor1, params.tipColor2, params.tipColor3, params.backgroundColor, params.backgroundScale]);
+    }, [params.seed, params.canvasWidth, params.canvasHeight, params.initialPaths, params.initialVelocity, params.branchProbability, params.diameterShrink, params.minDiameter, params.bumpMultiplier, params.velocityRetention, params.speedMin, params.speedMax, params.finishedCircleSize, params.strokeWeightMultiplier, params.stemColor1, params.stemColor2, params.stemColor3, params.tipColor1, params.tipColor2, params.tipColor3, params.backgroundColor, params.backgroundScale]);
 
     // Handle background image changes
     useEffect(() => {
@@ -117,11 +121,11 @@ const TreeArtwork = forwardRef<TreeArtworkRef, TreeArtworkProps>(
         if (!sketchRef.current) return;
         const currentCanvas = sketchRef.current.canvas;
         const exportCanvas = document.createElement("canvas");
-        exportCanvas.width = params.exportWidth;
-        exportCanvas.height = params.exportHeight;
+        exportCanvas.width = currentCanvas.width;
+        exportCanvas.height = currentCanvas.height;
         const ctx = exportCanvas.getContext("2d");
         if (ctx) {
-          ctx.drawImage(currentCanvas, 0, 0, exportCanvas.width, exportCanvas.height);
+          ctx.drawImage(currentCanvas, 0, 0);
           exportCanvas.toBlob((blob) => {
             if (blob) {
               const url = URL.createObjectURL(blob);
@@ -365,7 +369,7 @@ const TreeArtwork = forwardRef<TreeArtworkRef, TreeArtworkProps>(
 
           p.setup = () => {
             p.pixelDensity(1);
-            const canvas = p.createCanvas(800, 1000);
+            const canvas = p.createCanvas(paramsRef.current.canvasWidth, paramsRef.current.canvasHeight);
             canvas.parent(containerRef.current!);
             p.randomSeed(paramsRef.current.seed);
             p.noiseSeed(paramsRef.current.seed);
