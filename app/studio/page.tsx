@@ -103,23 +103,25 @@ const generateRandomFlowParams = (): ArtworkParams => {
 
 // Generate random initial grid params
 const generateRandomGridParams = (): GridArtworkParams => {
-  const palette = getRandomColors(4);
+  // Detect if mobile (screen width < 768px)
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+
   return {
-    backgroundColor: "#1d1d1b",
-    borderColor: "#f2f2e7",
-    color1: palette.colors[0],
-    color2: palette.colors[1],
-    color3: palette.colors[2],
-    color4: palette.colors[3],
-    animationSpeed: randomInRange(0.01, 0.05),
-    maxDepth: Math.floor(randomInRange(1, 3)),
-    minModuleSize: Math.floor(randomInRange(30, 60)),
-    subdivideChance: randomInRange(0.3, 0.6),
-    crossSize: randomInRange(0.5, 0.9),
-    minColumns: Math.floor(randomInRange(4, 6)),
-    maxColumns: Math.floor(randomInRange(7, 10)),
-    canvasWidth: 400,
-    canvasHeight: 400,
+    backgroundColor: "#1B4332",
+    borderColor: "#52B788",
+    color1: "#2D6A4F",
+    color2: "#95D5B2",
+    color3: "#40916C",
+    color4: "#74C69D",
+    animationSpeed: 0.065,
+    maxDepth: 2,
+    minModuleSize: 30,
+    subdivideChance: 0.62,
+    crossSize: 0.83,
+    minColumns: 5,
+    maxColumns: 10,
+    canvasWidth: isMobile ? 400 : 630,
+    canvasHeight: isMobile ? 500 : 790,
     isAnimating: true,
     seed: Date.now(),
     exportWidth: 1600,
