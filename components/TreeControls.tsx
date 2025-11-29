@@ -97,6 +97,39 @@ export default function TreeControls({
         </button>
       </div>
 
+      {/* Global Settings */}
+      <div className="border-b border-zinc-100">
+        <button
+          onClick={() => toggleSection("Global Settings")}
+          className="w-full px-3 py-2 flex items-center justify-between hover:bg-zinc-50 transition-colors"
+        >
+          <span className="font-semibold text-xs tracking-wider text-zinc-500">Global Settings</span>
+          {expandedSections.has("Global Settings") ? (
+            <ChevronDown className="w-3 h-3 text-zinc-400" />
+          ) : (
+            <ChevronRight className="w-3 h-3 text-zinc-400" />
+          )}
+        </button>
+        {expandedSections.has("Global Settings") && (
+          <div className="px-3 pb-3 space-y-3">
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between">
+                <span className="text-zinc-700 font-medium">Grain Amount</span>
+                <span className="text-zinc-500 font-mono">{params.grainAmount || 0}</span>
+              </div>
+              <Slider
+                min={0}
+                max={50}
+                step={1}
+                value={[params.grainAmount || 0]}
+                onValueChange={(values) => onParamChange("grainAmount", values[0])}
+                className="py-1"
+              />
+            </div>
+          </div>
+        )}
+      </div>
+
       {/* Tree Structure Section */}
       <div className="border-b border-zinc-100">
         <button
@@ -567,18 +600,7 @@ export default function TreeControls({
                   />
                 </div>
 
-                <div className="flex items-center justify-between pt-2 border-t border-zinc-50">
-                  <span className="text-zinc-700 font-medium">Paper Grain</span>
-                  <label className="relative inline-flex items-center cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={params.paperGrain}
-                      onChange={(e) => onParamChange("paperGrain", e.target.checked ? 1 : 0)}
-                      className="sr-only peer"
-                    />
-                    <div className="w-9 h-5 bg-zinc-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-zinc-900"></div>
-                  </label>
-                </div>
+
               </>
             )}
           </div>

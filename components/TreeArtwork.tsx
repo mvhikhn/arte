@@ -43,7 +43,7 @@ export interface TreeArtworkParams {
   fontFamily: string;
   fontUrl: string;
   customFontFamily: string;
-  paperGrain: boolean;
+  grainAmount: number;
 
   // Canvas
   canvasWidth: number;
@@ -107,7 +107,7 @@ const TreeArtwork = forwardRef<TreeArtworkRef, TreeArtworkProps>(
       if (sketchRef.current && sketchRef.current.resetSketch) {
         sketchRef.current.resetSketch();
       }
-    }, [params.seed, params.canvasWidth, params.canvasHeight, params.initialPaths, params.initialVelocity, params.branchProbability, params.diameterShrink, params.minDiameter, params.bumpMultiplier, params.velocityRetention, params.speedMin, params.speedMax, params.finishedCircleSize, params.strokeWeightMultiplier, params.stemColor1, params.stemColor2, params.stemColor3, params.tipColor1, params.tipColor2, params.tipColor3, params.backgroundColor, params.backgroundScale]);
+    }, [params.seed, params.canvasWidth, params.canvasHeight, params.initialPaths, params.initialVelocity, params.branchProbability, params.diameterShrink, params.minDiameter, params.bumpMultiplier, params.velocityRetention, params.speedMin, params.speedMax, params.finishedCircleSize, params.strokeWeightMultiplier, params.stemColor1, params.stemColor2, params.stemColor3, params.tipColor1, params.tipColor2, params.tipColor3, params.backgroundColor, params.backgroundScale, params.grainAmount]);
 
     // Handle background image changes
     useEffect(() => {
@@ -368,7 +368,7 @@ const TreeArtwork = forwardRef<TreeArtworkRef, TreeArtworkProps>(
           let bgImage: any = null;
 
           p.setup = () => {
-            p.pixelDensity(1);
+            p.pixelDensity(2);
             const canvas = p.createCanvas(paramsRef.current.canvasWidth, paramsRef.current.canvasHeight);
             canvas.parent(containerRef.current!);
             p.randomSeed(paramsRef.current.seed);
@@ -387,113 +387,6 @@ const TreeArtwork = forwardRef<TreeArtworkRef, TreeArtworkProps>(
             if (!paramsRef.current.isAnimating) {
               p.noLoop();
             }
-          };
-
-          const resetSketch = () => {
-            p.randomSeed(paramsRef.current.seed);
-
-            // Resize canvas if dimensions changed
-            if (p.width !== paramsRef.current.canvasWidth || p.height !== paramsRef.current.canvasHeight) {
-              p.resizeCanvas(paramsRef.current.canvasWidth, paramsRef.current.canvasHeight);
-            }
-
-            if (bgImage) {
-              // Draw background image with cover logic
-              const imgAspect = bgImage.width / bgImage.height;
-              const canvasAspect = p.width / p.height;
-              let drawW, drawH, x, y;
-
-              // Default to cover
-              const scaleMode = paramsRef.current.backgroundScale || 'cover';
-
-              if (scaleMode === 'contain') {
-                if (canvasAspect > imgAspect) {
-                  drawH = p.height;
-                  drawW = p.height * imgAspect;
-                  x = (p.width - drawW) / 2;
-                  y = 0;
-                } else {
-                  drawW = p.width;
-                  drawH = p.width / imgAspect;
-                  x = 0;
-                  y = (p.height - drawH) / 2;
-                }
-                p.background(paramsRef.current.backgroundColor); // Fill gaps
-                p.image(bgImage, x, y, drawW, drawH);
-              } else {
-                // Cover
-                if (canvasAspect > imgAspect) {
-                  drawW = p.width;
-                  drawH = p.width / imgAspect;
-                  x = 0;
-                  y = (p.height - drawH) / 2;
-                } else {
-                  drawH = p.height;
-                  drawW = p.height * imgAspect;
-                  x = (p.width - drawW) / 2;
-                  y = 0;
-                }
-                p.image(bgImage, x, y, drawW, drawH);
-              }
-            } else {
-              p.background(paramsRef.current.backgroundColor);
-            }
-
-            p.ellipseMode(p.CENTER);
-            p.smooth();
-
-            paths = [];
-            for (let i = 0; i < paramsRef.current.initialPaths; i++) {
-              paths.push(new Pathfinder());
-            }
-
-            grainApplied = false; // Reset grain flag
-            p.loop();
-          };
-
-          let grainApplied = false;
-
-          p.draw = () => {
-            // Don't clear background - let tree build up
-            for (let i = paths.length - 1; i >= 0; i--) {
-              paths[i].draw();
-              const newPath = paths[i].update();
-              if (newPath) {
-                paths.push(newPath);
-              }
-            }
-
-            // Check if all paths are finished
-            const allFinished = paths.every(path => path.isFinished || path.diameter <= paramsRef.current.minDiameter);
-            if (allFinished && paths.length > 0) {
-              // Apply effects only once when tree is finished
-              if (!grainApplied) {
-                // Apply paper grain effect if enabled
-                if (paramsRef.current.paperGrain) {
-                  applyGrain();
-                }
-
-                // Render text overlay if enabled
-                if (paramsRef.current.textEnabled && paramsRef.current.textContent) {
-                  renderText();
-                }
-
-                grainApplied = true;
-              }
-              p.noLoop();
-            }
-          };
-
-          (p as any).loadBackgroundImage = (url: string) => {
-            if (!url) {
-              bgImage = null;
-              resetSketch();
-              return;
-            }
-            p.loadImage(url, (img: any) => {
-              bgImage = img;
-              resetSketch();
-            });
           };
 
           const renderText = () => {
@@ -569,10 +462,120 @@ const TreeArtwork = forwardRef<TreeArtworkRef, TreeArtworkProps>(
             p.pop();
           };
 
+          const resetSketch = () => {
+            p.randomSeed(paramsRef.current.seed);
+
+            // Resize canvas if dimensions changed
+            if (p.width !== paramsRef.current.canvasWidth || p.height !== paramsRef.current.canvasHeight) {
+              p.resizeCanvas(paramsRef.current.canvasWidth, paramsRef.current.canvasHeight);
+            }
+
+            if (bgImage) {
+              // Draw background image with cover logic
+              const imgAspect = bgImage.width / bgImage.height;
+              const canvasAspect = p.width / p.height;
+              let drawW, drawH, x, y;
+
+              // Default to cover
+              const scaleMode = paramsRef.current.backgroundScale || 'cover';
+
+              if (scaleMode === 'contain') {
+                if (canvasAspect > imgAspect) {
+                  drawH = p.height;
+                  drawW = p.height * imgAspect;
+                  x = (p.width - drawW) / 2;
+                  y = 0;
+                } else {
+                  drawW = p.width;
+                  drawH = p.width / imgAspect;
+                  x = 0;
+                  y = (p.height - drawH) / 2;
+                }
+                p.background(paramsRef.current.backgroundColor); // Fill gaps
+                p.image(bgImage, x, y, drawW, drawH);
+              } else {
+                // Cover
+                if (canvasAspect > imgAspect) {
+                  drawW = p.width;
+                  drawH = p.width / imgAspect;
+                  x = 0;
+                  y = (p.height - drawH) / 2;
+                } else {
+                  drawH = p.height;
+                  drawW = p.height * imgAspect;
+                  x = (p.width - drawW) / 2;
+                  y = 0;
+                }
+                p.image(bgImage, x, y, drawW, drawH);
+              }
+            } else {
+              p.background(paramsRef.current.backgroundColor);
+            }
+
+            p.ellipseMode(p.CENTER);
+            p.smooth();
+
+            paths = [];
+            for (let i = 0; i < paramsRef.current.initialPaths; i++) {
+              paths.push(new Pathfinder());
+            }
+
+            if (paramsRef.current.textEnabled && paramsRef.current.textContent) {
+              renderText();
+            }
+            grainApplied = false; // Reset grain flag
+            p.loop();
+          };
+
+          let grainApplied = false;
+
+          p.draw = () => {
+            // Don't clear background - let tree build up
+            for (let i = paths.length - 1; i >= 0; i--) {
+              paths[i].draw();
+              const newPath = paths[i].update();
+              if (newPath) {
+                paths.push(newPath);
+              }
+            }
+
+            // Check if all paths are finished
+            const allFinished = paths.every(path => path.isFinished || path.diameter <= paramsRef.current.minDiameter);
+            if (allFinished && paths.length > 0) {
+              // Apply effects only once when tree is finished
+              if (!grainApplied) {
+                // Apply paper grain effect if enabled
+                if (paramsRef.current.grainAmount > 0) {
+                  applyGrain();
+                }
+
+
+
+                grainApplied = true;
+              }
+              p.noLoop();
+            }
+          };
+
+          (p as any).loadBackgroundImage = (url: string) => {
+            if (!url) {
+              bgImage = null;
+              resetSketch();
+              return;
+            }
+            p.loadImage(url, (img: any) => {
+              bgImage = img;
+              resetSketch();
+            });
+          };
+
+
+
           const applyGrain = () => {
             p.loadPixels();
             for (let i = 0; i < p.pixels.length; i += 4) {
-              const noise = p.random(-15, 15);
+              const amount = paramsRef.current.grainAmount || 0;
+              const noise = p.random(-amount, amount);
               p.pixels[i] += noise;     // R
               p.pixels[i + 1] += noise; // G
               p.pixels[i + 2] += noise; // B

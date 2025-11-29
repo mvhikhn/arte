@@ -58,7 +58,7 @@ const getDefaultTreeParams = (): TreeArtworkParams => ({
   fontFamily: 'Georgia, serif',
   fontUrl: '',
   customFontFamily: '',
-  paperGrain: false,
+  grainAmount: 0,
   canvasWidth: 400,
   canvasHeight: 400,
   seed: 12345,
@@ -234,7 +234,7 @@ const generateRandomTreeParams = (): TreeArtworkParams => {
     fontFamily: 'Georgia, serif',
     fontUrl: '',
     customFontFamily: '',
-    paperGrain: false,
+    grainAmount: 0,
     canvasWidth: 400,
     canvasHeight: 400,
     seed: Date.now(),
@@ -250,16 +250,17 @@ const generateRandomTextDesignParams = (): TextDesignArtworkParams => {
     backgroundColor: "#001eff",
     canvasWidth: 400,
     canvasHeight: 400,
+    grainAmount: 40,
     fontUrl: "",
     customFontFamily: "",
     layer1: {
       text: "ZOHRAN",
       x: 0.5,
       y: 0.5,
-      size: 100,
+      size: 70,
       alignment: 'center',
       fill: "#FF9900",
-      extrudeDepth: 10,
+      extrudeDepth: 6,
       extrudeX: -1.2,
       extrudeY: 0.8,
       extrudeStart: "#ff0000",
@@ -505,7 +506,7 @@ export default function StudioPage() {
   const handleTreeParamChange = (param: keyof TreeArtworkParams, value: number) => {
     setTreeParams((prev) => ({
       ...prev,
-      [param]: param === 'textEnabled' || param === 'paperGrain' ? Boolean(value) : value,
+      [param]: param === 'textEnabled' ? Boolean(value) : value,
     }));
   };
 

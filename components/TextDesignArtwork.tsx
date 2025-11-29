@@ -109,8 +109,8 @@ const TextDesignArtwork = forwardRef<TextDesignArtworkRef, TextDesignArtworkProp
                 if (!sketchRef.current) return;
                 const currentCanvas = sketchRef.current.canvas;
                 const exportCanvas = document.createElement("canvas");
-                exportCanvas.width = params.exportWidth;
-                exportCanvas.height = params.exportHeight;
+                exportCanvas.width = params.canvasWidth;
+                exportCanvas.height = params.canvasHeight;
                 const ctx = exportCanvas.getContext("2d");
                 if (ctx) {
                     ctx.drawImage(currentCanvas, 0, 0, exportCanvas.width, exportCanvas.height);
