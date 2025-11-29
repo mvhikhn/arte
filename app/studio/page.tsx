@@ -187,60 +187,42 @@ const generateRandomRotatedGridParams = (): RotatedGridArtworkParams => {
 
 // Generate random tree params with darker stems and lighter tips
 const generateRandomTreeParams = (): TreeArtworkParams => {
-  const stemPalette = getRandomColors(3); // Get darker colors for stems
-  const tipPalette = getRandomColors(3);  // Get lighter colors for tips
-
-  // Helper to darken a color
-  const darkenColor = (hex: string) => {
-    const r = parseInt(hex.slice(1, 3), 16);
-    const g = parseInt(hex.slice(3, 5), 16);
-    const b = parseInt(hex.slice(5, 7), 16);
-    const factor = 0.6; // Darken by 40%
-    return `#${Math.floor(r * factor).toString(16).padStart(2, '0')}${Math.floor(g * factor).toString(16).padStart(2, '0')}${Math.floor(b * factor).toString(16).padStart(2, '0')}`;
-  };
-
-  // Helper to lighten a color
-  const lightenColor = (hex: string) => {
-    const r = parseInt(hex.slice(1, 3), 16);
-    const g = parseInt(hex.slice(3, 5), 16);
-    const b = parseInt(hex.slice(5, 7), 16);
-    const factor = 1.4; // Lighten by 40%
-    return `#${Math.min(255, Math.floor(r * factor)).toString(16).padStart(2, '0')}${Math.min(255, Math.floor(g * factor)).toString(16).padStart(2, '0')}${Math.min(255, Math.floor(b * factor)).toString(16).padStart(2, '0')}`;
-  };
+  // Detect if mobile (screen width < 768px)
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
 
   return {
-    initialPaths: Math.floor(randomInRange(1, 3)),
-    initialVelocity: randomInRange(8, 15),
-    branchProbability: randomInRange(0.15, 0.25),
-    diameterShrink: randomInRange(0.6, 0.7),
-    minDiameter: randomInRange(0.2, 0.4),
-    bumpMultiplier: randomInRange(0.15, 0.3),
-    velocityRetention: randomInRange(0.7, 0.85),
-    speedMin: randomInRange(4, 6),
-    speedMax: randomInRange(9, 12),
-    finishedCircleSize: randomInRange(8, 15),
-    strokeWeightMultiplier: randomInRange(0.8, 1.5),
-    stemColor1: darkenColor(stemPalette.colors[0]),
-    stemColor2: darkenColor(stemPalette.colors[1]),
-    stemColor3: darkenColor(stemPalette.colors[2]),
-    tipColor1: lightenColor(tipPalette.colors[0]),
-    tipColor2: lightenColor(tipPalette.colors[1]),
-    tipColor3: lightenColor(tipPalette.colors[2]),
-    backgroundColor: "#fafafa",
-    textContent: "Nature's Code",
+    initialPaths: 1,
+    initialVelocity: isMobile ? 10 : 14.04,
+    branchProbability: 0.17,
+    diameterShrink: 0.61,
+    minDiameter: 0.20,
+    bumpMultiplier: 0.29,
+    velocityRetention: 0.71,
+    speedMin: 4.13,
+    speedMax: 11.24,
+    finishedCircleSize: 10.07,
+    strokeWeightMultiplier: 1.29,
+    stemColor1: "#8B4513",
+    stemColor2: "#A0522D",
+    stemColor3: "#CD853F",
+    tipColor1: "#FF69B4",
+    tipColor2: "#FFB6C1",
+    tipColor3: "#FFC0CB",
+    backgroundColor: "#000000",
+    textContent: "",
     textEnabled: true,
     fontSize: 24,
-    textColor: "#333333",
+    textColor: "#ff1f1f",
     textAlign: 'center' as 'left' | 'center' | 'right',
-    textX: 400,
+    textX: isMobile ? 200 : 311,
     textY: 50,
     lineHeight: 1.5,
-    fontFamily: 'Georgia, serif',
-    fontUrl: '',
+    fontFamily: 'Georgia',
+    fontUrl: 'https://fonts.googleapis.com/css2?family=...',
     customFontFamily: '',
-    grainAmount: 0,
-    canvasWidth: 400,
-    canvasHeight: 400,
+    grainAmount: 50,
+    canvasWidth: isMobile ? 400 : 630,
+    canvasHeight: isMobile ? 500 : 790,
     seed: Date.now(),
     exportWidth: 1600,
     exportHeight: 2000,
