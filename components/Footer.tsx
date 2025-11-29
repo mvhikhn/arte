@@ -92,14 +92,14 @@ export default function Footer() {
             </div>
 
             {/* Bottom Section */}
-            <div className="flex flex-col md:flex-row justify-between items-end w-full mt-12 gap-4">
+            <div className="flex flex-col md:flex-row justify-between items-start w-full mt-12 gap-4">
                 {/* Bottom Left: Date | Location | Weather */}
-                <div className="text-sm font-light text-zinc-800 tracking-tight">
+                <div className="text-sm font-light text-zinc-800 tracking-tight text-left">
                     {new Date().toLocaleDateString('en-GB').replace(/\//g, '.')} | 📍DHK | {weather ? `${weather.temp} C- ${weather.condition}` : 'Loading...'}
                 </div>
 
                 {/* Bottom Right: Last Updated */}
-                <div className="text-[10px] text-zinc-500 tracking-wide font-mono">
+                <div className="text-[10px] text-zinc-500 tracking-wide font-mono text-left">
                     Last Updated On {new Date().toLocaleDateString('en-GB').replace(/\//g, '.')} {new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })} GMT+6
                 </div>
             </div>

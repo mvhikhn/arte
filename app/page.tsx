@@ -92,6 +92,30 @@ export default function Home() {
                                 {isGalleryOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                             </button>
                         </div>
+
+                        {/* Mobile Gallery Grid - Rendered here to be before Footer */}
+                        <div className={`md:hidden pt-6 ${isGalleryOpen ? 'block' : 'hidden'}`}>
+                            <div className="grid grid-cols-1 gap-4">
+                                {artworks.map((artwork, index) => (
+                                    <Link
+                                        key={artwork.id}
+                                        href={`/studio?artwork=${artwork.id}`}
+                                        className="group block aspect-square border border-zinc-100 hover:border-zinc-300 transition-all duration-300 p-6 flex flex-col justify-between"
+                                        style={{ backgroundColor: artworkColors[index] || '#f5f5f5' }}
+                                    >
+                                        <div className="flex justify-between items-start">
+                                            <span className="text-xs font-medium text-zinc-400 group-hover:text-zinc-900 transition-colors">0{index + 1}</span>
+                                            <ArrowUpRight className="w-4 h-4 text-zinc-300 group-hover:text-zinc-900 transition-colors opacity-0 group-hover:opacity-100" />
+                                        </div>
+
+                                        <div>
+                                            <h3 className="font-medium text-lg mb-1 group-hover:translate-x-1 transition-transform duration-300">{artwork.title}</h3>
+                                            <p className="text-xs text-zinc-400 group-hover:text-zinc-600 transition-colors">{artwork.description}</p>
+                                        </div>
+                                    </Link>
+                                ))}
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -99,9 +123,9 @@ export default function Home() {
                 <Footer />
             </div>
 
-            {/* Right Section - Gallery - Scrollable */}
-            <div className={`w-full md:w-1/2 h-full overflow-y-auto no-scrollbar p-6 md:p-12 custom-scrollbar transition-all duration-300 ${isGalleryOpen ? 'block' : 'hidden md:block'}`}>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pb-12">
+            {/* Right Section - Gallery - Desktop Only */}
+            <div className="hidden md:block w-1/2 h-full overflow-y-auto no-scrollbar p-12 custom-scrollbar">
+                <div className="grid grid-cols-2 gap-4 pb-12">
                     {artworks.map((artwork, index) => (
                         <Link
                             key={artwork.id}
