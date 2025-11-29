@@ -18,7 +18,7 @@ import TextDesignControls from "@/components/TextDesignControls";
 import { ExportPopup } from "@/components/ExportPopup";
 import { PaymentModal } from "@/components/PaymentModal";
 import { EmailVerificationModal } from "@/components/EmailVerificationModal";
-import { ArrowRight, SlidersHorizontal } from "lucide-react";
+import { ArrowRight, ArrowLeft, SlidersHorizontal } from "lucide-react";
 import { getRandomColors } from "@/lib/colorPalettes";
 import { hasGifAccess, grantGifAccess } from "@/lib/paymentUtils";
 
@@ -848,23 +848,29 @@ export default function StudioPage() {
       </main>
 
       {/* Home Button - Top Left */}
+      {/* Home Button - Minimal */}
       <Link
         href="/"
-        className="fixed top-6 left-6 w-12 h-12 flex items-center justify-center bg-zinc-900 hover:bg-zinc-800 text-white rounded-full shadow-lg transition-all hover:shadow-xl z-40"
+        className="group fixed top-6 left-6 flex items-center gap-2 text-zinc-400 hover:text-zinc-900 transition-colors z-50"
         aria-label="Return to home"
       >
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-        </svg>
+        <div className="p-2 rounded-full group-hover:bg-zinc-100 transition-colors">
+          <ArrowLeft className="w-4 h-4" />
+        </div>
+        <span className="text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity -ml-2 group-hover:ml-0">Home</span>
       </Link>
 
       {/* Next Artwork Button - Minimal Circle */}
+      {/* Next Artwork Button - Minimal */}
       <button
         onClick={handleNextArtwork}
-        className="fixed bottom-6 right-6 w-12 h-12 flex items-center justify-center bg-zinc-900 hover:bg-zinc-800 text-white rounded-full shadow-lg transition-all hover:shadow-xl z-40"
+        className="group fixed bottom-6 right-6 flex items-center gap-2 text-zinc-400 hover:text-zinc-900 transition-colors z-50"
         aria-label="Next artwork"
       >
-        <ArrowRight className="w-6 h-6" />
+        <span className="text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity -mr-2 group-hover:mr-0">Next</span>
+        <div className="p-2 rounded-full group-hover:bg-zinc-100 transition-colors">
+          <ArrowRight className="w-4 h-4" />
+        </div>
       </button>
 
       {/* Controls Dropdown Panel - Always Visible */}

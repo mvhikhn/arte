@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowUpRight } from "lucide-react";
+import { ArrowUpRight, ChevronDown, ChevronUp } from "lucide-react";
 import { useState, useEffect } from "react";
 import Footer from "@/components/Footer";
 
@@ -22,6 +22,7 @@ export default function Home() {
 
     // Generate random pastel colors for each artwork
     const [artworkColors, setArtworkColors] = useState<string[]>([]);
+    const [isGalleryOpen, setIsGalleryOpen] = useState(false);
 
     useEffect(() => {
         const pastelColors = artworks.map(() => {
@@ -80,6 +81,17 @@ export default function Home() {
                                 ))}
                             </div>
                         </div>
+
+                        {/* Mobile Gallery Toggle */}
+                        <div className="md:hidden pt-6">
+                            <button
+                                onClick={() => setIsGalleryOpen(!isGalleryOpen)}
+                                className="flex items-center gap-2 text-sm font-medium text-zinc-500 hover:text-zinc-900 transition-colors w-full py-2 border-b border-zinc-100"
+                            >
+                                <span>Project Gallery</span>
+                                {isGalleryOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -88,7 +100,7 @@ export default function Home() {
             </div>
 
             {/* Right Section - Gallery - Scrollable */}
-            <div className="w-full md:w-1/2 h-full overflow-y-auto no-scrollbar p-6 md:p-12 custom-scrollbar">
+            <div className={`w-full md:w-1/2 h-full overflow-y-auto no-scrollbar p-6 md:p-12 custom-scrollbar transition-all duration-300 ${isGalleryOpen ? 'block' : 'hidden md:block'}`}>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pb-12">
                     {artworks.map((artwork, index) => (
                         <Link
