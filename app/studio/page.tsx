@@ -160,21 +160,23 @@ const generateRandomMosaicParams = (): MosaicArtworkParams => {
 
 // Generate random initial rotated grid params
 const generateRandomRotatedGridParams = (): RotatedGridArtworkParams => {
-  const palette = getRandomColors(4);
+  // Detect if mobile (screen width < 768px)
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+
   return {
-    color1: palette.colors[0],
-    color2: palette.colors[1],
-    color3: palette.colors[2],
-    color4: palette.colors[3],
-    backgroundColor: "#000000",
-    offsetRatio: randomInRange(0.03, 0.08),
-    marginRatio: randomInRange(0.15, 0.3),
-    minCellCount: Math.floor(randomInRange(2, 4)),
-    maxCellCount: Math.floor(randomInRange(4, 6)),
-    minRecursionSize: randomInRange(0.05, 0.15),
-    strokeWeight: randomInRange(1, 3),
-    canvasWidth: 400,
-    canvasHeight: 400,
+    color1: "#FF1493",
+    color2: "#FF69B4",
+    color3: "#FFB7C5",
+    color4: "#C71585",
+    backgroundColor: "#2C1810",
+    offsetRatio: 0.010,
+    marginRatio: 0.50,
+    minCellCount: 2,
+    maxCellCount: 6,
+    minRecursionSize: 0.030,
+    strokeWeight: 4.00,
+    canvasWidth: isMobile ? 400 : 630,
+    canvasHeight: isMobile ? 500 : 790,
     seed: Date.now(),
     exportWidth: 1600,
     exportHeight: 2000,
