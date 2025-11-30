@@ -93,10 +93,10 @@ export default function Home() {
         const touch = e.touches[0];
         setTouchPosition({ x: touch.clientX, y: touch.clientY });
 
-        // Set a 3-second timer before showing preview
+        // Set a 800ms timer before showing preview
         touchTimerRef.current = setTimeout(() => {
             setTouchedArtwork(artworkId);
-        }, 3000);
+        }, 800);
     };
 
     const handleTouchEnd = () => {
@@ -134,7 +134,7 @@ export default function Home() {
         if (isDragging) {
             window.addEventListener('mousemove', handleMouseMove);
             window.addEventListener('mouseup', handleMouseUp);
-            document.body.style.cursor = 'col-resize';
+            document.body.style.cursor = 'none'; // Hide default cursor during drag
         }
 
         return () => {
@@ -147,7 +147,7 @@ export default function Home() {
     return (
         <main
             ref={containerRef}
-            className="h-screen w-full flex flex-col md:flex-row bg-white text-zinc-900 font-sans selection:bg-zinc-100 overflow-hidden select-none"
+            className="h-dvh w-full flex flex-col md:flex-row bg-white text-zinc-900 font-sans selection:bg-zinc-100 overflow-hidden select-none"
             style={{
                 '--left-panel-width': `${leftPanelWidth}%`
             } as React.CSSProperties}

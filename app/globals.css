@@ -46,9 +46,12 @@
     border-radius: 0.25rem;
   }
 
+  html,
   body {
     font-family: 'ABC Diatype', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     font-size: 13px !important;
+    overscroll-behavior: none;
+    height: 100%;
   }
 
   /* Ensure all text elements are 13px */
