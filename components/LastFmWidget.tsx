@@ -106,7 +106,7 @@ export default function LastFmWidget() {
     if (loading || !track) return null;
 
     return (
-        <div className="flex items-center gap-3 w-full">
+        <div className="flex items-center gap-3 w-auto justify-end">
             <div className="relative w-10 h-10 flex-shrink-0">
                 {track.image ? (
                     <div className="w-full h-full rounded-full overflow-hidden animate-spin-slow">

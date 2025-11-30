@@ -107,8 +107,48 @@ export default function Home() {
         setTouchedArtwork(null);
     };
 
+    // Resizable partition state
+    const [leftPanelWidth, setLeftPanelWidth] = useState(50);
+    const [isDragging, setIsDragging] = useState(false);
+    const containerRef = useRef<HTMLDivElement>(null);
+
+    // Handle resizing
+    useEffect(() => {
+        const handleMouseMove = (e: MouseEvent) => {
+            if (!isDragging || !containerRef.current) return;
+
+            const containerRect = containerRef.current.getBoundingClientRect();
+            const newWidth = ((e.clientX - containerRect.left) / containerRect.width) * 100;
+
+            // Limit width between 20% and 80%
+            if (newWidth >= 20 && newWidth <= 80) {
+                setLeftPanelWidth(newWidth);
+            }
+        };
+
+        const handleMouseUp = () => {
+            setIsDragging(false);
+            document.body.style.cursor = 'default';
+        };
+
+        if (isDragging) {
+            window.addEventListener('mousemove', handleMouseMove);
+            window.addEventListener('mouseup', handleMouseUp);
+            document.body.style.cursor = 'col-resize';
+        }
+
+        return () => {
+            window.removeEventListener('mousemove', handleMouseMove);
+            window.removeEventListener('mouseup', handleMouseUp);
+            document.body.style.cursor = 'default';
+        };
+    }, [isDragging]);
+
     return (
-        <main className="h-screen w-full flex flex-col md:flex-row bg-white text-zinc-900 font-sans selection:bg-zinc-100 overflow-hidden">
+        <main
+            ref={containerRef}
+            className="h-screen w-full flex flex-col md:flex-row bg-white text-zinc-900 font-sans selection:bg-zinc-100 overflow-hidden select-none"
+        >
             {/* Custom cursor preview for desktop */}
             <ArtworkPreviewCursor
                 artworkId={hoveredArtwork}
@@ -143,96 +183,119 @@ export default function Home() {
             )}
 
             {/* Left Section - Bio, Blog, Footer - Scrollable */}
-            <div className="w-full md:w-1/2 h-full overflow-y-auto no-scrollbar border-b md:border-b-0 md:border-r border-zinc-200 flex flex-col">
-                <div className="p-6 md:p-12 flex-grow">
-                    <div className="space-y-12">
-                        {/* Header */}
-                        <div className="space-y-2">
-                            <h1 ref={nameRef} className="text-4xl font-medium tracking-tight text-black">Mahi Khan</h1>
-                            <p className="text-zinc-500 text-sm">est. 2004</p>
-                        </div>
+            <div
+                className="w-full md:h-full overflow-y-auto no-scrollbar border-b md:border-b-0 border-zinc-200 flex flex-col"
+                style={{ width: `100%`, flexBasis: `md:${leftPanelWidth}%` }}
+            >
+                {/* Mobile-only width override via class, desktop via style */}
+                <style jsx>{`
+                    @media (min-width: 768px) {
+                        .left-panel { width: ${leftPanelWidth}% !important; }
+                        .right-panel { width: ${100 - leftPanelWidth}% !important; }
+                    }
+                `}</style>
 
-                        {/* Bio Content */}
-                        <div className="max-w-md space-y-6 text-sm leading-relaxed text-zinc-600">
-                            <p>
-                                Because of having an esoteric level of curiosity about a wide range of subjects, I have struggled for a long time to decide where to put my effort. I wanted something that would give me a peaceful mind and a fulfilled life. Visual media captured a different and surprisingly tenacious part of me. I have been an avid consumer all my life, but I found this field difficult to enter because of financial, social, and networking limitations. That changed when I discovered algorithmic art.
-                            </p>
-                            <p>
-                                This levelling of the field for every creative person, and the way it removes so many barriers to entry, became the main reason I fell in love with it. Anyone can put together some algorithmic wizardry, and anyone can make art that stands beside work from a fancy Manhattan studio. I still intend to broaden my footprint across the full visual media spectrum over time, as I slowly reach mastery in each distinct area.
-                            </p>
-                            <p>
-                                This website chronicles the passion projects I take on throughout my twenties. I occasionally add blog posts to write about my process, reflect on things, and share my views on life or the state of the world.
-                            </p>
-                        </div>
-
-                        {/* Blog Section */}
-                        <div className="space-y-6 pt-6">
-                            <h2 className="text-xs font-medium uppercase tracking-widest text-zinc-400">Journal</h2>
-                            <div className="space-y-4">
-                                {blogPosts.map((post) => (
-                                    <Link
-                                        key={post.slug}
-                                        href={`/blog/${post.slug}`}
-                                        className="group block"
-                                    >
-                                        <div className="flex items-baseline justify-between border-b border-zinc-100 pb-2 group-hover:border-zinc-300 transition-colors">
-                                            <h3 className="text-sm font-medium text-zinc-700 group-hover:text-zinc-900 transition-colors">
-                                                {post.title}
-                                            </h3>
-                                            <span className="text-xs text-zinc-400 font-mono group-hover:text-zinc-500 transition-colors">
-                                                {post.date}
-                                            </span>
-                                        </div>
-                                    </Link>
-                                ))}
+                <div className="left-panel w-full h-full flex flex-col">
+                    <div className="p-6 md:p-12 flex-grow">
+                        <div className="space-y-12">
+                            {/* Header */}
+                            <div className="space-y-2">
+                                <h1 ref={nameRef} className="text-4xl font-medium tracking-tight text-black">Mahi Khan</h1>
+                                <p className="text-zinc-500 text-sm">est. 2004</p>
                             </div>
-                        </div>
 
-                        {/* Mobile Gallery Toggle */}
-                        <div className="md:hidden pt-6">
-                            <button
-                                onClick={() => setIsGalleryOpen(!isGalleryOpen)}
-                                className="flex items-center gap-2 text-sm font-medium text-zinc-500 hover:text-zinc-900 transition-colors w-full py-2 border-b border-zinc-100"
-                            >
-                                <span>Project Gallery</span>
-                                {isGalleryOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-                            </button>
-                        </div>
+                            {/* Bio Content */}
+                            <div className="max-w-md space-y-6 text-sm leading-relaxed text-zinc-600">
+                                <p>
+                                    Because of having an esoteric level of curiosity about a wide range of subjects, I have struggled for a long time to decide where to put my effort. I wanted something that would give me a peaceful mind and a fulfilled life. Visual media captured a different and surprisingly tenacious part of me. I have been an avid consumer all my life, but I found this field difficult to enter because of financial, social, and networking limitations. That changed when I discovered algorithmic art.
+                                </p>
+                                <p>
+                                    This levelling of the field for every creative person, and the way it removes so many barriers to entry, became the main reason I fell in love with it. Anyone can put together some algorithmic wizardry, and anyone can make art that stands beside work from a fancy Manhattan studio. I still intend to broaden my footprint across the full visual media spectrum over time, as I slowly reach mastery in each distinct area.
+                                </p>
+                                <p>
+                                    This website chronicles the passion projects I take on throughout my twenties. I occasionally add blog posts to write about my process, reflect on things, and share my views on life or the state of the world.
+                                </p>
+                            </div>
 
-                        {/* Mobile Gallery Grid - Rendered here to be before Footer */}
-                        <div className={`md:hidden pt-6 ${isGalleryOpen ? 'block' : 'hidden'}`}>
-                            <div className="grid grid-cols-1 gap-4">
-                                {artworks.map((artwork, index) => (
-                                    <Link
-                                        key={artwork.id}
-                                        href={`/studio?artwork=${artwork.id}`}
-                                        className="group block aspect-square border border-zinc-100 hover:border-zinc-300 transition-all duration-300 p-6 flex flex-col justify-between"
-                                        style={{ backgroundColor: artworkColors[index] || '#f5f5f5' }}
-                                        onTouchStart={(e) => handleTouchStart(e, artwork.id)}
-                                        onTouchEnd={handleTouchEnd}
-                                    >
-                                        <div className="flex justify-between items-start">
-                                            <span className="text-xs font-medium text-zinc-400 group-hover:text-zinc-900 transition-colors">0{index + 1}</span>
-                                            <ArrowUpRight className="w-4 h-4 text-zinc-300 group-hover:text-zinc-900 transition-colors opacity-0 group-hover:opacity-100" />
-                                        </div>
+                            {/* Blog Section */}
+                            <div className="space-y-6 pt-6">
+                                <h2 className="text-xs font-medium uppercase tracking-widest text-zinc-400">Journal</h2>
+                                <div className="space-y-4">
+                                    {blogPosts.map((post) => (
+                                        <Link
+                                            key={post.slug}
+                                            href={`/blog/${post.slug}`}
+                                            className="group block"
+                                        >
+                                            <div className="flex items-baseline justify-between border-b border-zinc-100 pb-2 group-hover:border-zinc-300 transition-colors">
+                                                <h3 className="text-sm font-medium text-zinc-700 group-hover:text-zinc-900 transition-colors">
+                                                    {post.title}
+                                                </h3>
+                                                <span className="text-xs text-zinc-400 font-mono group-hover:text-zinc-500 transition-colors">
+                                                    {post.date}
+                                                </span>
+                                            </div>
+                                        </Link>
+                                    ))}
+                                </div>
+                            </div>
 
-                                        <div>
-                                            <h3 className="font-medium text-lg mb-1 group-hover:translate-x-1 transition-transform duration-300">{artwork.title}</h3>
-                                            <p className="text-xs text-zinc-400 group-hover:text-zinc-600 transition-colors">{artwork.description}</p>
-                                        </div>
-                                    </Link>
-                                ))}
+                            {/* Mobile Gallery Toggle */}
+                            <div className="md:hidden pt-6">
+                                <button
+                                    onClick={() => setIsGalleryOpen(!isGalleryOpen)}
+                                    className="flex items-center gap-2 text-sm font-medium text-zinc-500 hover:text-zinc-900 transition-colors w-full py-2 border-b border-zinc-100"
+                                >
+                                    <span>Project Gallery</span>
+                                    {isGalleryOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                                </button>
+                            </div>
+
+                            {/* Mobile Gallery Grid - Rendered here to be before Footer */}
+                            <div className={`md:hidden pt-6 ${isGalleryOpen ? 'block' : 'hidden'}`}>
+                                <div className="grid grid-cols-1 gap-4">
+                                    {artworks.map((artwork, index) => (
+                                        <Link
+                                            key={artwork.id}
+                                            href={`/studio?artwork=${artwork.id}`}
+                                            className="group block aspect-square border border-zinc-100 hover:border-zinc-300 transition-all duration-300 p-6 flex flex-col justify-between"
+                                            style={{ backgroundColor: artworkColors[index] || '#f5f5f5' }}
+                                            onTouchStart={(e) => handleTouchStart(e, artwork.id)}
+                                            onTouchEnd={handleTouchEnd}
+                                            onContextMenu={(e) => e.preventDefault()}
+                                        >
+                                            <div className="flex justify-between items-start">
+                                                <span className="text-xs font-medium text-zinc-400 group-hover:text-zinc-900 transition-colors">0{index + 1}</span>
+                                                <ArrowUpRight className="w-4 h-4 text-zinc-300 group-hover:text-zinc-900 transition-colors opacity-0 group-hover:opacity-100" />
+                                            </div>
+
+                                            <div>
+                                                <h3 className="font-medium text-lg mb-1 group-hover:translate-x-1 transition-transform duration-300">{artwork.title}</h3>
+                                                <p className="text-xs text-zinc-400 group-hover:text-zinc-600 transition-colors">{artwork.description}</p>
+                                            </div>
+                                        </Link>
+                                    ))}
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
 
-                {/* Footer at the bottom of left section */}
-                <Footer />
+                    {/* Footer at the bottom of left section */}
+                    <Footer />
+                </div>
+            </div>
+
+            {/* Drag Handle - Desktop Only */}
+            <div
+                className="hidden md:block w-[1px] h-full bg-zinc-200 hover:bg-zinc-400 cursor-col-resize transition-colors relative z-10 flex-shrink-0"
+                onMouseDown={() => setIsDragging(true)}
+            >
+                {/* Invisible wider hit area for easier grabbing */}
+                <div className="absolute inset-y-0 -left-2 -right-2 bg-transparent cursor-col-resize" />
             </div>
 
             {/* Right Section - Gallery - Desktop Only */}
-            <div className="hidden md:block w-1/2 h-full overflow-y-auto no-scrollbar p-12 custom-scrollbar">
+            <div className="right-panel hidden md:block h-full overflow-y-auto no-scrollbar p-12 custom-scrollbar">
                 <div className="grid grid-cols-2 gap-4 pb-12">
                     {artworks.map((artwork, index) => (
                         <Link
