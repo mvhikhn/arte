@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ArrowUpRight, ChevronDown, ChevronUp } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import Footer from "@/components/Footer";
+import Whiteboard from "@/components/Whiteboard";
 import ArtworkPreviewCursor from "@/components/ArtworkPreviewCursor";
 import gsap from "gsap";
 
@@ -187,10 +188,10 @@ export default function Home() {
 
             {/* Left Section - Bio, Blog, Footer - Scrollable */}
             <div
-                className="w-full md:w-[var(--left-panel-width)] h-full overflow-y-auto no-scrollbar border-b md:border-b-0 border-zinc-200 flex flex-col flex-shrink-0"
+                className="w-full md:w-[var(--left-panel-width)] h-full overflow-y-auto no-scrollbar border-b md:border-b-0 border-zinc-200 flex flex-col flex-shrink-0 relative"
             >
-                <div className="w-full h-full flex flex-col">
-                    <div className="p-6 md:p-12 flex-grow">
+                <div className="w-full h-full flex flex-col relative z-10 pointer-events-none">
+                    <div className="p-6 md:p-12 flex-grow pointer-events-auto">
                         <div className="space-y-12">
                             {/* Header */}
                             <div className="space-y-2">
@@ -276,6 +277,9 @@ export default function Home() {
 
                     {/* Footer at the bottom of left section */}
                     <Footer />
+
+                    {/* Whiteboard Layer - Behind text but interactive in empty spaces */}
+                    <Whiteboard />
                 </div>
             </div>
 
