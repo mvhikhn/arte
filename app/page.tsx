@@ -279,7 +279,7 @@ export default function Home() {
                     <Footer />
 
                     {/* Whiteboard Layer - Behind text but interactive in empty spaces */}
-                    <Whiteboard />
+                    <Whiteboard width={leftPanelWidth} />
                 </div>
             </div>
 
@@ -294,7 +294,7 @@ export default function Home() {
 
             {/* Right Section - Gallery - Desktop Only */}
             <div className="hidden md:block flex-1 h-full overflow-y-auto no-scrollbar p-12 custom-scrollbar">
-                <div className="grid grid-cols-2 gap-4 pb-12">
+                <div className={`grid gap-4 pb-12 ${leftPanelWidth > 60 ? 'grid-cols-1' : 'grid-cols-2'}`}>
                     {artworks.map((artwork, index) => (
                         <Link
                             key={artwork.id}
