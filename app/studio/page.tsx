@@ -310,7 +310,7 @@ const generateRandomTextDesignParams = (): TextDesignArtworkParams => {
 // Force dynamic rendering and prevent static generation
 export const dynamic = 'force-dynamic';
 
-export default function StudioPage() {
+function StudioContent() {
   const searchParams = useSearchParams();
   const artworkParam = searchParams.get('artwork');
   const validArtworks: ArtworkType[] = ["flow", "grid", "mosaic", "rotated", "tree", "textdesign"];
@@ -1004,5 +1004,17 @@ export default function StudioPage() {
         </>
       )}
     </div>
+  );
+}
+
+export default function StudioPage() {
+  return (
+    <Suspense fallback={
+      <div className="w-full h-screen flex items-center justify-center bg-white">
+        <div className="w-8 h-8 border-4 border-zinc-200 border-t-zinc-900 rounded-full animate-spin"></div>
+      </div>
+    }>
+      <StudioContent />
+    </Suspense>
   );
 }

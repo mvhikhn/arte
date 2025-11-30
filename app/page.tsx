@@ -4,7 +4,6 @@ import Link from "next/link";
 import { ArrowUpRight, ChevronDown, ChevronUp } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import Footer from "@/components/Footer";
-import Whiteboard from "@/components/Whiteboard";
 import ArtworkPreviewCursor from "@/components/ArtworkPreviewCursor";
 import gsap from "gsap";
 
@@ -190,19 +189,19 @@ export default function Home() {
             <div
                 className="w-full md:w-[var(--left-panel-width)] h-full overflow-y-auto no-scrollbar border-b md:border-b-0 border-zinc-200 flex flex-col flex-shrink-0 relative"
             >
-                {/* Content Wrapper - Z-10, sits ABOVE whiteboard, pointer-events-none to allow clicks through */}
-                <div className="relative z-10 min-h-full flex flex-col pointer-events-none">
-                    {/* Main Content - flex-1 to fill space, NO pointer-events-auto here */}
+                {/* Content Wrapper - Z-10, pointer-events-none to allow clicks through (though no whiteboard anymore, keeping structure for safety) */}
+                <div className="min-h-full flex flex-col relative z-10">
+                    {/* Main Content - flex-1 to fill space */}
                     <div className="flex-1 p-6 md:p-12">
                         <div className="space-y-12">
-                            {/* Header - pointer-events-auto to block drawing */}
-                            <div className="space-y-2 pointer-events-auto max-w-md">
+                            {/* Header */}
+                            <div className="space-y-2 max-w-md">
                                 <h1 ref={nameRef} className="text-4xl font-medium tracking-tight text-black">Mahi Khan</h1>
                                 <p className="text-zinc-500 text-sm">est. 2004</p>
                             </div>
 
-                            {/* Bio Content - pointer-events-auto to block drawing */}
-                            <div className="max-w-md space-y-6 text-sm leading-relaxed text-zinc-600 pointer-events-auto">
+                            {/* Bio Content */}
+                            <div className="max-w-md space-y-6 text-sm leading-relaxed text-zinc-600">
                                 <p>
                                     Because of having an esoteric level of curiosity about a wide range of subjects, I have struggled for a long time to decide where to put my effort. I wanted something that would give me a peaceful mind and a fulfilled life. Visual media captured a different and surprisingly tenacious part of me. I have been an avid consumer all my life, but I found this field difficult to enter because of financial, social, and networking limitations. That changed when I discovered algorithmic art.
                                 </p>
@@ -214,8 +213,8 @@ export default function Home() {
                                 </p>
                             </div>
 
-                            {/* Blog Section - pointer-events-auto to block drawing */}
-                            <div className="space-y-6 pt-6 pointer-events-auto max-w-md">
+                            {/* Blog Section */}
+                            <div className="space-y-6 pt-6 max-w-md">
                                 <h2 className="text-xs font-medium uppercase tracking-widest text-zinc-400">Journal</h2>
                                 <div className="space-y-4">
                                     {blogPosts.map((post) => (
@@ -237,8 +236,8 @@ export default function Home() {
                                 </div>
                             </div>
 
-                            {/* Mobile Gallery Toggle - pointer-events-auto */}
-                            <div className="md:hidden pt-6 pointer-events-auto">
+                            {/* Mobile Gallery Toggle */}
+                            <div className="md:hidden pt-6">
                                 <button
                                     onClick={() => setIsGalleryOpen(!isGalleryOpen)}
                                     className="flex items-center gap-2 text-sm font-medium text-zinc-500 hover:text-zinc-900 transition-colors w-full py-2 border-b border-zinc-100"
@@ -248,8 +247,8 @@ export default function Home() {
                                 </button>
                             </div>
 
-                            {/* Mobile Gallery Grid - pointer-events-auto */}
-                            <div className={`md:hidden pt-6 pointer-events-auto ${isGalleryOpen ? 'block' : 'hidden'}`}>
+                            {/* Mobile Gallery Grid */}
+                            <div className={`md:hidden pt-6 ${isGalleryOpen ? 'block' : 'hidden'}`}>
                                 <div className="grid grid-cols-1 gap-4">
                                     {artworks.map((artwork, index) => (
                                         <Link
@@ -277,20 +276,37 @@ export default function Home() {
                         </div>
                     </div>
 
-                    {/* Footer - pointer-events-auto, uses natural positioning (no mt-auto since parent is min-h-full) */}
+                    {/* Footer - Stays at bottom */}
                     <div className="pointer-events-auto">
                         <Footer />
                     </div>
                 </div>
-
-                {/* Whiteboard Layer - Behind text but interactive in empty spaces */}
-                <Whiteboard width={leftPanelWidth} />
             </div>
+
+            {/* Custom Resize Icon - Only visible when dragging */}
+            {isDragging && (
+                <div
+                    className="fixed z-50 pointer-events-none text-zinc-900 mix-blend-difference"
+                    style={{
+                        left: mousePosition.x,
+                        top: mousePosition.y,
+                        transform: 'translate(-50%, -50%)'
+                    }}
+                >
+                    <div className="bg-white/80 backdrop-blur rounded-full p-2 shadow-lg border border-zinc-200">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M18 8L22 12L18 16" />
+                            <path d="M6 8L2 12L6 16" />
+                        </svg>
+                    </div>
+                </div>
+            )}
 
             {/* Drag Handle - Desktop Only */}
             <div
-                className="hidden md:block w-[1px] h-full bg-zinc-200 hover:bg-zinc-400 cursor-col-resize transition-colors relative z-10 flex-shrink-0"
+                className="hidden md:block w-[1px] h-full bg-zinc-200 hover:bg-zinc-400 transition-colors relative z-10 flex-shrink-0 group"
                 onMouseDown={() => setIsDragging(true)}
+                style={{ cursor: isDragging ? 'none' : 'col-resize' }}
             >
                 {/* Invisible wider hit area for easier grabbing */}
                 <div className="absolute inset-y-0 -left-2 -right-2 bg-transparent cursor-col-resize" />
