@@ -34,8 +34,9 @@ export default function Home() {
     const [touchedArtwork, setTouchedArtwork] = useState<string | null>(null);
     const [touchPosition, setTouchPosition] = useState({ x: 0, y: 0 });
 
-    // Refs for text scramble
-    const bioRefs = useRef<(HTMLParagraphElement | null)[]>([]);
+    // Ref for name text scramble
+    const nameRef = useRef<HTMLHeadingElement | null>(null);
+    const touchTimerRef = useRef<NodeJS.Timeout | null>(null);
 
     useEffect(() => {
         const pastelColors = artworks.map(() => {
@@ -47,18 +48,20 @@ export default function Home() {
         setArtworkColors(pastelColors);
     }, []);
 
-    // GSAP text scramble effect
+    // GSAP text scramble effect for name only
     useEffect(() => {
+        if (!nameRef.current) return;
+
         const scrambleText = (element: HTMLElement) => {
             const originalText = element.textContent || "";
-            const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*";
+            const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 
             let iteration = 0;
             const interval = setInterval(() => {
                 element.textContent = originalText
                     .split("")
                     .map((char, index) => {
-                        if (char === " " || char === "\n") return char;
+                        if (char === " ") return char;
                         if (index < iteration) return originalText[index];
                         return chars[Math.floor(Math.random() * chars.length)];
                     })
@@ -72,14 +75,7 @@ export default function Home() {
             }, 30);
         };
 
-        // Stagger animation across bio paragraphs
-        bioRefs.current.forEach((ref, index) => {
-            if (ref) {
-                setTimeout(() => {
-                    scrambleText(ref);
-                }, index * 200);
-            }
-        });
+        scrambleText(nameRef.current);
     }, []);
 
     // Track mouse position
@@ -92,14 +88,22 @@ export default function Home() {
         return () => window.removeEventListener("mousemove", handleMouseMove);
     }, []);
 
-    // Handle mobile touch
+    // Handle mobile touch with 3-second hold
     const handleTouchStart = (e: React.TouchEvent, artworkId: string) => {
         const touch = e.touches[0];
-        setTouchedArtwork(artworkId);
         setTouchPosition({ x: touch.clientX, y: touch.clientY });
+
+        // Set a 3-second timer before showing preview
+        touchTimerRef.current = setTimeout(() => {
+            setTouchedArtwork(artworkId);
+        }, 3000);
     };
 
     const handleTouchEnd = () => {
+        if (touchTimerRef.current) {
+            clearTimeout(touchTimerRef.current);
+            touchTimerRef.current = null;
+        }
         setTouchedArtwork(null);
     };
 
@@ -144,19 +148,19 @@ export default function Home() {
                     <div className="space-y-12">
                         {/* Header */}
                         <div className="space-y-2">
-                            <h1 className="text-2xl font-medium tracking-tight">Mahi Khan</h1>
+                            <h1 ref={nameRef} className="text-4xl font-medium tracking-tight text-black">Mahi Khan</h1>
                             <p className="text-zinc-500 text-sm">est. 2004</p>
                         </div>
 
-                        {/* Bio Content with GSAP scramble */}
+                        {/* Bio Content */}
                         <div className="max-w-md space-y-6 text-sm leading-relaxed text-zinc-600">
-                            <p ref={(el) => { bioRefs.current[0] = el; }}>
+                            <p>
                                 Because of having an esoteric level of curiosity about a wide range of subjects, I have struggled for a long time to decide where to put my effort. I wanted something that would give me a peaceful mind and a fulfilled life. Visual media captured a different and surprisingly tenacious part of me. I have been an avid consumer all my life, but I found this field difficult to enter because of financial, social, and networking limitations. That changed when I discovered algorithmic art.
                             </p>
-                            <p ref={(el) => { bioRefs.current[1] = el; }}>
+                            <p>
                                 This levelling of the field for every creative person, and the way it removes so many barriers to entry, became the main reason I fell in love with it. Anyone can put together some algorithmic wizardry, and anyone can make art that stands beside work from a fancy Manhattan studio. I still intend to broaden my footprint across the full visual media spectrum over time, as I slowly reach mastery in each distinct area.
                             </p>
-                            <p ref={(el) => { bioRefs.current[2] = el; }}>
+                            <p>
                                 This website chronicles the passion projects I take on throughout my twenties. I occasionally add blog posts to write about my process, reflect on things, and share my views on life or the state of the world.
                             </p>
                         </div>

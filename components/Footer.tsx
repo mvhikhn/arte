@@ -72,13 +72,13 @@ export default function Footer() {
 
     return (
         <footer
-            className="w-full min-h-[320px] p-8 md:p-12 flex flex-col justify-between transition-colors duration-1000 ease-in-out mt-auto relative"
+            className="w-full min-h-[180px] p-6 md:p-8 flex flex-col justify-between transition-colors duration-1000 ease-in-out mt-auto relative"
             style={{ backgroundColor: bgColor }}
         >
             {/* Top Section */}
             <div className="flex justify-between items-start w-full">
                 {/* Top Left: Social Links */}
-                <div className="flex flex-col gap-2 text-sm">
+                <div className="flex flex-col gap-1.5 text-sm">
                     <a href="https://github.com/mvhikhn" target="_blank" rel="noopener noreferrer" className="text-zinc-600 hover:text-zinc-900 transition-colors">GitHub</a>
                     <a href="https://linkedin.com/in/mvhikhn" target="_blank" rel="noopener noreferrer" className="text-zinc-600 hover:text-zinc-900 transition-colors">LinkedIn</a>
                     <a href="https://x.com/mvhikhn" target="_blank" rel="noopener noreferrer" className="text-zinc-600 hover:text-zinc-900 transition-colors">X</a>
@@ -86,20 +86,20 @@ export default function Footer() {
                 </div>
 
                 {/* Top Right: Last.fm Widget */}
-                <div className="bg-white/50 backdrop-blur-sm p-4 rounded-2xl border border-white/60 shadow-sm max-w-[200px]">
+                <div className="bg-white/50 backdrop-blur-sm p-3 rounded-2xl border border-white/60 shadow-sm max-w-[180px]">
                     <LastFmWidget />
                 </div>
             </div>
 
             {/* Bottom Section */}
-            <div className="flex flex-col md:flex-row justify-between items-start w-full mt-12 gap-4">
+            <div className="flex flex-col md:flex-row justify-between items-start w-full mt-8 gap-2">
                 {/* Bottom Left: Date | Location | Weather */}
-                <div className="text-sm font-light text-zinc-800 tracking-tight text-left">
+                <div className="text-xs font-light text-zinc-800 tracking-tight text-left">
                     {new Date().toLocaleDateString('en-GB').replace(/\//g, '.')} | 📍DHK | {weather ? `${weather.temp} C- ${weather.condition}` : 'Loading...'}
                 </div>
 
                 {/* Bottom Right: Last Updated */}
-                <div className="text-[10px] text-zinc-500 tracking-wide font-mono text-left">
+                <div className="text-[9px] text-zinc-500 tracking-wide font-mono text-left">
                     {new Date().toLocaleDateString('en-GB').replace(/\//g, '.')}
                 </div>
             </div>

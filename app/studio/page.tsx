@@ -18,7 +18,7 @@ import TextDesignControls from "@/components/TextDesignControls";
 import { ExportPopup } from "@/components/ExportPopup";
 import { PaymentModal } from "@/components/PaymentModal";
 import { EmailVerificationModal } from "@/components/EmailVerificationModal";
-import { ArrowRight, ArrowLeft, SlidersHorizontal } from "lucide-react";
+import { ArrowRight, ArrowLeft, SlidersHorizontal, RefreshCw, Shuffle, Download } from "lucide-react";
 import { getRandomColors } from "@/lib/colorPalettes";
 import { hasGifAccess, grantGifAccess } from "@/lib/paymentUtils";
 
@@ -865,6 +865,48 @@ export default function StudioPage() {
           <ArrowRight className="w-4 h-4" />
         </div>
       </button>
+
+      {/* Action Icons - Regenerate, Randomize, Export */}
+      <div className="fixed top-6 right-20 flex items-center gap-2 z-50">
+        {/* Regenerate Button - only for artworks that have regenerate */}
+        {(currentArtwork === "mosaic" || currentArtwork === "rotated" || currentArtwork === "tree") && (
+          <button
+            onClick={() => {
+              if (currentArtwork === "mosaic") handleMosaicRegenerate();
+              if (currentArtwork === "rotated") handleRotatedGridRegenerate();
+              if (currentArtwork === "tree") handleTreeRegenerate();
+            }}
+            className="group p-2 rounded-full text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 transition-colors"
+            aria-label="Regenerate"
+          >
+            <RefreshCw className="w-4 h-4" />
+          </button>
+        )}
+
+        {/* Randomize Button */}
+        <button
+          onClick={() => {
+            if (currentArtwork === "flow") handleFlowRandomize();
+            if (currentArtwork === "grid") handleGridRandomize();
+            if (currentArtwork === "mosaic") handleMosaicRandomize();
+            if (currentArtwork === "rotated") handleRotatedGridRandomize();
+            if (currentArtwork === "tree") handleTreeRandomize();
+          }}
+          className="group p-2 rounded-full text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 transition-colors"
+          aria-label="Randomize"
+        >
+          <Shuffle className="w-4 h-4" />
+        </button>
+
+        {/* Export Button */}
+        <button
+          onClick={handleExportImage}
+          className="group p-2 rounded-full text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 transition-colors"
+          aria-label="Export"
+        >
+          <Download className="w-4 h-4" />
+        </button>
+      </div>
 
       {/* Controls Toggle Button */}
       <button
