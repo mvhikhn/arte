@@ -867,7 +867,7 @@ export default function StudioPage() {
       </button>
 
       {/* Action Icons - Regenerate, Randomize, Export */}
-      <div className="fixed top-6 right-20 flex items-center gap-2 z-50">
+      <div className="fixed top-6 right-32 flex items-center gap-2 z-50">
         {/* Regenerate Button - only for artworks that have regenerate */}
         {(currentArtwork === "mosaic" || currentArtwork === "rotated" || currentArtwork === "tree") && (
           <button

@@ -109,11 +109,13 @@ export default function LastFmWidget() {
         <div className="flex items-center gap-3 w-full">
             <div className="relative w-10 h-10 flex-shrink-0">
                 {track.image ? (
-                    <div className={`w-full h-full rounded-full overflow-hidden border border-zinc-900/10 animate-spin-slow`}>
+                    <div className="w-full h-full rounded-full overflow-hidden animate-spin-slow">
                         <img
                             src={track.image}
                             alt={`${track.album} cover`}
                             className="w-full h-full object-cover"
+                            draggable={false}
+                            onContextMenu={(e) => e.preventDefault()}
                         />
                         {/* Center hole for vinyl record look */}
                         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-2 h-2 bg-zinc-900 rounded-full border border-white/50"></div>
