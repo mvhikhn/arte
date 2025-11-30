@@ -331,6 +331,7 @@ export default function StudioPage() {
   const [showEmailVerification, setShowEmailVerification] = useState(false);
   const [pendingGifExport, setPendingGifExport] = useState<{ duration: number; fps: number } | null>(null);
   const [isPending, startTransition] = useTransition();
+  const isPreview = searchParams.get('preview') === 'true';
 
   const [flowParams, setFlowParams] = useState<ArtworkParams>(() => generateRandomFlowParams());
 
@@ -841,160 +842,166 @@ export default function StudioPage() {
         </div>
       </main>
 
-      {/* Home Button - Top Left */}
-      {/* Home Button - Minimal */}
-      <Link
-        href="/"
-        className="group fixed top-6 left-6 flex items-center gap-2 text-zinc-400 hover:text-zinc-900 transition-colors z-50"
-        aria-label="Return to home"
-      >
-        <div className="p-2 rounded-full group-hover:bg-zinc-100 transition-colors">
-          <ArrowLeft className="w-4 h-4" />
-        </div>
-        <span className="text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity -ml-2 group-hover:ml-0">Home</span>
-      </Link>
-
-      {/* Next Artwork Button - Minimal */}
-      <button
-        onClick={handleNextArtwork}
-        className="group fixed bottom-6 right-6 flex items-center gap-2 text-zinc-400 hover:text-zinc-900 transition-colors z-50"
-        aria-label="Next artwork"
-      >
-        <span className="text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity -mr-2 group-hover:mr-0">Next</span>
-        <div className="p-2 rounded-full group-hover:bg-zinc-100 transition-colors">
-          <ArrowRight className="w-4 h-4" />
-        </div>
-      </button>
-
-      {/* Action Icons - Regenerate, Randomize, Export */}
-      <div className="fixed top-6 right-32 flex items-center gap-2 z-50">
-        {/* Regenerate Button - only for artworks that have regenerate */}
-        {(currentArtwork === "mosaic" || currentArtwork === "rotated" || currentArtwork === "tree") && (
-          <button
-            onClick={() => {
-              if (currentArtwork === "mosaic") handleMosaicRegenerate();
-              if (currentArtwork === "rotated") handleRotatedGridRegenerate();
-              if (currentArtwork === "tree") handleTreeRegenerate();
-            }}
-            className="group p-2 rounded-full text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 transition-colors"
-            aria-label="Regenerate"
+      {/* Only show controls/buttons when NOT in preview mode */}
+      {!isPreview && (
+        <>
+          {/* Home Button - Top Left */}
+          {/* Home Button - Minimal */}
+          <Link
+            href="/"
+            className="group fixed top-6 left-6 flex items-center gap-2 text-zinc-400 hover:text-zinc-900 transition-colors z-50"
+            aria-label="Return to home"
           >
-            <RefreshCw className="w-4 h-4" />
+            <div className="p-2 rounded-full group-hover:bg-zinc-100 transition-colors">
+              <ArrowLeft className="w-4 h-4" />
+            </div>
+            <span className="text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity -ml-2 group-hover:ml-0">Home</span>
+          </Link>
+
+          {/* Next Artwork Button - Minimal */}
+          <button
+            onClick={handleNextArtwork}
+            className="group fixed bottom-6 right-6 flex items-center gap-2 text-zinc-400 hover:text-zinc-900 transition-colors z-50"
+            aria-label="Next artwork"
+          >
+            <span className="text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity -mr-2 group-hover:mr-0">Next</span>
+            <div className="p-2 rounded-full group-hover:bg-zinc-100 transition-colors">
+              <ArrowRight className="w-4 h-4" />
+            </div>
           </button>
-        )}
 
-        {/* Randomize Button */}
-        <button
-          onClick={() => {
-            if (currentArtwork === "flow") handleFlowRandomize();
-            if (currentArtwork === "grid") handleGridRandomize();
-            if (currentArtwork === "mosaic") handleMosaicRandomize();
-            if (currentArtwork === "rotated") handleRotatedGridRandomize();
-            if (currentArtwork === "tree") handleTreeRandomize();
-          }}
-          className="group p-2 rounded-full text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 transition-colors"
-          aria-label="Randomize"
-        >
-          <Shuffle className="w-4 h-4" />
-        </button>
+          {/* Action Icons - Regenerate, Randomize, Export */}
+          <div className="fixed top-6 right-32 flex items-center gap-2 z-50">
+            {/* Regenerate Button - only for artworks that have regenerate */}
+            {(currentArtwork === "mosaic" || currentArtwork === "rotated" || currentArtwork === "tree") && (
+              <button
+                onClick={() => {
+                  if (currentArtwork === "mosaic") handleMosaicRegenerate();
+                  if (currentArtwork === "rotated") handleRotatedGridRegenerate();
+                  if (currentArtwork === "tree") handleTreeRegenerate();
+                }}
+                className="group p-2 rounded-full text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 transition-colors"
+                aria-label="Regenerate"
+              >
+                <RefreshCw className="w-4 h-4" />
+              </button>
+            )}
 
-        {/* Export Button */}
-        <button
-          onClick={handleExportImage}
-          className="group p-2 rounded-full text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 transition-colors"
-          aria-label="Export"
-        >
-          <Download className="w-4 h-4" />
-        </button>
-      </div>
+            {/* Randomize Button */}
+            <button
+              onClick={() => {
+                if (currentArtwork === "flow") handleFlowRandomize();
+                if (currentArtwork === "grid") handleGridRandomize();
+                if (currentArtwork === "mosaic") handleMosaicRandomize();
+                if (currentArtwork === "rotated") handleRotatedGridRandomize();
+                if (currentArtwork === "tree") handleTreeRandomize();
+              }}
+              className="group p-2 rounded-full text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 transition-colors"
+              aria-label="Randomize"
+            >
+              <Shuffle className="w-4 h-4" />
+            </button>
 
-      {/* Controls Toggle Button */}
-      <button
-        onClick={() => setControlsVisible(!controlsVisible)}
-        className="group fixed top-6 right-6 flex items-center gap-2 text-zinc-400 hover:text-zinc-900 transition-colors z-50"
-        aria-label="Toggle controls"
-      >
-        <span className="text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity -mr-2 group-hover:mr-0">Controls</span>
-        <div className="p-2 rounded-full group-hover:bg-zinc-100 transition-colors">
-          <SlidersHorizontal className="w-4 h-4" />
-        </div>
-      </button>
-
-      {/* Controls Dropdown Panel */}
-      {controlsVisible && (
-        <div
-          className="fixed top-16 right-6 w-[300px] max-h-[calc(100vh-8rem)] overflow-y-auto bg-white/90 backdrop-blur-md border border-zinc-200 shadow-2xl rounded-2xl z-40 no-scrollbar"
-        >
-          <div className="overflow-y-auto no-scrollbar" style={{ maxHeight: 'calc(100vh - 73px)' }}>
-            {currentArtwork === "flow" && (
-              <Controls
-                params={flowParams}
-                onParamChange={handleFlowParamChange}
-                onColorChange={handleFlowColorChange}
-                onExportImage={handleExportImage}
-                onExportGif={handleExportGif}
-                onExportWallpapers={handleExportWallpapers}
-                onToggleAnimation={handleToggleAnimation}
-                onRandomize={handleFlowRandomize}
-              />
-            )}
-            {currentArtwork === "grid" && (
-              <GridControls
-                params={gridParams}
-                onParamChange={handleGridParamChange}
-                onColorChange={handleGridColorChange}
-                onExportImage={handleExportImage}
-                onExportGif={handleExportGif}
-                onExportWallpapers={handleExportWallpapers}
-                onToggleAnimation={handleToggleAnimation}
-                onRandomize={handleGridRandomize}
-              />
-            )}
-            {currentArtwork === "mosaic" && (
-              <MosaicControls
-                params={mosaicParams}
-                onParamChange={handleMosaicParamChange}
-                onColorChange={handleMosaicColorChange}
-                onExportImage={handleExportImage}
-                onExportWallpapers={handleExportWallpapers}
-                onRandomize={handleMosaicRandomize}
-                onRegenerate={handleMosaicRegenerate}
-              />
-            )}
-            {currentArtwork === "rotated" && (
-              <RotatedGridControls
-                params={rotatedGridParams}
-                onParamChange={handleRotatedGridParamChange}
-                onColorChange={handleRotatedGridColorChange}
-                onExportImage={handleExportImage}
-                onExportWallpapers={handleExportWallpapers}
-                onRandomize={handleRotatedGridRandomize}
-                onRegenerate={handleRotatedGridRegenerate}
-              />
-            )}
-            {currentArtwork === "tree" && (
-              <TreeControls
-                params={treeParams}
-                onParamChange={handleTreeParamChange}
-                onColorChange={handleTreeColorChange}
-                onExportImage={handleExportImage}
-                onExportGif={handleExportGif}
-                onExportWallpapers={handleExportWallpapers}
-                onToggleAnimation={handleToggleAnimation}
-                onRandomize={handleTreeRandomize}
-                onRegenerate={handleTreeRegenerate}
-              />
-            )}
-            {currentArtwork === "textdesign" && (
-              <TextDesignControls
-                params={textDesignParams}
-                onParamChange={handleTextDesignParamChange}
-                onExportImage={handleExportImage}
-                onExportWallpapers={handleExportWallpapers}
-              />
-            )}
+            {/* Export Button */}
+            <button
+              onClick={handleExportImage}
+              className="group p-2 rounded-full text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 transition-colors"
+              aria-label="Export"
+            >
+              <Download className="w-4 h-4" />
+            </button>
           </div>
-        </div>
+
+          {/* Controls Toggle Button */}
+          <button
+            onClick={() => setControlsVisible(!controlsVisible)}
+            className="group fixed top-6 right-6 flex items-center gap-2 text-zinc-400 hover:text-zinc-900 transition-colors z-50"
+            aria-label="Toggle controls"
+          >
+            <span className="text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity -mr-2 group-hover:mr-0">Controls</span>
+            <div className="p-2 rounded-full group-hover:bg-zinc-100 transition-colors">
+              <SlidersHorizontal className="w-4 h-4" />
+            </div>
+          </button>
+
+          {/* Controls Dropdown Panel */}
+          {controlsVisible && (
+            <div
+              className="fixed top-16 right-6 w-[300px] max-h-[calc(100vh-8rem)] overflow-y-auto bg-white/90 backdrop-blur-md border border-zinc-200 shadow-2xl rounded-2xl z-40 no-scrollbar"
+            >
+              <div className="overflow-y-auto no-scrollbar" style={{ maxHeight: 'calc(100vh - 73px)' }}>
+                {currentArtwork === "flow" && (
+                  <Controls
+                    params={flowParams}
+                    onParamChange={handleFlowParamChange}
+                    onColorChange={handleFlowColorChange}
+                    onExportImage={handleExportImage}
+                    onExportGif={handleExportGif}
+                    onExportWallpapers={handleExportWallpapers}
+                    onToggleAnimation={handleToggleAnimation}
+                    onRandomize={handleFlowRandomize}
+                  />
+                )}
+                {currentArtwork === "grid" && (
+                  <GridControls
+                    params={gridParams}
+                    onParamChange={handleGridParamChange}
+                    onColorChange={handleGridColorChange}
+                    onExportImage={handleExportImage}
+                    onExportGif={handleExportGif}
+                    onExportWallpapers={handleExportWallpapers}
+                    onToggleAnimation={handleToggleAnimation}
+                    onRandomize={handleGridRandomize}
+                  />
+                )}
+                {currentArtwork === "mosaic" && (
+                  <MosaicControls
+                    params={mosaicParams}
+                    onParamChange={handleMosaicParamChange}
+                    onColorChange={handleMosaicColorChange}
+                    onExportImage={handleExportImage}
+                    onExportWallpapers={handleExportWallpapers}
+                    onRandomize={handleMosaicRandomize}
+                    onRegenerate={handleMosaicRegenerate}
+                  />
+                )}
+                {currentArtwork === "rotated" && (
+                  <RotatedGridControls
+                    params={rotatedGridParams}
+                    onParamChange={handleRotatedGridParamChange}
+                    onColorChange={handleRotatedGridColorChange}
+                    onExportImage={handleExportImage}
+                    onExportWallpapers={handleExportWallpapers}
+                    onRandomize={handleRotatedGridRandomize}
+                    onRegenerate={handleRotatedGridRegenerate}
+                  />
+                )}
+                {currentArtwork === "tree" && (
+                  <TreeControls
+                    params={treeParams}
+                    onParamChange={handleTreeParamChange}
+                    onColorChange={handleTreeColorChange}
+                    onExportImage={handleExportImage}
+                    onExportGif={handleExportGif}
+                    onExportWallpapers={handleExportWallpapers}
+                    onToggleAnimation={handleToggleAnimation}
+                    onRandomize={handleTreeRandomize}
+                    onRegenerate={handleTreeRegenerate}
+                  />
+                )}
+                {currentArtwork === "textdesign" && (
+                  <TextDesignControls
+                    params={textDesignParams}
+                    onParamChange={handleTextDesignParamChange}
+                    onExportImage={handleExportImage}
+                    onExportWallpapers={handleExportWallpapers}
+                  />
+                )}
+              </div>
+            </div>
+          )}
+          {/* End of preview mode conditional */}
+        </>
       )}
     </div>
   );

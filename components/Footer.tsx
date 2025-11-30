@@ -86,9 +86,7 @@ export default function Footer() {
                 </div>
 
                 {/* Top Right: Last.fm Widget */}
-                <div className="bg-white/50 backdrop-blur-sm p-3 rounded-2xl border border-white/60 shadow-sm max-w-[180px]">
-                    <LastFmWidget />
-                </div>
+                <LastFmWidget />
             </div>
 
             {/* Bottom Section */}
