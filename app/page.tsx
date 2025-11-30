@@ -2,8 +2,10 @@
 
 import Link from "next/link";
 import { ArrowUpRight, ChevronDown, ChevronUp } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Footer from "@/components/Footer";
+import ArtworkPreviewCursor from "@/components/ArtworkPreviewCursor";
+import gsap from "gsap";
 
 export default function Home() {
     const artworks = [
@@ -24,6 +26,17 @@ export default function Home() {
     const [artworkColors, setArtworkColors] = useState<string[]>([]);
     const [isGalleryOpen, setIsGalleryOpen] = useState(false);
 
+    // Cursor preview state
+    const [hoveredArtwork, setHoveredArtwork] = useState<string | null>(null);
+    const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+
+    // Mobile preview state
+    const [touchedArtwork, setTouchedArtwork] = useState<string | null>(null);
+    const [touchPosition, setTouchPosition] = useState({ x: 0, y: 0 });
+
+    // Refs for text scramble
+    const bioRefs = useRef<(HTMLParagraphElement | null)[]>([]);
+
     useEffect(() => {
         const pastelColors = artworks.map(() => {
             const hue = Math.floor(Math.random() * 360);
@@ -34,8 +47,97 @@ export default function Home() {
         setArtworkColors(pastelColors);
     }, []);
 
+    // GSAP text scramble effect
+    useEffect(() => {
+        const scrambleText = (element: HTMLElement) => {
+            const originalText = element.textContent || "";
+            const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*";
+
+            let iteration = 0;
+            const interval = setInterval(() => {
+                element.textContent = originalText
+                    .split("")
+                    .map((char, index) => {
+                        if (char === " " || char === "\n") return char;
+                        if (index < iteration) return originalText[index];
+                        return chars[Math.floor(Math.random() * chars.length)];
+                    })
+                    .join("");
+
+                if (iteration >= originalText.length) {
+                    clearInterval(interval);
+                    element.textContent = originalText;
+                }
+                iteration += 1 / 3;
+            }, 30);
+        };
+
+        // Stagger animation across bio paragraphs
+        bioRefs.current.forEach((ref, index) => {
+            if (ref) {
+                setTimeout(() => {
+                    scrambleText(ref);
+                }, index * 200);
+            }
+        });
+    }, []);
+
+    // Track mouse position
+    useEffect(() => {
+        const handleMouseMove = (e: MouseEvent) => {
+            setMousePosition({ x: e.clientX, y: e.clientY });
+        };
+
+        window.addEventListener("mousemove", handleMouseMove);
+        return () => window.removeEventListener("mousemove", handleMouseMove);
+    }, []);
+
+    // Handle mobile touch
+    const handleTouchStart = (e: React.TouchEvent, artworkId: string) => {
+        const touch = e.touches[0];
+        setTouchedArtwork(artworkId);
+        setTouchPosition({ x: touch.clientX, y: touch.clientY });
+    };
+
+    const handleTouchEnd = () => {
+        setTouchedArtwork(null);
+    };
+
     return (
         <main className="h-screen w-full flex flex-col md:flex-row bg-white text-zinc-900 font-sans selection:bg-zinc-100 overflow-hidden">
+            {/* Custom cursor preview for desktop */}
+            <ArtworkPreviewCursor
+                artworkId={hoveredArtwork}
+                mouseX={mousePosition.x}
+                mouseY={mousePosition.y}
+            />
+
+            {/* Mobile touch preview */}
+            {touchedArtwork && (
+                <div
+                    className="md:hidden fixed z-50 pointer-events-none"
+                    style={{
+                        left: touchPosition.x - 80,
+                        top: touchPosition.y - 120,
+                        width: "160px",
+                        height: "200px",
+                    }}
+                >
+                    <div className="w-full h-full bg-white border border-zinc-300 shadow-2xl overflow-hidden">
+                        <iframe
+                            src={`/studio?artwork=${touchedArtwork}&preview=true`}
+                            className="w-full h-full border-none"
+                            style={{
+                                transform: "scale(0.8)",
+                                transformOrigin: "top left",
+                                width: "125%",
+                                height: "125%",
+                            }}
+                        />
+                    </div>
+                </div>
+            )}
+
             {/* Left Section - Bio, Blog, Footer - Scrollable */}
             <div className="w-full md:w-1/2 h-full overflow-y-auto no-scrollbar border-b md:border-b-0 md:border-r border-zinc-200 flex flex-col">
                 <div className="p-6 md:p-12 flex-grow">
@@ -46,15 +148,15 @@ export default function Home() {
                             <p className="text-zinc-500 text-sm">est. 2004</p>
                         </div>
 
-                        {/* Bio Content */}
+                        {/* Bio Content with GSAP scramble */}
                         <div className="max-w-md space-y-6 text-sm leading-relaxed text-zinc-600">
-                            <p>
+                            <p ref={(el) => { bioRefs.current[0] = el; }}>
                                 Because of having an esoteric level of curiosity about a wide range of subjects, I have struggled for a long time to decide where to put my effort. I wanted something that would give me a peaceful mind and a fulfilled life. Visual media captured a different and surprisingly tenacious part of me. I have been an avid consumer all my life, but I found this field difficult to enter because of financial, social, and networking limitations. That changed when I discovered algorithmic art.
                             </p>
-                            <p>
+                            <p ref={(el) => { bioRefs.current[1] = el; }}>
                                 This levelling of the field for every creative person, and the way it removes so many barriers to entry, became the main reason I fell in love with it. Anyone can put together some algorithmic wizardry, and anyone can make art that stands beside work from a fancy Manhattan studio. I still intend to broaden my footprint across the full visual media spectrum over time, as I slowly reach mastery in each distinct area.
                             </p>
-                            <p>
+                            <p ref={(el) => { bioRefs.current[2] = el; }}>
                                 This website chronicles the passion projects I take on throughout my twenties. I occasionally add blog posts to write about my process, reflect on things, and share my views on life or the state of the world.
                             </p>
                         </div>
@@ -102,6 +204,8 @@ export default function Home() {
                                         href={`/studio?artwork=${artwork.id}`}
                                         className="group block aspect-square border border-zinc-100 hover:border-zinc-300 transition-all duration-300 p-6 flex flex-col justify-between"
                                         style={{ backgroundColor: artworkColors[index] || '#f5f5f5' }}
+                                        onTouchStart={(e) => handleTouchStart(e, artwork.id)}
+                                        onTouchEnd={handleTouchEnd}
                                     >
                                         <div className="flex justify-between items-start">
                                             <span className="text-xs font-medium text-zinc-400 group-hover:text-zinc-900 transition-colors">0{index + 1}</span>
@@ -130,8 +234,10 @@ export default function Home() {
                         <Link
                             key={artwork.id}
                             href={`/studio?artwork=${artwork.id}`}
-                            className="group block aspect-square border border-zinc-100 hover:border-zinc-300 transition-all duration-300 p-6 flex flex-col justify-between"
+                            className="group block aspect-square border border-zinc-100 hover:border-zinc-300 transition-all duration-300 p-6 flex flex-col justify-between cursor-none"
                             style={{ backgroundColor: artworkColors[index] || '#f5f5f5' }}
+                            onMouseEnter={() => setHoveredArtwork(artwork.id)}
+                            onMouseLeave={() => setHoveredArtwork(null)}
                         >
                             <div className="flex justify-between items-start">
                                 <span className="text-xs font-medium text-zinc-400 group-hover:text-zinc-900 transition-colors">0{index + 1}</span>
@@ -149,3 +255,4 @@ export default function Home() {
         </main>
     );
 }
+
