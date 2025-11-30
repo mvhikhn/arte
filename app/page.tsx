@@ -187,10 +187,13 @@ export default function Home() {
             )}
 
             {/* Left Section - Bio, Blog, Footer - Scrollable */}
+            {/* Left Section - Bio, Blog, Footer - Scrollable */}
             <div
                 className="w-full md:w-[var(--left-panel-width)] h-full overflow-y-auto no-scrollbar border-b md:border-b-0 border-zinc-200 flex flex-col flex-shrink-0 relative"
             >
-                <div className="w-full h-full flex flex-col relative z-10 pointer-events-none">
+                {/* Content Wrapper - Z-10, sits ABOVE whiteboard */}
+                <div className="min-h-full flex flex-col relative z-10 pointer-events-none">
+                    {/* Main Content - Auto pointer events to block drawing and allow interaction */}
                     <div className="p-6 md:p-12 flex-grow pointer-events-auto">
                         <div className="space-y-12">
                             {/* Header */}
@@ -275,12 +278,14 @@ export default function Home() {
                         </div>
                     </div>
 
-                    {/* Footer at the bottom of left section */}
-                    <Footer />
-
-                    {/* Whiteboard Layer - Behind text but interactive in empty spaces */}
-                    <Whiteboard width={leftPanelWidth} />
+                    {/* Footer at the bottom of left section - Auto pointer events */}
+                    <div className="pointer-events-auto mt-auto">
+                        <Footer />
+                    </div>
                 </div>
+
+                {/* Whiteboard Layer - Behind text but interactive in empty spaces */}
+                <Whiteboard width={leftPanelWidth} />
             </div>
 
             {/* Drag Handle - Desktop Only */}
