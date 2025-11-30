@@ -148,6 +148,9 @@ export default function Home() {
         <main
             ref={containerRef}
             className="h-screen w-full flex flex-col md:flex-row bg-white text-zinc-900 font-sans selection:bg-zinc-100 overflow-hidden select-none"
+            style={{
+                '--left-panel-width': `${leftPanelWidth}%`
+            } as React.CSSProperties}
         >
             {/* Custom cursor preview for desktop */}
             <ArtworkPreviewCursor
@@ -184,18 +187,9 @@ export default function Home() {
 
             {/* Left Section - Bio, Blog, Footer - Scrollable */}
             <div
-                className="w-full md:h-full overflow-y-auto no-scrollbar border-b md:border-b-0 border-zinc-200 flex flex-col"
-                style={{ width: `100%`, flexBasis: `md:${leftPanelWidth}%` }}
+                className="w-full md:w-[var(--left-panel-width)] h-full overflow-y-auto no-scrollbar border-b md:border-b-0 border-zinc-200 flex flex-col flex-shrink-0"
             >
-                {/* Mobile-only width override via class, desktop via style */}
-                <style jsx>{`
-                    @media (min-width: 768px) {
-                        .left-panel { width: ${leftPanelWidth}% !important; }
-                        .right-panel { width: ${100 - leftPanelWidth}% !important; }
-                    }
-                `}</style>
-
-                <div className="left-panel w-full h-full flex flex-col">
+                <div className="w-full h-full flex flex-col">
                     <div className="p-6 md:p-12 flex-grow">
                         <div className="space-y-12">
                             {/* Header */}
@@ -295,7 +289,7 @@ export default function Home() {
             </div>
 
             {/* Right Section - Gallery - Desktop Only */}
-            <div className="right-panel hidden md:block h-full overflow-y-auto no-scrollbar p-12 custom-scrollbar">
+            <div className="hidden md:block flex-1 h-full overflow-y-auto no-scrollbar p-12 custom-scrollbar">
                 <div className="grid grid-cols-2 gap-4 pb-12">
                     {artworks.map((artwork, index) => (
                         <Link
