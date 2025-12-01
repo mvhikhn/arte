@@ -1,10 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowUpRight, ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronDown, ChevronUp } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import Footer from "@/components/Footer";
-import ArtworkPreviewCursor from "@/components/ArtworkPreviewCursor";
+import ArtworkCard from "@/components/ArtworkCard";
 import gsap from "gsap";
 
 export default function Home() {
@@ -26,17 +26,8 @@ export default function Home() {
     const [artworkColors, setArtworkColors] = useState<string[]>([]);
     const [isGalleryOpen, setIsGalleryOpen] = useState(false);
 
-    // Cursor preview state
-    const [hoveredArtwork, setHoveredArtwork] = useState<string | null>(null);
-    const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-
-    // Mobile preview state
-    const [touchedArtwork, setTouchedArtwork] = useState<string | null>(null);
-    const [touchPosition, setTouchPosition] = useState({ x: 0, y: 0 });
-
     // Ref for name text scramble
     const nameRef = useRef<HTMLHeadingElement | null>(null);
-    const touchTimerRef = useRef<NodeJS.Timeout | null>(null);
 
     useEffect(() => {
         const pastelColors = artworks.map(() => {
@@ -78,43 +69,19 @@ export default function Home() {
         scrambleText(nameRef.current);
     }, []);
 
-    // Track mouse position
-    useEffect(() => {
-        const handleMouseMove = (e: MouseEvent) => {
-            setMousePosition({ x: e.clientX, y: e.clientY });
-        };
-
-        window.addEventListener("mousemove", handleMouseMove);
-        return () => window.removeEventListener("mousemove", handleMouseMove);
-    }, []);
-
-    // Handle mobile touch with 3-second hold
-    const handleTouchStart = (e: React.TouchEvent, artworkId: string) => {
-        const touch = e.touches[0];
-        setTouchPosition({ x: touch.clientX, y: touch.clientY });
-
-        // Set a 800ms timer before showing preview
-        touchTimerRef.current = setTimeout(() => {
-            setTouchedArtwork(artworkId);
-        }, 800);
-    };
-
-    const handleTouchEnd = () => {
-        if (touchTimerRef.current) {
-            clearTimeout(touchTimerRef.current);
-            touchTimerRef.current = null;
-        }
-        setTouchedArtwork(null);
-    };
-
     // Resizable partition state
     const [leftPanelWidth, setLeftPanelWidth] = useState(50);
     const [isDragging, setIsDragging] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
+    const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
 
     // Handle resizing
     useEffect(() => {
         const handleMouseMove = (e: MouseEvent) => {
+            if (isDragging) {
+                setMousePosition({ x: e.clientX, y: e.clientY });
+            }
+
             if (!isDragging || !containerRef.current) return;
 
             const containerRect = containerRef.current.getBoundingClientRect();
@@ -155,39 +122,6 @@ export default function Home() {
                 '--left-panel-width': `${leftPanelWidth}%`
             } as React.CSSProperties}
         >
-            {/* Custom cursor preview for desktop */}
-            <ArtworkPreviewCursor
-                artworkId={hoveredArtwork}
-                mouseX={mousePosition.x}
-                mouseY={mousePosition.y}
-            />
-
-            {/* Mobile touch preview */}
-            {touchedArtwork && (
-                <div
-                    className="md:hidden fixed z-50 pointer-events-none"
-                    style={{
-                        left: touchPosition.x - 80,
-                        top: touchPosition.y - 120,
-                        width: "160px",
-                        height: "200px",
-                    }}
-                >
-                    <div className="w-full h-full bg-white border border-zinc-300 shadow-2xl overflow-hidden">
-                        <iframe
-                            src={`/studio?artwork=${touchedArtwork}&preview=true`}
-                            className="w-full h-full border-none"
-                            style={{
-                                transform: "scale(0.8)",
-                                transformOrigin: "top left",
-                                width: "125%",
-                                height: "125%",
-                            }}
-                        />
-                    </div>
-                </div>
-            )}
-
             {/* Left Section - Bio, Blog, Footer - Scrollable */}
             <div
                 className="w-full md:w-[var(--left-panel-width)] h-full overflow-y-auto no-scrollbar border-b md:border-b-0 border-zinc-200 flex flex-col flex-shrink-0 relative"
@@ -254,25 +188,14 @@ export default function Home() {
                             <div className={`md:hidden pt-6 ${isGalleryOpen ? 'block' : 'hidden'}`}>
                                 <div className="grid grid-cols-1 gap-4">
                                     {artworks.map((artwork, index) => (
-                                        <Link
+                                        <ArtworkCard
                                             key={artwork.id}
-                                            href={`/studio?artwork=${artwork.id}`}
-                                            className="group block aspect-square border border-zinc-100 hover:border-zinc-300 transition-all duration-300 p-6 flex flex-col justify-between"
-                                            style={{ backgroundColor: artworkColors[index] || '#f5f5f5' }}
-                                            onTouchStart={(e) => handleTouchStart(e, artwork.id)}
-                                            onTouchEnd={handleTouchEnd}
-                                            onContextMenu={(e) => e.preventDefault()}
-                                        >
-                                            <div className="flex justify-between items-start">
-                                                <span className="text-xs font-medium text-zinc-400 group-hover:text-zinc-900 transition-colors">0{index + 1}</span>
-                                                <ArrowUpRight className="w-4 h-4 text-zinc-300 group-hover:text-zinc-900 transition-colors opacity-0 group-hover:opacity-100" />
-                                            </div>
-
-                                            <div>
-                                                <h3 className="font-medium text-lg mb-1 group-hover:translate-x-1 transition-transform duration-300">{artwork.title}</h3>
-                                                <p className="text-xs text-zinc-400 group-hover:text-zinc-600 transition-colors">{artwork.description}</p>
-                                            </div>
-                                        </Link>
+                                            id={artwork.id}
+                                            title={artwork.title}
+                                            description={artwork.description}
+                                            index={index}
+                                            color={artworkColors[index] || '#f5f5f5'}
+                                        />
                                     ))}
                                 </div>
                             </div>
@@ -316,27 +239,17 @@ export default function Home() {
             </div>
 
             {/* Right Section - Gallery - Desktop Only */}
-            <div className={`hidden md:block flex-1 h-full overflow-y-auto no-scrollbar p-12 custom-scrollbar ${hoveredArtwork ? 'overflow-hidden' : ''}`}>
+            <div className="hidden md:block flex-1 h-full overflow-y-auto no-scrollbar p-12 custom-scrollbar">
                 <div className={`grid gap-4 pb-12 ${leftPanelWidth > 60 ? 'grid-cols-1' : 'grid-cols-2'}`}>
                     {artworks.map((artwork, index) => (
-                        <Link
+                        <ArtworkCard
                             key={artwork.id}
-                            href={`/studio?artwork=${artwork.id}`}
-                            className="group block aspect-square border border-zinc-100 hover:border-zinc-300 transition-all duration-300 p-6 flex flex-col justify-between cursor-none"
-                            style={{ backgroundColor: artworkColors[index] || '#f5f5f5' }}
-                            onMouseEnter={() => setHoveredArtwork(artwork.id)}
-                            onMouseLeave={() => setHoveredArtwork(null)}
-                        >
-                            <div className="flex justify-between items-start">
-                                <span className="text-xs font-medium text-zinc-400 group-hover:text-zinc-900 transition-colors">0{index + 1}</span>
-                                <ArrowUpRight className="w-4 h-4 text-zinc-300 group-hover:text-zinc-900 transition-colors opacity-0 group-hover:opacity-100" />
-                            </div>
-
-                            <div>
-                                <h3 className="font-medium text-lg mb-1 group-hover:translate-x-1 transition-transform duration-300">{artwork.title}</h3>
-                                <p className="text-xs text-zinc-400 group-hover:text-zinc-600 transition-colors">{artwork.description}</p>
-                            </div>
-                        </Link>
+                            id={artwork.id}
+                            title={artwork.title}
+                            description={artwork.description}
+                            index={index}
+                            color={artworkColors[index] || '#f5f5f5'}
+                        />
                     ))}
                 </div>
             </div>
