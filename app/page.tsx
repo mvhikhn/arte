@@ -1,6 +1,6 @@
 "use client";
 
-import CleanLink from "@/components/CleanLink";
+import Link from "next/link";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import Footer from "@/components/Footer";
@@ -20,7 +20,6 @@ export default function Home() {
     const blogPosts = [
         { slug: "hello-world", title: "Hello World", date: "Nov 29, 2025" },
         { slug: "algorithmic-beauty", title: "The Beauty of Algorithms", date: "Dec 05, 2025" },
-        { slug: "mosaic-technical-deep-dive", title: "Mosaic: A Technical Deep Dive", date: "Dec 12, 2025" },
     ];
 
     // Generate random pastel colors for each artwork
@@ -86,26 +85,20 @@ export default function Home() {
 
     // Handle resizing
     useEffect(() => {
-        let rafId: number | null = null;
-
         const handleMouseMove = (e: MouseEvent) => {
-            if (!isDragging) return;
-
-            setMousePosition({ x: e.clientX, y: e.clientY });
-
-            // Cancel previous frame if it hasn't run yet
-            if (rafId) {
-                cancelAnimationFrame(rafId);
+            if (isDragging) {
+                setMousePosition({ x: e.clientX, y: e.clientY });
             }
 
-            // Throttle with requestAnimationFrame
-            rafId = requestAnimationFrame(() => {
-                const newWidth = (e.clientX / window.innerWidth) * 100;
-                if (newWidth >= 20 && newWidth <= 80) {
-                    setLeftPanelWidth(newWidth);
-                }
-                rafId = null;
-            });
+            if (!isDragging || !containerRef.current) return;
+
+            const containerRect = containerRef.current.getBoundingClientRect();
+            const newWidth = ((e.clientX - containerRect.left) / containerRect.width) * 100;
+
+            // Limit width between 20% and 80%
+            if (newWidth >= 20 && newWidth <= 80) {
+                setLeftPanelWidth(newWidth);
+            }
         };
 
         const handleMouseUp = () => {
@@ -126,9 +119,6 @@ export default function Home() {
         }
 
         return () => {
-            if (rafId) {
-                cancelAnimationFrame(rafId);
-            }
             window.removeEventListener('mousemove', handleMouseMove);
             window.removeEventListener('mouseup', handleMouseUp);
             document.body.style.cursor = 'default';
@@ -177,7 +167,7 @@ export default function Home() {
                                 <h2 className="text-xs font-medium uppercase tracking-widest text-zinc-400">Journal</h2>
                                 <div className="space-y-4">
                                     {blogPosts.map((post) => (
-                                        <CleanLink
+                                        <Link
                                             key={post.slug}
                                             href={`/blog/${post.slug}`}
                                             className="group block"
@@ -190,7 +180,7 @@ export default function Home() {
                                                     {post.date}
                                                 </span>
                                             </div>
-                                        </CleanLink>
+                                        </Link>
                                     ))}
                                 </div>
                             </div>

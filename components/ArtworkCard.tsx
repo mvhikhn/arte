@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import CleanLink from "@/components/CleanLink";
+import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 
 interface ArtworkCardProps {
@@ -18,10 +18,10 @@ export default function ArtworkCard({ id, title, description, index, color }: Ar
     const [showPreview, setShowPreview] = useState(false);
     const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-    // Handle hover state with delay to prevent flickering
+    // Handle hover state with minimal delay for snappiness
     const handleMouseEnter = () => {
         setIsHovered(true);
-        // Reduced delay for snappy feel (50ms)
+        // Very small delay before showing preview for instant feel
         timeoutRef.current = setTimeout(() => {
             setShowPreview(true);
         }, 50);
@@ -36,18 +36,19 @@ export default function ArtworkCard({ id, title, description, index, color }: Ar
         }
     };
 
-    // Handle mobile touch
+    // Handle mobile touch - instant preview
     const handleTouchStart = () => {
         setShowPreview(true);
     };
 
+    // Handle mobile untap - instant close
     const handleTouchEnd = () => {
         setShowPreview(false);
         setIframeLoaded(false);
     };
 
     return (
-        <CleanLink
+        <Link
             href={`/studio?artwork=${id}`}
             className="group block relative aspect-[4/5] border border-zinc-100 hover:border-zinc-300 transition-all duration-300 overflow-hidden"
             style={{ backgroundColor: color }}
@@ -55,7 +56,6 @@ export default function ArtworkCard({ id, title, description, index, color }: Ar
             onMouseLeave={handleMouseLeave}
             onTouchStart={handleTouchStart}
             onTouchEnd={handleTouchEnd}
-            onTouchCancel={handleTouchEnd}
         >
             {/* Content Container - Fades out when preview loads */}
             <div
@@ -93,6 +93,6 @@ export default function ArtworkCard({ id, title, description, index, color }: Ar
                     />
                 </div>
             )}
-        </CleanLink>
+        </Link>
     );
 }

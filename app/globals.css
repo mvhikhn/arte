@@ -62,18 +62,6 @@
     cursor: none !important;
   }
 
-  /* Globally hide scrollbars */
-  * {
-    -ms-overflow-style: none;
-    /* IE and Edge */
-    scrollbar-width: none;
-    /* Firefox */
-  }
-
-  *::-webkit-scrollbar {
-    display: none;
-  }
-
   /* Ensure all text elements are 13px */
   span,
   p,
@@ -91,43 +79,17 @@
     font-size: 13px !important;
   }
 
-  /* Hide scrollbar for Chrome, Safari and Opera */
-  .no-scrollbar::-webkit-scrollbar {
-    display: none;
-  }
-
-  /* Hide scrollbar for IE, Edge and Firefox */
-  .no-scrollbar {
+  /* Hide all scrollbars globally while maintaining scroll functionality */
+  * {
     -ms-overflow-style: none;
     /* IE and Edge */
     scrollbar-width: none;
     /* Firefox */
   }
 
-  /* Custom boxy scrollbar */
-  .custom-scrollbar::-webkit-scrollbar {
-    width: 12px;
-    height: 12px;
-  }
-
-  .custom-scrollbar::-webkit-scrollbar-track {
-    background: #f5f5f5;
-    border-left: 1px solid #e5e5e5;
-  }
-
-  .custom-scrollbar::-webkit-scrollbar-thumb {
-    background: #a1a1a1;
-    border: 2px solid #f5f5f5;
-  }
-
-  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: #737373;
-  }
-
-  /* Firefox */
-  .custom-scrollbar {
-    scrollbar-width: thin;
-    scrollbar-color: #a1a1a1 #f5f5f5;
+  *::-webkit-scrollbar {
+    display: none;
+    /* Chrome, Safari, Opera */
   }
 }
 
