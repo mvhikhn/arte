@@ -45,6 +45,76 @@ This is a blog post written in *Typst*!
   *Hello from Typst!*
 ]
         `
+    },
+    "mosaic-technical-deep-dive": {
+        title: "Mosaic: A Technical Deep Dive",
+        date: "December 12, 2025",
+        type: 'typst',
+        content: `
+#set page(width: auto, height: auto, margin: 0pt)
+#set text(font: "Segoe UI", size: 13pt, fill: rgb("#18181b"))
+#set par(justify: true, leading: 0.65em)
+
+= Mosaic: A Technical Deep Dive
+
+The *Mosaic* artwork is a generative system exploring the balance between structure and randomness. Inspired by the De Stijl movement and Piet Mondrian's compositions, it uses recursive algorithms to create balanced, grid-based layouts.
+
+== Core Algorithm: Recursive Subdivision
+
+At its heart, Mosaic relies on a recursive function \`divideRectangle\`. Starting with a large rectangle (or the entire canvas), the algorithm decides whether to:
+
+1.  *Split* the rectangle into two smaller ones (vertically or horizontally).
+2.  *Stop* and draw the rectangle.
+
+This simple decision tree creates complex, non-uniform grids.
+
+== The Mathematics of Balance
+
+To prevent the composition from looking too chaotic or too uniform, we introduce biased randomness.
+
+The \`splitRatio\` determines where a cut happens. Instead of a perfect 0.5 (halfway) split, we use a range:
+
+$ "split" = w times "random"(0.4, 0.6) $
+
+This slight variation creates a more organic, "hand-drawn" feel.
+
+== Implementation
+
+Here is the core TypeScript logic using p5.js:
+
+\`\`\`typescript
+const divideRectangle = (x, y, w, h) => {
+  if (random() > recursionChance && min(w, h) > minSize) {
+    // Decide split direction based on aspect ratio
+    if (w >= h) {
+      let split = w * random(0.4, 0.6);
+      divideRectangle(x, y, split, h);
+      divideRectangle(x + split, y, w - split, h);
+    } else {
+      let split = h * random(0.4, 0.6);
+      divideRectangle(x, y, w, split);
+      divideRectangle(x, y + split, w, h - split);
+    }
+  } else {
+    drawRectangle(x, y, w, h);
+  }
+};
+\`\`\`
+
+== Aesthetics & Texture
+
+To ground the digital abstraction, we apply a noise grain layer. This mimics the texture of paper or canvas, softening the harsh digital edges.
+
+$ "noise"(x, y) = "perlin"(x times 0.01, y times 0.01) $
+
+The color palette is also crucial. We use a limited set of 4 colors, randomly assigned but weighted to ensure contrast.
+
+#v(1em)
+#rect(width: 100%, height: 1pt, fill: luma(220))
+#v(1em)
+
+*Mosaic* is a study in how simple rules, applied recursively, can generate infinite variation while maintaining a cohesive visual identity.
+        `
     }
 };
 

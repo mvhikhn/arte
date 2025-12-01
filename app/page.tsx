@@ -21,6 +21,7 @@ export default function Home() {
         { slug: "hello-world", title: "Hello World", date: "Nov 29, 2025" },
         { slug: "algorithmic-beauty", title: "The Beauty of Algorithms", date: "Dec 05, 2025" },
         { slug: "typst-demo", title: "Typst Demo", date: "Dec 10, 2025" },
+        { slug: "mosaic-technical-deep-dive", title: "Mosaic: A Technical Deep Dive", date: "Dec 12, 2025" },
     ];
 
     // Generate random pastel colors for each artwork
