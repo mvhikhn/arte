@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 import Footer from "@/components/Footer";
 import { useParams } from "next/navigation";
 
@@ -87,6 +87,35 @@ export default function BlogPost() {
                     className="prose prose-zinc prose-sm md:prose-base max-w-none font-light text-zinc-600 leading-relaxed"
                     dangerouslySetInnerHTML={{ __html: post.content }}
                 />
+
+                {/* Next Post Navigation */}
+                {(() => {
+                    const slugs = Object.keys(BLOG_POSTS);
+                    const currentIndex = slugs.indexOf(slug);
+                    const nextIndex = (currentIndex + 1) % slugs.length;
+                    const nextSlug = slugs[nextIndex];
+                    const nextPost = BLOG_POSTS[nextSlug];
+
+                    return (
+                        <div className="mt-20 pt-12 border-t border-zinc-100">
+                            <p className="text-xs font-medium uppercase tracking-widest text-zinc-400 mb-4">Read Next</p>
+                            <Link
+                                href={`/blog/${nextSlug}`}
+                                className="group inline-flex items-center gap-4"
+                            >
+                                <div className="space-y-1">
+                                    <h3 className="text-xl font-light text-zinc-900 group-hover:text-zinc-600 transition-colors">
+                                        {nextPost.title}
+                                    </h3>
+                                    <p className="text-sm text-zinc-400 font-mono">{nextPost.date}</p>
+                                </div>
+                                <div className="p-2 rounded-full bg-zinc-50 group-hover:bg-zinc-100 transition-colors">
+                                    <ArrowRight className="w-4 h-4 text-zinc-400 group-hover:text-zinc-900 transition-colors" />
+                                </div>
+                            </Link>
+                        </div>
+                    );
+                })()}
             </article>
 
             <Footer />

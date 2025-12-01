@@ -75,6 +75,14 @@ export default function Home() {
     const containerRef = useRef<HTMLDivElement>(null);
     const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
 
+    // Load saved width on mount
+    useEffect(() => {
+        const savedWidth = localStorage.getItem('arte_divider_width');
+        if (savedWidth) {
+            setLeftPanelWidth(parseFloat(savedWidth));
+        }
+    }, []);
+
     // Handle resizing
     useEffect(() => {
         const handleMouseMove = (e: MouseEvent) => {
@@ -94,9 +102,13 @@ export default function Home() {
         };
 
         const handleMouseUp = () => {
-            setIsDragging(false);
-            document.body.style.cursor = 'default';
-            document.body.classList.remove('cursor-none-override');
+            if (isDragging) {
+                setIsDragging(false);
+                document.body.style.cursor = 'default';
+                document.body.classList.remove('cursor-none-override');
+                // Save width to localStorage
+                localStorage.setItem('arte_divider_width', leftPanelWidth.toString());
+            }
         };
 
         if (isDragging) {
@@ -112,7 +124,7 @@ export default function Home() {
             document.body.style.cursor = 'default';
             document.body.classList.remove('cursor-none-override');
         };
-    }, [isDragging]);
+    }, [isDragging, leftPanelWidth]);
 
     return (
         <main
