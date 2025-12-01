@@ -27,6 +27,13 @@
 
 <body>
     <div id="app"></div>
+    <script type="importmap">
+        {
+            "imports": {
+                "@myriaddreamin/typst.ts/": "https://unpkg.com/@myriaddreamin/typst.ts@0.6.0-rc1/dist/esm/"
+            }
+        }
+    </script>
     <script type="module">
         // Import from CDN
         import { $typst } from 'https://unpkg.com/@myriaddreamin/typst.ts@0.6.0-rc1/dist/esm/contrib/snippet.mjs';
