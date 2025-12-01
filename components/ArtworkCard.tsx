@@ -41,6 +41,11 @@ export default function ArtworkCard({ id, title, description, index, color }: Ar
         setShowPreview(true);
     };
 
+    const handleTouchEnd = () => {
+        setShowPreview(false);
+        setIframeLoaded(false);
+    };
+
     return (
         <CleanLink
             href={`/studio?artwork=${id}`}
@@ -49,6 +54,8 @@ export default function ArtworkCard({ id, title, description, index, color }: Ar
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
             onTouchStart={handleTouchStart}
+            onTouchEnd={handleTouchEnd}
+            onTouchCancel={handleTouchEnd}
         >
             {/* Content Container - Fades out when preview loads */}
             <div

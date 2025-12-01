@@ -12,6 +12,7 @@ interface CleanLinkProps {
     onMouseLeave?: () => void;
     onTouchStart?: (e: React.TouchEvent) => void;
     onTouchEnd?: () => void;
+    onTouchCancel?: () => void;
     onContextMenu?: (e: React.MouseEvent) => void;
 }
 
@@ -24,6 +25,7 @@ export default function CleanLink({
     onMouseLeave,
     onTouchStart,
     onTouchEnd,
+    onTouchCancel,
     onContextMenu
 }: CleanLinkProps) {
     const router = useRouter();
@@ -42,6 +44,7 @@ export default function CleanLink({
             onMouseLeave={onMouseLeave}
             onTouchStart={onTouchStart}
             onTouchEnd={onTouchEnd}
+            onTouchCancel={onTouchCancel}
             onContextMenu={onContextMenu}
             role="link"
             tabIndex={0}

@@ -5,80 +5,61 @@ import CleanLink from "@/components/CleanLink";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import Footer from "@/components/Footer";
 import { useParams } from "next/navigation";
-import TypstRenderer from "@/components/TypstRenderer";
+import { MDXRemote } from "next-mdx-remote/rsc";
+import remarkMath from "remark-math";
+import rehypeKatex from "rehype-katex";
+import "katex/dist/katex.min.css";
 
 // Placeholder blog content
-const BLOG_POSTS: Record<string, { title: string; date: string; content: string; type?: 'html' | 'typst' }> = {
+const BLOG_POSTS: Record<string, { title: string; date: string; content: string }> = {
     "hello-world": {
         title: "Hello World",
         date: "November 29, 2025",
-        type: 'html',
         content: `
-      <p>This is the start of my digital garden. A place where I'll document my journey through creative coding, design engineering, and the search for mastery.</p>
-      <p>I've always been fascinated by the intersection of logic and beauty. Algorithmic art provides a unique canvas where code becomes the brush and mathematics the paint.</p>
-      <p>Stay tuned for more updates on my process and experiments.</p>
+This is the start of my digital garden. A place where I'll document my journey through creative coding, design engineering, and the search for mastery.
+
+I've always been fascinated by the intersection of logic and beauty. Algorithmic art provides a unique canvas where code becomes the brush and mathematics the paint.
+
+Stay tuned for more updates on my process and experiments.
     `
     },
     "algorithmic-beauty": {
         title: "The Beauty of Algorithms",
         date: "December 05, 2025",
-        type: 'html',
         content: `
-      <p>When we think of algorithms, we often think of efficiency, sorting, or data processing. But algorithms can also be expressive.</p>
-      <p>In my work with flow fields and recursive trees, I've found that simple rules can lead to emergent complexity that mimics nature in surprising ways.</p>
+When we think of algorithms, we often think of efficiency, sorting, or data processing. But algorithms can also be expressive.
+
+In my work with flow fields and recursive trees, I've found that simple rules can lead to emergent complexity that mimics nature in surprising ways.
     `
-    },
-    "typst-demo": {
-        title: "Typst Demo",
-        date: "December 10, 2025",
-        type: 'typst',
-        content: `
-= Typst Demo
-This is a blog post written in *Typst*!
-
-== Features
-- Fast compilation
-- Beautiful math: $E = m c^2$
-- Clean syntax
-
-#rect(width: 100%, height: 50pt, fill: blue.lighten(80%))[
-  *Hello from Typst!*
-]
-        `
     },
     "mosaic-technical-deep-dive": {
         title: "Mosaic: A Technical Deep Dive",
         date: "December 12, 2025",
-        type: 'typst',
         content: `
-#set page(width: auto, height: auto, margin: 0pt)
-#set text(font: "Segoe UI", size: 13pt, fill: rgb("#18181b"))
-#set par(justify: true, leading: 0.65em)
+The **Mosaic** artwork is a generative system exploring the balance between structure and randomness. Inspired by the De Stijl movement and Piet Mondrian's compositions, it uses recursive algorithms to create balanced, grid-based layouts.
 
-= Mosaic: A Technical Deep Dive
-
-The *Mosaic* artwork is a generative system exploring the balance between structure and randomness. Inspired by the De Stijl movement and Piet Mondrian's compositions, it uses recursive algorithms to create balanced, grid-based layouts.
-
-== Core Algorithm: Recursive Subdivision
+## Core Algorithm: Recursive Subdivision
 
 At its heart, Mosaic relies on a recursive function \`divideRectangle\`. Starting with a large rectangle (or the entire canvas), the algorithm decides whether to:
 
-1.  *Split* the rectangle into two smaller ones (vertically or horizontally).
-2.  *Stop* and draw the rectangle.
+1.  **Split** the rectangle into two smaller ones (vertically or horizontally).
+2.  **Stop** and draw the rectangle.
 
 This simple decision tree creates complex, non-uniform grids.
 
-== The Mathematics of Balance
+## The Mathematics of Balance
 
 To prevent the composition from looking too chaotic or too uniform, we introduce biased randomness.
 
 The \`splitRatio\` determines where a cut happens. Instead of a perfect 0.5 (halfway) split, we use a range:
 
-$ "split" = w times "random"(0.4, 0.6) $
+$$
+split = w \\times random(0.4, 0.6)
+$$
 
 This slight variation creates a more organic, "hand-drawn" feel.
 
-== Implementation
+## Implementation
 
 Here is the core TypeScript logic using p5.js:
 
@@ -101,19 +82,19 @@ const divideRectangle = (x, y, w, h) => {
 };
 \`\`\`
 
-== Aesthetics & Texture
+## Aesthetics & Texture
 
 To ground the digital abstraction, we apply a noise grain layer. This mimics the texture of paper or canvas, softening the harsh digital edges.
 
-$ "noise"(x, y) = "perlin"(x times 0.01, y times 0.01) $
+$$
+noise(x, y) = perlin(x \\times 0.01, y \\times 0.01)
+$$
 
 The color palette is also crucial. We use a limited set of 4 colors, randomly assigned but weighted to ensure contrast.
 
-#v(1em)
-#rect(width: 100%, height: 1pt, fill: luma(220))
-#v(1em)
+---
 
-*Mosaic* is a study in how simple rules, applied recursively, can generate infinite variation while maintaining a cohesive visual identity.
+**Mosaic** is a study in how simple rules, applied recursively, can generate infinite variation while maintaining a cohesive visual identity.
         `
     }
 };
@@ -176,14 +157,17 @@ export default function BlogPost() {
                         </h1>
                     </header>
 
-                    {post.type === 'typst' ? (
-                        <TypstRenderer content={post.content} />
-                    ) : (
-                        <div
-                            className="prose prose-zinc prose-sm md:prose-base max-w-none font-light text-zinc-600 leading-relaxed"
-                            dangerouslySetInnerHTML={{ __html: post.content }}
+                    <div className="prose prose-zinc prose-sm md:prose-base max-w-none font-light text-zinc-600 leading-relaxed">
+                        <MDXRemote
+                            source={post.content}
+                            options={{
+                                mdxOptions: {
+                                    remarkPlugins: [remarkMath],
+                                    rehypePlugins: [rehypeKatex],
+                                }
+                            }}
                         />
-                    )}
+                    </div>
 
                     {/* Next Post Navigation */}
                     {(() => {
