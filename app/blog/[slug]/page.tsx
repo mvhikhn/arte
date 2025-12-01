@@ -54,17 +54,7 @@ export default function BlogPost() {
     const post = BLOG_POSTS[slug];
     const [scrollProgress, setScrollProgress] = useState(0);
 
-    useEffect(() => {
-        const handleScroll = () => {
-            const totalScroll = document.documentElement.scrollTop;
-            const windowHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
-            const scroll = `${totalScroll / windowHeight}`;
-            setScrollProgress(Number(scroll));
-        };
-
-        window.addEventListener("scroll", handleScroll);
-        return () => window.removeEventListener("scroll", handleScroll);
-    }, []);
+    // Scroll progress handled in onScroll prop
 
     if (!post) {
         return (
@@ -78,7 +68,7 @@ export default function BlogPost() {
     }
 
     return (
-        <div className="min-h-screen bg-white flex flex-col">
+        <div className="h-dvh w-full bg-white flex flex-col overflow-hidden">
             {/* Progress Bar */}
             <div
                 className="fixed top-0 left-0 h-[1px] bg-zinc-900 z-50 transition-all duration-100 ease-out"
@@ -86,64 +76,75 @@ export default function BlogPost() {
             />
 
             {/* Navigation */}
-            <nav className="fixed top-0 left-0 w-full p-6 md:p-12 flex justify-between items-center bg-white/80 backdrop-blur-sm z-40">
-                <CleanLink href="/" className="group flex items-center gap-2 text-zinc-400 hover:text-zinc-900 transition-colors">
-                    <div className="p-2 rounded-full group-hover:bg-zinc-100 transition-colors">
-                        <ArrowLeft className="w-4 h-4" />
-                    </div>
-                    <span className="text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity -ml-2 group-hover:ml-0">Home</span>
-                </CleanLink>
+            <nav className="fixed top-0 left-0 w-full p-6 md:p-12 flex justify-between items-center bg-white/80 backdrop-blur-sm z-40 pointer-events-none">
+                <div className="pointer-events-auto">
+                    <CleanLink href="/" className="group flex items-center gap-2 text-zinc-400 hover:text-zinc-900 transition-colors">
+                        <div className="p-2 rounded-full group-hover:bg-zinc-100 transition-colors">
+                            <ArrowLeft className="w-4 h-4" />
+                        </div>
+                        <span className="text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity -ml-2 group-hover:ml-0">Home</span>
+                    </CleanLink>
+                </div>
             </nav>
 
-            {/* Content */}
-            <article className="flex-grow w-full max-w-2xl mx-auto px-6 pt-32 pb-20">
-                <header className="mb-12 space-y-4">
-                    <div className="text-xs text-zinc-400 uppercase tracking-widest">{post.date}</div>
-                    <h1 className="text-3xl md:text-4xl font-light text-zinc-900 tracking-tight leading-tight">
-                        {post.title}
-                    </h1>
-                </header>
+            {/* Scrollable Content */}
+            <div
+                className="flex-1 overflow-y-auto no-scrollbar"
+                onScroll={(e) => {
+                    const target = e.currentTarget;
+                    const totalScroll = target.scrollTop;
+                    const windowHeight = target.scrollHeight - target.clientHeight;
+                    const scroll = windowHeight > 0 ? totalScroll / windowHeight : 0;
+                    setScrollProgress(scroll);
+                }}
+            >
+                <article className="w-full max-w-2xl mx-auto px-6 pt-32 pb-20">
+                    <header className="mb-12 space-y-4">
+                        <div className="text-xs text-zinc-400 uppercase tracking-widest">{post.date}</div>
+                        <h1 className="text-3xl md:text-4xl font-light text-zinc-900 tracking-tight leading-tight">
+                            {post.title}
+                        </h1>
+                    </header>
 
-                {post.type === 'typst' ? (
-                    <TypstRenderer content={post.content} />
-                ) : (
-                    <div
-                        className="prose prose-zinc prose-sm md:prose-base max-w-none font-light text-zinc-600 leading-relaxed"
-                        dangerouslySetInnerHTML={{ __html: post.content }}
-                    />
-                )}
+                    {post.type === 'typst' ? (
+                        <TypstRenderer content={post.content} />
+                    ) : (
+                        <div
+                            className="prose prose-zinc prose-sm md:prose-base max-w-none font-light text-zinc-600 leading-relaxed"
+                            dangerouslySetInnerHTML={{ __html: post.content }}
+                        />
+                    )}
 
-                {/* Next Post Navigation */}
-                {(() => {
-                    const slugs = Object.keys(BLOG_POSTS);
-                    const currentIndex = slugs.indexOf(slug);
-                    const nextIndex = (currentIndex + 1) % slugs.length;
-                    const nextSlug = slugs[nextIndex];
-                    const nextPost = BLOG_POSTS[nextSlug];
+                    {/* Next Post Navigation */}
+                    {(() => {
+                        const slugs = Object.keys(BLOG_POSTS);
+                        const currentIndex = slugs.indexOf(slug);
+                        const nextIndex = (currentIndex + 1) % slugs.length;
+                        const nextSlug = slugs[nextIndex];
+                        const nextPost = BLOG_POSTS[nextSlug];
 
-                    return (
-                        <div className="mt-20 pt-12 border-t border-zinc-100">
-                            <p className="text-xs font-medium uppercase tracking-widest text-zinc-400 mb-4">Read Next</p>
-                            <CleanLink
-                                href={`/blog/${nextSlug}`}
-                                className="group inline-flex items-center gap-4"
-                            >
-                                <div className="space-y-1">
-                                    <h3 className="text-xl font-light text-zinc-900 group-hover:text-zinc-600 transition-colors">
-                                        {nextPost.title}
-                                    </h3>
-                                    <p className="text-sm text-zinc-400 font-mono">{nextPost.date}</p>
-                                </div>
-                                <div className="p-2 rounded-full bg-zinc-50 group-hover:bg-zinc-100 transition-colors">
-                                    <ArrowRight className="w-4 h-4 text-zinc-400 group-hover:text-zinc-900 transition-colors" />
-                                </div>
-                            </CleanLink>
-                        </div>
-                    );
-                })()}
-            </article>
-
-            <Footer />
+                        return (
+                            <div className="mt-20 pt-12 border-t border-zinc-100">
+                                <p className="text-xs font-medium uppercase tracking-widest text-zinc-400 mb-4">Read Next</p>
+                                <CleanLink
+                                    href={`/blog/${nextSlug}`}
+                                    className="group inline-flex items-center gap-4"
+                                >
+                                    <div className="space-y-1">
+                                        <h3 className="text-xl font-light text-zinc-900 group-hover:text-zinc-600 transition-colors">
+                                            {nextPost.title}
+                                        </h3>
+                                        <p className="text-sm text-zinc-400 font-mono">{nextPost.date}</p>
+                                    </div>
+                                    <div className="p-2 rounded-full bg-zinc-50 group-hover:bg-zinc-100 transition-colors">
+                                        <ArrowRight className="w-4 h-4 text-zinc-400 group-hover:text-zinc-900 transition-colors" />
+                                    </div>
+                                </CleanLink>
+                            </div>
+                        );
+                    })()}
+                </article>
+            </div>
         </div>
     );
 }
