@@ -52,6 +52,14 @@
     font-size: 13px !important;
     overscroll-behavior: none;
     height: 100%;
+    overflow: hidden;
+    /* Prevent root scroll for snugness */
+  }
+
+  /* Force hide cursor during resize */
+  .cursor-none-override,
+  .cursor-none-override * {
+    cursor: none !important;
   }
 
   /* Ensure all text elements are 13px */

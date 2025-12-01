@@ -129,18 +129,21 @@ export default function Home() {
         const handleMouseUp = () => {
             setIsDragging(false);
             document.body.style.cursor = 'default';
+            document.body.classList.remove('cursor-none-override');
         };
 
         if (isDragging) {
             window.addEventListener('mousemove', handleMouseMove);
             window.addEventListener('mouseup', handleMouseUp);
             document.body.style.cursor = 'none'; // Hide default cursor during drag
+            document.body.classList.add('cursor-none-override');
         }
 
         return () => {
             window.removeEventListener('mousemove', handleMouseMove);
             window.removeEventListener('mouseup', handleMouseUp);
             document.body.style.cursor = 'default';
+            document.body.classList.remove('cursor-none-override');
         };
     }, [isDragging]);
 
@@ -313,7 +316,7 @@ export default function Home() {
             </div>
 
             {/* Right Section - Gallery - Desktop Only */}
-            <div className="hidden md:block flex-1 h-full overflow-y-auto no-scrollbar p-12 custom-scrollbar">
+            <div className={`hidden md:block flex-1 h-full overflow-y-auto no-scrollbar p-12 custom-scrollbar ${hoveredArtwork ? 'overflow-hidden' : ''}`}>
                 <div className={`grid gap-4 pb-12 ${leftPanelWidth > 60 ? 'grid-cols-1' : 'grid-cols-2'}`}>
                     {artworks.map((artwork, index) => (
                         <Link
