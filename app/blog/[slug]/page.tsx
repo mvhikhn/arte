@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import CleanLink from "@/components/CleanLink";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import Footer from "@/components/Footer";
 import { useParams } from "next/navigation";
-import { MDXRemote, MDXRemoteSerializeResult } from "next-mdx-remote";
-import { serialize } from "next-mdx-remote/serialize";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
 import "katex/dist/katex.min.css";
@@ -105,19 +105,6 @@ export default function BlogPost() {
     const slug = params.slug as string;
     const post = BLOG_POSTS[slug];
     const [scrollProgress, setScrollProgress] = useState(0);
-    const [mdxSource, setMdxSource] = useState<MDXRemoteSerializeResult | null>(null);
-
-    // Serialize MDX content on mount
-    useEffect(() => {
-        if (post) {
-            serialize(post.content, {
-                mdxOptions: {
-                    remarkPlugins: [remarkMath],
-                    rehypePlugins: [rehypeKatex],
-                }
-            }).then(setMdxSource);
-        }
-    }, [post]);
 
     if (!post) {
         return (
@@ -170,11 +157,12 @@ export default function BlogPost() {
                     </header>
 
                     <div className="prose prose-zinc prose-sm md:prose-base max-w-none font-light text-zinc-600 leading-relaxed">
-                        {mdxSource ? (
-                            <MDXRemote {...mdxSource} />
-                        ) : (
-                            <div className="text-zinc-400">Loading...</div>
-                        )}
+                        <ReactMarkdown
+                            remarkPlugins={[remarkGfm, remarkMath]}
+                            rehypePlugins={[rehypeKatex]}
+                        >
+                            {post.content}
+                        </ReactMarkdown>
                     </div>
 
                     {/* Next Post Navigation */}

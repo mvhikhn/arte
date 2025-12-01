@@ -86,20 +86,26 @@ export default function Home() {
 
     // Handle resizing
     useEffect(() => {
+        let rafId: number | null = null;
+
         const handleMouseMove = (e: MouseEvent) => {
-            if (isDragging) {
-                setMousePosition({ x: e.clientX, y: e.clientY });
+            if (!isDragging) return;
+
+            setMousePosition({ x: e.clientX, y: e.clientY });
+
+            // Cancel previous frame if it hasn't run yet
+            if (rafId) {
+                cancelAnimationFrame(rafId);
             }
 
-            if (!isDragging || !containerRef.current) return;
-
-            const containerRect = containerRef.current.getBoundingClientRect();
-            const newWidth = ((e.clientX - containerRect.left) / containerRect.width) * 100;
-
-            // Limit width between 20% and 80%
-            if (newWidth >= 20 && newWidth <= 80) {
-                setLeftPanelWidth(newWidth);
-            }
+            // Throttle with requestAnimationFrame
+            rafId = requestAnimationFrame(() => {
+                const newWidth = (e.clientX / window.innerWidth) * 100;
+                if (newWidth >= 20 && newWidth <= 80) {
+                    setLeftPanelWidth(newWidth);
+                }
+                rafId = null;
+            });
         };
 
         const handleMouseUp = () => {
@@ -120,6 +126,9 @@ export default function Home() {
         }
 
         return () => {
+            if (rafId) {
+                cancelAnimationFrame(rafId);
+            }
             window.removeEventListener('mousemove', handleMouseMove);
             window.removeEventListener('mouseup', handleMouseUp);
             document.body.style.cursor = 'default';
