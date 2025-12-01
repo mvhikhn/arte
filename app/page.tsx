@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import CleanLink from "@/components/CleanLink";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import Footer from "@/components/Footer";
@@ -20,6 +20,7 @@ export default function Home() {
     const blogPosts = [
         { slug: "hello-world", title: "Hello World", date: "Nov 29, 2025" },
         { slug: "algorithmic-beauty", title: "The Beauty of Algorithms", date: "Dec 05, 2025" },
+        { slug: "typst-demo", title: "Typst Demo", date: "Dec 10, 2025" },
     ];
 
     // Generate random pastel colors for each artwork
@@ -167,7 +168,7 @@ export default function Home() {
                                 <h2 className="text-xs font-medium uppercase tracking-widest text-zinc-400">Journal</h2>
                                 <div className="space-y-4">
                                     {blogPosts.map((post) => (
-                                        <Link
+                                        <CleanLink
                                             key={post.slug}
                                             href={`/blog/${post.slug}`}
                                             className="group block"
@@ -180,7 +181,7 @@ export default function Home() {
                                                     {post.date}
                                                 </span>
                                             </div>
-                                        </Link>
+                                        </CleanLink>
                                     ))}
                                 </div>
                             </div>

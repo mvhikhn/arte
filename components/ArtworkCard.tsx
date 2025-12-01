@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import Link from "next/link";
+import CleanLink from "@/components/CleanLink";
 import { ArrowUpRight } from "lucide-react";
 
 interface ArtworkCardProps {
@@ -21,10 +21,10 @@ export default function ArtworkCard({ id, title, description, index, color }: Ar
     // Handle hover state with delay to prevent flickering
     const handleMouseEnter = () => {
         setIsHovered(true);
-        // Small delay before showing preview to avoid accidental triggers
+        // Reduced delay for snappy feel (50ms)
         timeoutRef.current = setTimeout(() => {
             setShowPreview(true);
-        }, 200);
+        }, 50);
     };
 
     const handleMouseLeave = () => {
@@ -42,7 +42,7 @@ export default function ArtworkCard({ id, title, description, index, color }: Ar
     };
 
     return (
-        <Link
+        <CleanLink
             href={`/studio?artwork=${id}`}
             className="group block relative aspect-[4/5] border border-zinc-100 hover:border-zinc-300 transition-all duration-300 overflow-hidden"
             style={{ backgroundColor: color }}
@@ -86,6 +86,6 @@ export default function ArtworkCard({ id, title, description, index, color }: Ar
                     />
                 </div>
             )}
-        </Link>
+        </CleanLink>
     );
 }

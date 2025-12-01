@@ -1,16 +1,18 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Link from "next/link";
+import CleanLink from "@/components/CleanLink";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import Footer from "@/components/Footer";
 import { useParams } from "next/navigation";
+import TypstRenderer from "@/components/TypstRenderer";
 
 // Placeholder blog content
-const BLOG_POSTS: Record<string, { title: string; date: string; content: string }> = {
+const BLOG_POSTS: Record<string, { title: string; date: string; content: string; type?: 'html' | 'typst' }> = {
     "hello-world": {
         title: "Hello World",
         date: "November 29, 2025",
+        type: 'html',
         content: `
       <p>This is the start of my digital garden. A place where I'll document my journey through creative coding, design engineering, and the search for mastery.</p>
       <p>I've always been fascinated by the intersection of logic and beauty. Algorithmic art provides a unique canvas where code becomes the brush and mathematics the paint.</p>
@@ -20,10 +22,29 @@ const BLOG_POSTS: Record<string, { title: string; date: string; content: string 
     "algorithmic-beauty": {
         title: "The Beauty of Algorithms",
         date: "December 05, 2025",
+        type: 'html',
         content: `
       <p>When we think of algorithms, we often think of efficiency, sorting, or data processing. But algorithms can also be expressive.</p>
       <p>In my work with flow fields and recursive trees, I've found that simple rules can lead to emergent complexity that mimics nature in surprising ways.</p>
     `
+    },
+    "typst-demo": {
+        title: "Typst Demo",
+        date: "December 10, 2025",
+        type: 'typst',
+        content: `
+= Typst Demo
+This is a blog post written in *Typst*!
+
+== Features
+- Fast compilation
+- Beautiful math: $E = m c^2$
+- Clean syntax
+
+#rect(width: 100%, height: 50pt, fill: blue.lighten(80%))[
+  *Hello from Typst!*
+]
+        `
     }
 };
 
@@ -49,9 +70,9 @@ export default function BlogPost() {
         return (
             <div className="min-h-screen flex flex-col items-center justify-center">
                 <h1 className="text-2xl font-light mb-4">Post not found</h1>
-                <Link href="/" className="text-sm text-zinc-500 hover:text-zinc-900 transition-colors flex items-center gap-2">
+                <CleanLink href="/" className="text-sm text-zinc-500 hover:text-zinc-900 transition-colors flex items-center gap-2">
                     <ArrowLeft className="w-4 h-4" /> Back Home
-                </Link>
+                </CleanLink>
             </div>
         );
     }
@@ -66,12 +87,12 @@ export default function BlogPost() {
 
             {/* Navigation */}
             <nav className="fixed top-0 left-0 w-full p-6 md:p-12 flex justify-between items-center bg-white/80 backdrop-blur-sm z-40">
-                <Link href="/" className="group flex items-center gap-2 text-zinc-400 hover:text-zinc-900 transition-colors">
+                <CleanLink href="/" className="group flex items-center gap-2 text-zinc-400 hover:text-zinc-900 transition-colors">
                     <div className="p-2 rounded-full group-hover:bg-zinc-100 transition-colors">
                         <ArrowLeft className="w-4 h-4" />
                     </div>
                     <span className="text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity -ml-2 group-hover:ml-0">Home</span>
-                </Link>
+                </CleanLink>
             </nav>
 
             {/* Content */}
@@ -83,10 +104,14 @@ export default function BlogPost() {
                     </h1>
                 </header>
 
-                <div
-                    className="prose prose-zinc prose-sm md:prose-base max-w-none font-light text-zinc-600 leading-relaxed"
-                    dangerouslySetInnerHTML={{ __html: post.content }}
-                />
+                {post.type === 'typst' ? (
+                    <TypstRenderer content={post.content} />
+                ) : (
+                    <div
+                        className="prose prose-zinc prose-sm md:prose-base max-w-none font-light text-zinc-600 leading-relaxed"
+                        dangerouslySetInnerHTML={{ __html: post.content }}
+                    />
+                )}
 
                 {/* Next Post Navigation */}
                 {(() => {
@@ -99,7 +124,7 @@ export default function BlogPost() {
                     return (
                         <div className="mt-20 pt-12 border-t border-zinc-100">
                             <p className="text-xs font-medium uppercase tracking-widest text-zinc-400 mb-4">Read Next</p>
-                            <Link
+                            <CleanLink
                                 href={`/blog/${nextSlug}`}
                                 className="group inline-flex items-center gap-4"
                             >
@@ -112,7 +137,7 @@ export default function BlogPost() {
                                 <div className="p-2 rounded-full bg-zinc-50 group-hover:bg-zinc-100 transition-colors">
                                     <ArrowRight className="w-4 h-4 text-zinc-400 group-hover:text-zinc-900 transition-colors" />
                                 </div>
-                            </Link>
+                            </CleanLink>
                         </div>
                     );
                 })()}
