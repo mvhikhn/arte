@@ -77,40 +77,24 @@ const generateFlowParamsFromToken = (token: string): ArtworkParams => {
   const { createSeededRandom } = require('@/utils/token');
   const rand = createSeededRandom(token);
 
-  // Generate colors using seeded random
-  const hue1 = Math.floor(rand() * 360);
-  const hue2 = (hue1 + 30 + Math.floor(rand() * 60)) % 360; // Analogous colors
-  const hue3 = (hue1 + 120 + Math.floor(rand() * 60)) % 360; // Triadic
-  const hue4 = (hue1 + 180) % 360; // Complementary
-  const hue5 = (hue1 + 240 + Math.floor(rand() * 60)) % 360;
+  // Use seeded random for all parameters
+  const { colors } = getRandomColors(5);
 
-  const saturation = 60 + Math.floor(rand() * 30); // 60-90%
-  const lightness = 45 + Math.floor(rand() * 20); // 45-65%
-
-  const colors = [
-    `hsl(${hue1}, ${saturation}%, ${lightness}%)`,
-    `hsl(${hue2}, ${saturation}%, ${lightness}%)`,
-    `hsl(${hue3}, ${saturation}%, ${lightness}%)`,
-    `hsl(${hue4}, ${saturation}%, ${lightness}%)`,
-    `hsl(${hue5}, ${saturation}%, ${lightness}%)`,
-  ];
-
-  // Tuned ranges for better aesthetics
   return {
-    numPoints: isMobile ? 250 : Math.floor(rand() * 250) + 150, // 150-400
+    numPoints: isMobile ? 250 : Math.floor(rand() * 400) + 100,
     backgroundFade: 20,
-    scaleValue: rand() * 0.015 + 0.002, // 0.002-0.017 (smoother flow)
-    noiseSpeed: rand() * 0.002 + 0.0005, // 0.0005-0.0025 (slower, more organic)
-    movementDistance: Math.floor(rand() * 10) + 5, // 5-15 (more controlled)
-    gaussianMean: rand() * 0.3 + 0.4, // 0.4-0.7 (more centered)
-    gaussianStd: rand() * 0.15 + 0.05, // 0.05-0.2 (tighter distribution)
-    minIterations: Math.floor(rand() * 30) + 20, // 20-50 (longer trails)
-    maxIterations: Math.floor(rand() * 50) + 50, // 50-100 (longer trails)
-    circleSize: isMobile ? 10 : Math.floor(rand() * 20) + 8, // 8-28 (more variation)
-    strokeWeightMin: rand() * 1.5 + 0.3, // 0.3-1.8 (finer lines)
-    strokeWeightMax: rand() * 3 + 2, // 2-5 (controlled thickness)
-    angleMultiplier1: Math.floor(rand() * 20) + 5, // 5-25 (less extreme)
-    angleMultiplier2: Math.floor(rand() * 20) + 5, // 5-25 (less extreme)
+    scaleValue: rand() * 0.02,
+    noiseSpeed: rand() * 0.003,
+    movementDistance: Math.floor(rand() * 15) + 3,
+    gaussianMean: rand() * 0.4 + 0.3,
+    gaussianStd: rand() * 0.25 + 0.05,
+    minIterations: Math.floor(rand() * 20) + 5,
+    maxIterations: Math.floor(rand() * 40) + 20,
+    circleSize: isMobile ? 10 : Math.floor(rand() * 30) + 5,
+    strokeWeightMin: rand() * 2 + 0.5,
+    strokeWeightMax: rand() * 4 + 2,
+    angleMultiplier1: Math.floor(rand() * 25) + 3,
+    angleMultiplier2: Math.floor(rand() * 25) + 5,
     canvasWidth: isMobile ? 400 : 630,
     canvasHeight: isMobile ? 500 : 790,
     targetWidth: 800,
@@ -480,95 +464,28 @@ function StudioContent() {
 
 
   const handleFlowParamChange = (param: keyof ArtworkParams, value: number) => {
-    setFlowParams((prev) => {
-      const newParams = {
-        ...prev,
-        [param]: value,
-      };
-      // Generate a new token from the updated parameters
-      const newToken = generateTokenFromParams(newParams);
-      return {
-        ...newParams,
-        token: newToken,
-      };
-    });
+    setFlowParams((prev) => ({
+      ...prev,
+      [param]: value,
+    }));
   };
 
   const handleFlowColorChange = (param: keyof ArtworkParams, value: string) => {
-    setFlowParams((prev) => {
-      const newParams = {
-        ...prev,
-        [param]: value,
-      };
-      // Generate a new token from the updated parameters
-      const newToken = generateTokenFromParams(newParams);
-      return {
-        ...newParams,
-        token: newToken,
-      };
-    });
-  };
-
-  // Generate a token from current parameters (for when user manually changes params)
-  const generateTokenFromParams = (params: ArtworkParams): string => {
-    // Create a deterministic string from all parameters
-    const paramString = JSON.stringify({
-      numPoints: params.numPoints,
-      scaleValue: params.scaleValue,
-      noiseSpeed: params.noiseSpeed,
-      movementDistance: params.movementDistance,
-      gaussianMean: params.gaussianMean,
-      gaussianStd: params.gaussianStd,
-      minIterations: params.minIterations,
-      maxIterations: params.maxIterations,
-      circleSize: params.circleSize,
-      strokeWeightMin: params.strokeWeightMin,
-      strokeWeightMax: params.strokeWeightMax,
-      angleMultiplier1: params.angleMultiplier1,
-      angleMultiplier2: params.angleMultiplier2,
-      color1: params.color1,
-      color2: params.color2,
-      color3: params.color3,
-      color4: params.color4,
-      color5: params.color5,
-    });
-
-    // Generate a hash from the param string
-    let hash = 0;
-    for (let i = 0; i < paramString.length; i++) {
-      const char = paramString.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
-      hash = hash & hash;
-    }
-
-    // Convert to base58-like string
-    const chars = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
-    let result = "";
-    let n = Math.abs(hash);
-
-    for (let i = 0; i < 48; i++) {
-      result += chars[n % chars.length];
-      n = Math.floor(n / chars.length);
-      if (n === 0) n = Math.abs(hash) + i; // Add variety
-    }
-
-    // Calculate checksum
-    let sum = 0;
-    for (let i = 0; i < result.length; i++) {
-      sum += result.charCodeAt(i);
-    }
-    const checksum = (sum % 256).toString(16).padStart(2, '0');
-
-    return `fx-${result}${checksum}`;
+    setFlowParams((prev) => ({
+      ...prev,
+      [param]: value,
+    }));
   };
 
   const handleFlowTokenChange = (value: string) => {
-    // Allow free editing
+    // Trim whitespace
+    const trimmedValue = value.trim();
+
+    // Always update the input field (with untrimmed value for UX)
     setTokenInput(value);
 
-    // Only regenerate params if the token is valid
-    const trimmedValue = value.trim();
-    if (trimmedValue && validateToken(trimmedValue)) {
+    // Only update if the token is valid - regenerate ALL params from the token
+    if (validateToken(trimmedValue)) {
       const newParams = generateFlowParamsFromToken(trimmedValue);
       setFlowParams(newParams);
     }
@@ -914,7 +831,7 @@ function StudioContent() {
         {/* Artwork Section - Full Screen */}
         <div className="h-full w-full flex items-center justify-center md:w-1/2 md:h-full md:items-center md:justify-center relative bg-white">
           {/* Artwork wrapper - fills container */}
-          <div className="w-full h-full flex items-center justify-center">
+          <div className="w-full h-full flex items-center justify-center relative">
             {currentArtwork === "flow" ? (
               <Artwork ref={flowArtworkRef} params={flowParams} />
             ) : currentArtwork === "grid" ? (

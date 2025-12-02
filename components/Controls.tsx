@@ -141,14 +141,14 @@ export default function Controls({ params, onParamChange, onColorChange, onExpor
         </button>
       </div>
 
-      {/* Token Section - Only show if onTokenChange is provided */}
+      {/* Token Section - Collapsible */}
       {onTokenChange && params.token && (
         <div className="border-b border-zinc-100">
           <button
             onClick={() => toggleSection("Token")}
             className="w-full px-3 py-2 flex items-center justify-between hover:bg-zinc-50 transition-colors"
           >
-            <span className="font-semibold text-xs tracking-wider text-zinc-500">TOKEN</span>
+            <span className="font-semibold text-xs tracking-wider text-zinc-500">Token (Seed)</span>
             {expandedSections.has("Token") ? (
               <ChevronDown className="w-3 h-3 text-zinc-400" />
             ) : (
@@ -156,14 +156,16 @@ export default function Controls({ params, onParamChange, onColorChange, onExpor
             )}
           </button>
           {expandedSections.has("Token") && (
-            <div className="px-3 pb-3 space-y-2">
-              <span className="text-[10px] text-zinc-500 tracking-wide">Paste a saved token to reproduce artwork</span>
+            <div className="px-3 pb-3 space-y-1.5">
               <input
                 type="text"
                 value={params.token}
                 onChange={(e) => onTokenChange(e.target.value)}
-                className="w-full px-2 py-1.5 bg-zinc-50 border border-zinc-200 rounded-md font-mono text-[10px] text-zinc-600 focus:outline-none focus:border-zinc-400 focus:text-zinc-900 transition-colors"
-                placeholder="fx-..."
+                className={`w-full px-2 py-1.5 bg-zinc-50 border rounded-md font-mono text-[10px] transition-colors ${params.token && params.token.trim().length > 0
+                    ? 'border-zinc-200 text-zinc-600 focus:border-zinc-400 focus:text-zinc-900'
+                    : 'border-red-200 text-red-600 focus:border-red-400'
+                  } focus:outline-none`}
+                placeholder="Enter token (fx-...)..."
               />
             </div>
           )}
