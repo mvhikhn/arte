@@ -1,3 +1,4 @@
+// fxhash-style token generation and seeding
 export function generateToken(): string {
     const chars = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
     let randomPart = "";
@@ -32,12 +33,39 @@ export function validateToken(token: string): boolean {
     return providedChecksum === calculatedChecksum;
 }
 
-export function tokenToSeed(token: string): number {
-    let seed = 0;
+// Simple hash function to convert token to numbers
+function hashToken(token: string): number[] {
+    const hashes = [0, 0, 0, 0];
     for (let i = 0; i < token.length; i++) {
-        const char = token.charCodeAt(i);
-        seed = ((seed << 5) - seed) + char;
-        seed = seed & seed; // Convert to 32bit integer
+        const code = token.charCodeAt(i);
+        hashes[i % 4] = ((hashes[i % 4] << 5) - hashes[i % 4]) + code;
+        hashes[i % 4] = hashes[i % 4] & hashes[i % 4];
     }
-    return Math.abs(seed);
+    return hashes.map(h => Math.abs(h));
+}
+
+// sfc32 PRNG implementation (fxhash uses this)
+function sfc32(a: number, b: number, c: number, d: number) {
+    return function () {
+        a >>>= 0; b >>>= 0; c >>>= 0; d >>>= 0;
+        let t = (a + b) | 0;
+        a = b ^ b >>> 9;
+        b = c + (c << 3) | 0;
+        c = (c << 21 | c >>> 11);
+        d = d + 1 | 0;
+        t = t + d | 0;
+        c = c + t | 0;
+        return (t >>> 0) / 4294967296;
+    }
+}
+
+// Create a seedable random function from token
+export function createSeededRandom(token: string): () => number {
+    const hashes = hashToken(token);
+    return sfc32(hashes[0], hashes[1], hashes[2], hashes[3]);
+}
+
+export function tokenToSeed(token: string): number {
+    const hashes = hashToken(token);
+    return hashes[0];
 }
