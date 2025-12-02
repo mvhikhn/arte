@@ -141,22 +141,6 @@ export default function Controls({ params, onParamChange, onColorChange, onExpor
         </button>
       </div>
 
-      {/* Token Input */}
-      {onTokenChange && params.token && (
-        <div className="px-3 py-3 border-b border-zinc-100 space-y-1.5">
-          <span className="text-zinc-700 font-medium">Token (Seed)</span>
-          <div className="flex gap-2">
-            <input
-              type="text"
-              value={params.token}
-              onChange={(e) => onTokenChange(e.target.value)}
-              className="w-full px-2 py-1.5 bg-zinc-50 border border-zinc-200 rounded-md font-mono text-[10px] text-zinc-600 focus:outline-none focus:border-zinc-400 focus:text-zinc-900 transition-colors"
-              placeholder="Enter token..."
-            />
-          </div>
-        </div>
-      )}
-
       {/* Collapsible Sections */}
       {sections.map((section) => {
         const isExpanded = expandedSections.has(section.title);

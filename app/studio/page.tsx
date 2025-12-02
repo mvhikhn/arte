@@ -21,7 +21,7 @@ import { EmailVerificationModal } from "@/components/EmailVerificationModal";
 import { ArrowRight, ArrowLeft, SlidersHorizontal, RefreshCw, Shuffle, Download } from "lucide-react";
 import { getRandomColors } from "@/lib/colorPalettes";
 import { hasGifAccess, grantGifAccess } from "@/lib/paymentUtils";
-import { generateToken } from "@/utils/token";
+import { generateToken, validateToken } from "@/utils/token";
 
 type ArtworkType = "flow" | "grid" | "mosaic" | "rotated" | "tree" | "textdesign";
 
@@ -457,10 +457,13 @@ function StudioContent() {
   };
 
   const handleFlowTokenChange = (value: string) => {
-    setFlowParams((prev) => ({
-      ...prev,
-      token: value,
-    }));
+    // Only update if the token is valid
+    if (validateToken(value)) {
+      setFlowParams((prev) => ({
+        ...prev,
+        token: value,
+      }));
+    }
   };
 
   const handleGridParamChange = (param: keyof GridArtworkParams, value: number) => {
@@ -832,7 +835,23 @@ function StudioContent() {
         {/* Artwork Section - Full Screen */}
         <div className="h-full w-full flex items-center justify-center md:w-1/2 md:h-full md:items-center md:justify-center relative bg-white">
           {/* Artwork wrapper - fills container */}
-          <div className="w-full h-full flex items-center justify-center">
+          <div className="w-full h-full flex items-center justify-center relative">
+            {/* Token Input Overlay - Only for Flow artwork */}
+            {currentArtwork === "flow" && (
+              <div className="absolute top-4 left-1/2 -translate-x-1/2 z-10">
+                <input
+                  type="text"
+                  value={flowParams.token}
+                  onChange={(e) => handleFlowTokenChange(e.target.value)}
+                  className={`w-[400px] px-3 py-2 bg-white/90 backdrop-blur-sm border rounded-md font-mono text-xs text-center shadow-sm transition-all ${validateToken(flowParams.token)
+                      ? 'border-zinc-200 text-zinc-900 focus:border-zinc-400'
+                      : 'border-red-200 text-red-600 focus:border-red-400'
+                    } focus:outline-none focus:shadow-md`}
+                  placeholder="Enter token (fx-...)..."
+                />
+              </div>
+            )}
+
             {currentArtwork === "flow" ? (
               <Artwork ref={flowArtworkRef} params={flowParams} />
             ) : currentArtwork === "grid" ? (
