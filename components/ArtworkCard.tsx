@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import Link from "next/link";
+import CleanLink from "@/components/CleanLink";
 import { ArrowUpRight } from "lucide-react";
 
 interface ArtworkCardProps {
@@ -48,7 +48,7 @@ export default function ArtworkCard({ id, title, description, index, color }: Ar
     };
 
     return (
-        <Link
+        <CleanLink
             href={`/studio?artwork=${id}`}
             className="group block relative aspect-[4/5] border border-zinc-100 hover:border-zinc-300 transition-all duration-300 overflow-hidden"
             style={{ backgroundColor: color }}
@@ -93,6 +93,6 @@ export default function ArtworkCard({ id, title, description, index, color }: Ar
                     />
                 </div>
             )}
-        </Link>
+        </CleanLink>
     );
 }
