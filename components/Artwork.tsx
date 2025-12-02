@@ -235,7 +235,7 @@ const Artwork = forwardRef<ArtworkRef, ArtworkProps>(({ params }, ref) => {
         };
 
         p.draw = () => {
-          p.background(255); // White background for trails
+          p.background(0); // Black background for elegant look
           p.strokeWeight(1);
           for (let pt of points) {
             sweety(pt);

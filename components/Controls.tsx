@@ -161,11 +161,8 @@ export default function Controls({ params, onParamChange, onColorChange, onExpor
                 type="text"
                 value={params.token}
                 onChange={(e) => onTokenChange(e.target.value)}
-                className={`w-full px-2 py-1.5 bg-zinc-50 border rounded-md font-mono text-[10px] transition-colors ${params.token && params.token.trim().length > 0
-                    ? 'border-zinc-200 text-zinc-600 focus:border-zinc-400 focus:text-zinc-900'
-                    : 'border-red-200 text-red-600 focus:border-red-400'
-                  } focus:outline-none`}
-                placeholder="Enter token (fx-...)..."
+                className="w-full px-2 py-1.5 bg-zinc-50 border border-zinc-200 rounded-md font-mono text-[10px] text-zinc-600 focus:border-zinc-400 focus:text-zinc-900 focus:outline-none transition-colors"
+                placeholder="fx-..."
               />
             </div>
           )}

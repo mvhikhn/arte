@@ -77,24 +77,38 @@ const generateFlowParamsFromToken = (token: string): ArtworkParams => {
   const { createSeededRandom } = require('@/utils/token');
   const rand = createSeededRandom(token);
 
-  // Use seeded random for all parameters
-  const { colors } = getRandomColors(5);
+  // Elegant monochromatic palette inspired by studioyorktown
+  // Black/dark background with light flowing lines
+  const bgShades = ['#000000', '#0a0a0a', '#0f0f0f', '#1a1a1a'];
+  const strokeShades = [
+    '#ffffff', '#f5f5f5', '#e8e8e8', '#d4d4d4', '#c0c0c0',
+    '#faf8f3', '#f0ede6', '#e6e3dc', // cream tones
+  ];
+
+  // Pick background
+  const backgroundColor = bgShades[Math.floor(rand() * bgShades.length)];
+
+  // Pick 5 coordinated light strokes
+  const colors = [];
+  for (let i = 0; i < 5; i++) {
+    colors.push(strokeShades[Math.floor(rand() * strokeShades.length)]);
+  }
 
   return {
-    numPoints: isMobile ? 250 : Math.floor(rand() * 400) + 100,
-    backgroundFade: 20,
-    scaleValue: rand() * 0.02,
-    noiseSpeed: rand() * 0.003,
-    movementDistance: Math.floor(rand() * 15) + 3,
-    gaussianMean: rand() * 0.4 + 0.3,
-    gaussianStd: rand() * 0.25 + 0.05,
-    minIterations: Math.floor(rand() * 20) + 5,
-    maxIterations: Math.floor(rand() * 40) + 20,
-    circleSize: isMobile ? 10 : Math.floor(rand() * 30) + 5,
-    strokeWeightMin: rand() * 2 + 0.5,
-    strokeWeightMax: rand() * 4 + 2,
-    angleMultiplier1: Math.floor(rand() * 25) + 3,
-    angleMultiplier2: Math.floor(rand() * 25) + 5,
+    numPoints: isMobile ? 350 : Math.floor(rand() * 300) + 250, // More points for density
+    backgroundFade: 5, // Less fade for cleaner look
+    scaleValue: rand() * 0.015 + 0.002, // Smoother, more organic curves
+    noiseSpeed: rand() * 0.001 + 0.0002, // Slower movement
+    movementDistance: Math.floor(rand() * 8) + 4, // Moderate movement
+    gaussianMean: rand() * 0.2 + 0.4, // More centered
+    gaussianStd: rand() * 0.15 + 0.08, // Tighter distribution
+    minIterations: Math.floor(rand() * 30) + 40, // Longer lines
+    maxIterations: Math.floor(rand() * 50) + 60, // Even longer lines
+    circleSize: isMobile ? 2 : Math.floor(rand() * 4) + 1, // Smaller dots for elegance
+    strokeWeightMin: rand() * 0.3 + 0.1, // Thinner lines
+    strokeWeightMax: rand() * 1.5 + 0.5, // Varied but elegant
+    angleMultiplier1: Math.floor(rand() * 15) + 8,
+    angleMultiplier2: Math.floor(rand() * 15) + 8,
     canvasWidth: isMobile ? 400 : 630,
     canvasHeight: isMobile ? 500 : 790,
     targetWidth: 800,
