@@ -5,12 +5,19 @@ import { RotatedGridArtworkParams } from "@/components/RotatedGridArtwork";
 import { TreeArtworkParams } from "@/components/TreeArtwork";
 import { TextDesignArtworkParams } from "@/components/TextDesignArtwork";
 import { createSeededRandom } from "@/utils/token";
+import { decodeParams } from "@/utils/serialization";
 
 // Helper to generate random value within range
 const randomInRange = (min: number, max: number) => Math.random() * (max - min) + min;
 
 // Generate flow params from a token (deterministic)
 export const generateFlowParamsFromToken = (token: string): ArtworkParams => {
+    // Check for encoded params first
+    if (token.includes("-v1-")) {
+        const decoded = decodeParams(token);
+        if (decoded) return decoded;
+    }
+
     // Detect if mobile (screen width < 768px)
     const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
     const rand = createSeededRandom(token);
@@ -90,6 +97,12 @@ export const generateFlowParamsFromToken = (token: string): ArtworkParams => {
 
 // Generate grid params from token
 export const generateGridParamsFromToken = (token: string): GridArtworkParams => {
+    // Check for encoded params first
+    if (token.includes("-v1-")) {
+        const decoded = decodeParams(token);
+        if (decoded) return decoded;
+    }
+
     const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
     const rand = createSeededRandom(token);
 
@@ -126,6 +139,12 @@ export const generateGridParamsFromToken = (token: string): GridArtworkParams =>
 
 // Generate mosaic params from token
 export const generateMosaicParamsFromToken = (token: string): MosaicArtworkParams => {
+    // Check for encoded params first
+    if (token.includes("-v1-")) {
+        const decoded = decodeParams(token);
+        if (decoded) return decoded;
+    }
+
     const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
     const rand = createSeededRandom(token);
 
@@ -166,6 +185,12 @@ export const generateMosaicParamsFromToken = (token: string): MosaicArtworkParam
 
 // Generate rotated grid params from token
 export const generateRotatedGridParamsFromToken = (token: string): RotatedGridArtworkParams => {
+    // Check for encoded params first
+    if (token.includes("-v1-")) {
+        const decoded = decodeParams(token);
+        if (decoded) return decoded;
+    }
+
     const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
     const rand = createSeededRandom(token);
 
@@ -198,6 +223,12 @@ export const generateRotatedGridParamsFromToken = (token: string): RotatedGridAr
 
 // Generate tree params from token
 export const generateTreeParamsFromToken = (token: string): TreeArtworkParams => {
+    // Check for encoded params first
+    if (token.includes("-v1-")) {
+        const decoded = decodeParams(token);
+        if (decoded) return decoded;
+    }
+
     const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
     const rand = createSeededRandom(token);
 
@@ -250,6 +281,12 @@ export const generateTreeParamsFromToken = (token: string): TreeArtworkParams =>
 
 // Generate text design params from token
 export const generateTextDesignParamsFromToken = (token: string): TextDesignArtworkParams => {
+    // Check for encoded params first
+    if (token.includes("-v1-")) {
+        const decoded = decodeParams(token);
+        if (decoded) return decoded;
+    }
+
     const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
     const rand = createSeededRandom(token);
 

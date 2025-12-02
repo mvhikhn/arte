@@ -22,6 +22,7 @@ import { ArrowRight, ArrowLeft, SlidersHorizontal, RefreshCw, Shuffle, Download 
 import { getRandomColors } from "@/lib/colorPalettes";
 import { hasGifAccess, grantGifAccess } from "@/lib/paymentUtils";
 import { generateToken, validateToken } from "@/utils/token";
+import { encodeParams } from "@/utils/serialization";
 
 type ArtworkType = "flow" | "grid" | "mosaic" | "rotated" | "tree" | "textdesign";
 
@@ -287,7 +288,7 @@ function StudioContent() {
       };
 
       // Generate a new token to represent this state
-      const newToken = generateToken('flow');
+      const newToken = encodeParams('flow', newParams);
 
       return {
         ...newParams,
@@ -305,7 +306,7 @@ function StudioContent() {
       };
 
       // Generate a new token to represent this state
-      const newToken = generateToken('flow');
+      const newToken = encodeParams('flow', newParams);
 
       return {
         ...newParams,
@@ -331,7 +332,7 @@ function StudioContent() {
   const handleGridParamChange = (param: keyof GridArtworkParams, value: number) => {
     setGridParams((prev) => {
       const newParams = { ...prev, [param]: value };
-      const newToken = generateToken('grid');
+      const newToken = encodeParams('grid', newParams);
       return { ...newParams, token: newToken };
     });
   };
@@ -339,7 +340,7 @@ function StudioContent() {
   const handleGridColorChange = (param: keyof GridArtworkParams, value: string) => {
     setGridParams((prev) => {
       const newParams = { ...prev, [param]: value };
-      const newToken = generateToken('grid');
+      const newToken = encodeParams('grid', newParams);
       return { ...newParams, token: newToken };
     });
   };
@@ -356,7 +357,7 @@ function StudioContent() {
   const handleMosaicParamChange = (param: keyof MosaicArtworkParams, value: number) => {
     setMosaicParams((prev) => {
       const newParams = { ...prev, [param]: value };
-      const newToken = generateToken('mosaic');
+      const newToken = encodeParams('mosaic', newParams);
       return { ...newParams, token: newToken };
     });
   };
@@ -364,7 +365,7 @@ function StudioContent() {
   const handleMosaicColorChange = (param: keyof MosaicArtworkParams, value: string) => {
     setMosaicParams((prev) => {
       const newParams = { ...prev, [param]: value };
-      const newToken = generateToken('mosaic');
+      const newToken = encodeParams('mosaic', newParams);
       return { ...newParams, token: newToken };
     });
   };
@@ -381,7 +382,7 @@ function StudioContent() {
   const handleRotatedGridParamChange = (param: keyof RotatedGridArtworkParams, value: number) => {
     setRotatedGridParams((prev) => {
       const newParams = { ...prev, [param]: value };
-      const newToken = generateToken('rotated');
+      const newToken = encodeParams('rotated', newParams);
       return { ...newParams, token: newToken };
     });
   };
@@ -389,7 +390,7 @@ function StudioContent() {
   const handleRotatedGridColorChange = (param: keyof RotatedGridArtworkParams, value: string) => {
     setRotatedGridParams((prev) => {
       const newParams = { ...prev, [param]: value };
-      const newToken = generateToken('rotated');
+      const newToken = encodeParams('rotated', newParams);
       return { ...newParams, token: newToken };
     });
   };
@@ -406,7 +407,7 @@ function StudioContent() {
   const handleTreeParamChange = (param: keyof TreeArtworkParams, value: number) => {
     setTreeParams((prev) => {
       const newParams = { ...prev, [param]: param === 'textEnabled' ? Boolean(value) : value };
-      const newToken = generateToken('tree');
+      const newToken = encodeParams('tree', newParams);
       return { ...newParams, token: newToken };
     });
   };
@@ -414,7 +415,7 @@ function StudioContent() {
   const handleTreeColorChange = (param: keyof TreeArtworkParams, value: string) => {
     setTreeParams((prev) => {
       const newParams = { ...prev, [param]: value };
-      const newToken = generateToken('tree');
+      const newToken = encodeParams('tree', newParams);
       return { ...newParams, token: newToken };
     });
   };
@@ -431,7 +432,7 @@ function StudioContent() {
   const handleTextDesignParamChange = (param: keyof TextDesignArtworkParams, value: any) => {
     setTextDesignParams((prev) => {
       const newParams = { ...prev, [param]: value };
-      const newToken = generateToken('text');
+      const newToken = encodeParams('text', newParams);
       return { ...newParams, token: newToken };
     });
   };
