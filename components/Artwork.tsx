@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useImperativeHandle, forwardRef } from "react";
+import { tokenToSeed } from "@/utils/token";
 
 export interface ArtworkParams {
   numPoints: number;
@@ -29,7 +30,7 @@ export interface ArtworkParams {
   exportWidth: number; // Deprecated, WYSIWYG export uses canvas dimensions
   exportHeight: number; // Deprecated, WYSIWYG export uses canvas dimensions
   isAnimating: boolean;
-  seed: number; // Controls when to regenerate random points
+  token: string; // Unique token for deterministic rendering
 }
 
 export interface ArtworkRef {
@@ -220,9 +221,10 @@ const Artwork = forwardRef<ArtworkRef, ArtworkProps>(({ params }, ref) => {
           p.stroke(255);
           p.colorMode(p.RGB);
 
-          // Set random seed for reproducible randomness
-          p.randomSeed(paramsRef.current.seed);
-          p.noiseSeed(paramsRef.current.seed);
+          // Set random seed for reproducible randomness based on token
+          const seed = tokenToSeed(paramsRef.current.token);
+          p.randomSeed(seed);
+          p.noiseSeed(seed);
 
           generatePoints();
 
@@ -324,7 +326,7 @@ const Artwork = forwardRef<ArtworkRef, ArtworkProps>(({ params }, ref) => {
         sketchRef.current = null;
       }
     };
-  }, [params.seed, params.canvasWidth, params.canvasHeight]); // Recreate when seed or dimensions change
+  }, [params.token, params.canvasWidth, params.canvasHeight]); // Recreate when token or dimensions change
 
   // Control animation loop based on isAnimating parameter
   useEffect(() => {

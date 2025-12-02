@@ -21,6 +21,7 @@ import { EmailVerificationModal } from "@/components/EmailVerificationModal";
 import { ArrowRight, ArrowLeft, SlidersHorizontal, RefreshCw, Shuffle, Download } from "lucide-react";
 import { getRandomColors } from "@/lib/colorPalettes";
 import { hasGifAccess, grantGifAccess } from "@/lib/paymentUtils";
+import { generateToken } from "@/utils/token";
 
 type ArtworkType = "flow" | "grid" | "mosaic" | "rotated" | "tree" | "textdesign";
 
@@ -99,7 +100,7 @@ const generateRandomFlowParams = (): ArtworkParams => {
     exportWidth: 1600,
     exportHeight: 2000,
     isAnimating: true,
-    seed: Date.now(),
+    token: generateToken(),
   };
 };
 
@@ -455,6 +456,13 @@ function StudioContent() {
     }));
   };
 
+  const handleFlowTokenChange = (value: string) => {
+    setFlowParams((prev) => ({
+      ...prev,
+      token: value,
+    }));
+  };
+
   const handleGridParamChange = (param: keyof GridArtworkParams, value: number) => {
     setGridParams((prev) => ({
       ...prev,
@@ -664,7 +672,7 @@ function StudioContent() {
       exportWidth: 1600,
       exportHeight: 2000,
       isAnimating: flowParams.isAnimating,
-      seed: Date.now(),
+      token: generateToken(),
     });
   };
 
@@ -935,6 +943,7 @@ function StudioContent() {
                     params={flowParams}
                     onParamChange={handleFlowParamChange}
                     onColorChange={handleFlowColorChange}
+                    onTokenChange={handleFlowTokenChange}
                     onExportImage={handleExportImage}
                     onExportGif={handleExportGif}
                     onExportWallpapers={handleExportWallpapers}
