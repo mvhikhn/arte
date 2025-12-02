@@ -77,24 +77,40 @@ const generateFlowParamsFromToken = (token: string): ArtworkParams => {
   const { createSeededRandom } = require('@/utils/token');
   const rand = createSeededRandom(token);
 
-  // Use seeded random for all parameters
-  const { colors } = getRandomColors(5);
+  // Generate colors using seeded random
+  const hue1 = Math.floor(rand() * 360);
+  const hue2 = (hue1 + 30 + Math.floor(rand() * 60)) % 360; // Analogous colors
+  const hue3 = (hue1 + 120 + Math.floor(rand() * 60)) % 360; // Triadic
+  const hue4 = (hue1 + 180) % 360; // Complementary
+  const hue5 = (hue1 + 240 + Math.floor(rand() * 60)) % 360;
 
+  const saturation = 60 + Math.floor(rand() * 30); // 60-90%
+  const lightness = 45 + Math.floor(rand() * 20); // 45-65%
+
+  const colors = [
+    `hsl(${hue1}, ${saturation}%, ${lightness}%)`,
+    `hsl(${hue2}, ${saturation}%, ${lightness}%)`,
+    `hsl(${hue3}, ${saturation}%, ${lightness}%)`,
+    `hsl(${hue4}, ${saturation}%, ${lightness}%)`,
+    `hsl(${hue5}, ${saturation}%, ${lightness}%)`,
+  ];
+
+  // Tuned ranges for better aesthetics
   return {
-    numPoints: isMobile ? 250 : Math.floor(rand() * 400) + 100,
+    numPoints: isMobile ? 250 : Math.floor(rand() * 250) + 150, // 150-400
     backgroundFade: 20,
-    scaleValue: rand() * 0.02,
-    noiseSpeed: rand() * 0.003,
-    movementDistance: Math.floor(rand() * 15) + 3,
-    gaussianMean: rand() * 0.4 + 0.3,
-    gaussianStd: rand() * 0.25 + 0.05,
-    minIterations: Math.floor(rand() * 20) + 5,
-    maxIterations: Math.floor(rand() * 40) + 20,
-    circleSize: isMobile ? 10 : Math.floor(rand() * 30) + 5,
-    strokeWeightMin: rand() * 2 + 0.5,
-    strokeWeightMax: rand() * 4 + 2,
-    angleMultiplier1: Math.floor(rand() * 25) + 3,
-    angleMultiplier2: Math.floor(rand() * 25) + 5,
+    scaleValue: rand() * 0.015 + 0.002, // 0.002-0.017 (smoother flow)
+    noiseSpeed: rand() * 0.002 + 0.0005, // 0.0005-0.0025 (slower, more organic)
+    movementDistance: Math.floor(rand() * 10) + 5, // 5-15 (more controlled)
+    gaussianMean: rand() * 0.3 + 0.4, // 0.4-0.7 (more centered)
+    gaussianStd: rand() * 0.15 + 0.05, // 0.05-0.2 (tighter distribution)
+    minIterations: Math.floor(rand() * 30) + 20, // 20-50 (longer trails)
+    maxIterations: Math.floor(rand() * 50) + 50, // 50-100 (longer trails)
+    circleSize: isMobile ? 10 : Math.floor(rand() * 20) + 8, // 8-28 (more variation)
+    strokeWeightMin: rand() * 1.5 + 0.3, // 0.3-1.8 (finer lines)
+    strokeWeightMax: rand() * 3 + 2, // 2-5 (controlled thickness)
+    angleMultiplier1: Math.floor(rand() * 20) + 5, // 5-25 (less extreme)
+    angleMultiplier2: Math.floor(rand() * 20) + 5, // 5-25 (less extreme)
     canvasWidth: isMobile ? 400 : 630,
     canvasHeight: isMobile ? 500 : 790,
     targetWidth: 800,
@@ -831,23 +847,7 @@ function StudioContent() {
         {/* Artwork Section - Full Screen */}
         <div className="h-full w-full flex items-center justify-center md:w-1/2 md:h-full md:items-center md:justify-center relative bg-white">
           {/* Artwork wrapper - fills container */}
-          <div className="w-full h-full flex items-center justify-center relative">
-            {/* Token Input Overlay - Only for Flow artwork */}
-            {currentArtwork === "flow" && (
-              <div className="absolute top-4 left-1/2 -translate-x-1/2 z-10">
-                <input
-                  type="text"
-                  value={tokenInput}
-                  onChange={(e) => handleFlowTokenChange(e.target.value)}
-                  className={`w-[400px] px-3 py-2 bg-white/90 backdrop-blur-sm border rounded-md font-mono text-xs text-center shadow-sm transition-all ${validateToken(tokenInput.trim())
-                    ? 'border-zinc-200 text-zinc-900 focus:border-zinc-400'
-                    : 'border-red-200 text-red-600 focus:border-red-400'
-                    } focus:outline-none focus:shadow-md`}
-                  placeholder="Enter token (fx-...)..."
-                />
-              </div>
-            )}
-
+          <div className="w-full h-full flex items-center justify-center">
             {currentArtwork === "flow" ? (
               <Artwork ref={flowArtworkRef} params={flowParams} />
             ) : currentArtwork === "grid" ? (

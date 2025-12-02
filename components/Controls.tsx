@@ -141,6 +141,35 @@ export default function Controls({ params, onParamChange, onColorChange, onExpor
         </button>
       </div>
 
+      {/* Token Section - Only show if onTokenChange is provided */}
+      {onTokenChange && params.token && (
+        <div className="border-b border-zinc-100">
+          <button
+            onClick={() => toggleSection("Token")}
+            className="w-full px-3 py-2 flex items-center justify-between hover:bg-zinc-50 transition-colors"
+          >
+            <span className="font-semibold text-xs tracking-wider text-zinc-500">TOKEN</span>
+            {expandedSections.has("Token") ? (
+              <ChevronDown className="w-3 h-3 text-zinc-400" />
+            ) : (
+              <ChevronRight className="w-3 h-3 text-zinc-400" />
+            )}
+          </button>
+          {expandedSections.has("Token") && (
+            <div className="px-3 pb-3 space-y-2">
+              <span className="text-[10px] text-zinc-500 tracking-wide">Paste a saved token to reproduce artwork</span>
+              <input
+                type="text"
+                value={params.token}
+                onChange={(e) => onTokenChange(e.target.value)}
+                className="w-full px-2 py-1.5 bg-zinc-50 border border-zinc-200 rounded-md font-mono text-[10px] text-zinc-600 focus:outline-none focus:border-zinc-400 focus:text-zinc-900 transition-colors"
+                placeholder="fx-..."
+              />
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Collapsible Sections */}
       {sections.map((section) => {
         const isExpanded = expandedSections.has(section.title);
