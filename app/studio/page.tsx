@@ -346,6 +346,14 @@ function StudioContent() {
 
   const [textDesignParams, setTextDesignParams] = useState<TextDesignArtworkParams>(() => generateRandomTextDesignParams());
 
+  // Separate state for token input to allow free editing
+  const [tokenInput, setTokenInput] = useState<string>("");
+
+  // Initialize token input when flowParams changes
+  useEffect(() => {
+    setTokenInput(flowParams.token);
+  }, [flowParams.token]);
+
   // Save current artwork state to localStorage
   const saveArtworkState = () => {
     const state = {
@@ -457,7 +465,10 @@ function StudioContent() {
   };
 
   const handleFlowTokenChange = (value: string) => {
-    // Only update if the token is valid
+    // Always update the input field
+    setTokenInput(value);
+
+    // Only update the actual token (and trigger re-render) if valid
     if (validateToken(value)) {
       setFlowParams((prev) => ({
         ...prev,
@@ -841,11 +852,11 @@ function StudioContent() {
               <div className="absolute top-4 left-1/2 -translate-x-1/2 z-10">
                 <input
                   type="text"
-                  value={flowParams.token}
+                  value={tokenInput}
                   onChange={(e) => handleFlowTokenChange(e.target.value)}
-                  className={`w-[400px] px-3 py-2 bg-white/90 backdrop-blur-sm border rounded-md font-mono text-xs text-center shadow-sm transition-all ${validateToken(flowParams.token)
-                      ? 'border-zinc-200 text-zinc-900 focus:border-zinc-400'
-                      : 'border-red-200 text-red-600 focus:border-red-400'
+                  className={`w-[400px] px-3 py-2 bg-white/90 backdrop-blur-sm border rounded-md font-mono text-xs text-center shadow-sm transition-all ${validateToken(tokenInput)
+                    ? 'border-zinc-200 text-zinc-900 focus:border-zinc-400'
+                    : 'border-red-200 text-red-600 focus:border-red-400'
                     } focus:outline-none focus:shadow-md`}
                   placeholder="Enter token (fx-...)..."
                 />
