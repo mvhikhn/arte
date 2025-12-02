@@ -1,36 +1,92 @@
-// fxhash-style token generation and seeding
-export function generateToken(): string {
+// fxhash-style token generation and seeding with artwork type
+export type ArtworkType = 'flow' | 'grid' | 'mosaic' | 'rotated' | 'tree' | 'text';
+
+export function generateToken(artworkType?: ArtworkType): string {
     const chars = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
     let randomPart = "";
-    for (let i = 0; i < 48; i++) {
+    // Slightly shorter random part to accommodate artwork type in similar total length
+    const randomLength = artworkType ? 44 : 48;
+    for (let i = 0; i < randomLength; i++) {
         randomPart += chars.charAt(Math.floor(Math.random() * chars.length));
     }
 
     // Calculate checksum
+    // We include the artwork type in the checksum calculation to bind the token to its type
+    // This prevents users from manually changing the prefix (e.g. fx-grid- to fx-flow-)
+    // as the checksum validation will fail.
+    const checksumSource = artworkType ? `${artworkType}${randomPart}` : randomPart;
+
     let sum = 0;
-    for (let i = 0; i < randomPart.length; i++) {
-        sum += randomPart.charCodeAt(i);
+    for (let i = 0; i < checksumSource.length; i++) {
+        sum += checksumSource.charCodeAt(i);
     }
     const checksum = (sum % 256).toString(16).padStart(2, '0');
 
+    // Include artwork type in token if provided
+    if (artworkType) {
+        return `fx-${artworkType}-${randomPart}${checksum}`;
+    }
     return `fx-${randomPart}${checksum}`;
 }
 
-export function validateToken(token: string): boolean {
-    if (!token.startsWith("fx-") || token.length !== 53) { // fx- (3) + 48 random + 2 checksum
-        return false;
+export function validateToken(token: string, artworkType?: ArtworkType): boolean {
+    // Check if token has artwork type prefix
+    const hasArtworkType = token.match(/^fx-(flow|grid|mosaic|rotated|tree|text)-/);
+
+    if (hasArtworkType) {
+        // Token format: fx-[type]-[44 random chars][2 checksum]
+        const parts = token.split('-');
+        if (parts.length !== 3 || parts[0] !== 'fx') {
+            return false;
+        }
+
+        const tokenArtworkType = parts[1] as ArtworkType;
+        const randomAndChecksum = parts[2];
+
+        // Validate artwork type matches if specified
+        if (artworkType && tokenArtworkType !== artworkType) {
+            return false;
+        }
+
+        // Validate length: 44 random + 2 checksum
+        if (randomAndChecksum.length !== 46) {
+            return false;
+        }
+
+        const randomPart = randomAndChecksum.substring(0, 44);
+        const providedChecksum = randomAndChecksum.substring(44);
+
+        // Verify checksum with artwork type binding
+        const checksumSource = `${tokenArtworkType}${randomPart}`;
+        let sum = 0;
+        for (let i = 0; i < checksumSource.length; i++) {
+            sum += checksumSource.charCodeAt(i);
+        }
+        const calculatedChecksum = (sum % 256).toString(16).padStart(2, '0');
+
+        return providedChecksum === calculatedChecksum;
+    } else {
+        // Legacy format: fx-[48 random chars][2 checksum]
+        if (!token.startsWith("fx-") || token.length !== 53) {
+            return false;
+        }
+
+        const randomPart = token.substring(3, 51);
+        const providedChecksum = token.substring(51);
+
+        let sum = 0;
+        for (let i = 0; i < randomPart.length; i++) {
+            sum += randomPart.charCodeAt(i);
+        }
+        const calculatedChecksum = (sum % 256).toString(16).padStart(2, '0');
+
+        return providedChecksum === calculatedChecksum;
     }
+}
 
-    const randomPart = token.substring(3, 51);
-    const providedChecksum = token.substring(51);
-
-    let sum = 0;
-    for (let i = 0; i < randomPart.length; i++) {
-        sum += randomPart.charCodeAt(i);
-    }
-    const calculatedChecksum = (sum % 256).toString(16).padStart(2, '0');
-
-    return providedChecksum === calculatedChecksum;
+export function getTokenArtworkType(token: string): ArtworkType | null {
+    const match = token.match(/^fx-(flow|grid|mosaic|rotated|tree|text)-/);
+    return match ? (match[1] as ArtworkType) : null;
 }
 
 // Simple hash function to convert token to numbers
