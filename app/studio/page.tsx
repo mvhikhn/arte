@@ -480,28 +480,95 @@ function StudioContent() {
 
 
   const handleFlowParamChange = (param: keyof ArtworkParams, value: number) => {
-    setFlowParams((prev) => ({
-      ...prev,
-      [param]: value,
-    }));
+    setFlowParams((prev) => {
+      const newParams = {
+        ...prev,
+        [param]: value,
+      };
+      // Generate a new token from the updated parameters
+      const newToken = generateTokenFromParams(newParams);
+      return {
+        ...newParams,
+        token: newToken,
+      };
+    });
   };
 
   const handleFlowColorChange = (param: keyof ArtworkParams, value: string) => {
-    setFlowParams((prev) => ({
-      ...prev,
-      [param]: value,
-    }));
+    setFlowParams((prev) => {
+      const newParams = {
+        ...prev,
+        [param]: value,
+      };
+      // Generate a new token from the updated parameters
+      const newToken = generateTokenFromParams(newParams);
+      return {
+        ...newParams,
+        token: newToken,
+      };
+    });
+  };
+
+  // Generate a token from current parameters (for when user manually changes params)
+  const generateTokenFromParams = (params: ArtworkParams): string => {
+    // Create a deterministic string from all parameters
+    const paramString = JSON.stringify({
+      numPoints: params.numPoints,
+      scaleValue: params.scaleValue,
+      noiseSpeed: params.noiseSpeed,
+      movementDistance: params.movementDistance,
+      gaussianMean: params.gaussianMean,
+      gaussianStd: params.gaussianStd,
+      minIterations: params.minIterations,
+      maxIterations: params.maxIterations,
+      circleSize: params.circleSize,
+      strokeWeightMin: params.strokeWeightMin,
+      strokeWeightMax: params.strokeWeightMax,
+      angleMultiplier1: params.angleMultiplier1,
+      angleMultiplier2: params.angleMultiplier2,
+      color1: params.color1,
+      color2: params.color2,
+      color3: params.color3,
+      color4: params.color4,
+      color5: params.color5,
+    });
+
+    // Generate a hash from the param string
+    let hash = 0;
+    for (let i = 0; i < paramString.length; i++) {
+      const char = paramString.charCodeAt(i);
+      hash = ((hash << 5) - hash) + char;
+      hash = hash & hash;
+    }
+
+    // Convert to base58-like string
+    const chars = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
+    let result = "";
+    let n = Math.abs(hash);
+
+    for (let i = 0; i < 48; i++) {
+      result += chars[n % chars.length];
+      n = Math.floor(n / chars.length);
+      if (n === 0) n = Math.abs(hash) + i; // Add variety
+    }
+
+    // Calculate checksum
+    let sum = 0;
+    for (let i = 0; i < result.length; i++) {
+      sum += result.charCodeAt(i);
+    }
+    const checksum = (sum % 256).toString(16).padStart(2, '0');
+
+    return `fx-${result}${checksum}`;
   };
 
   const handleFlowTokenChange = (value: string) => {
-    // Trim whitespace
-    const trimmedValue = value.trim();
-
-    // Always update the input field (with untrimmed value for UX)
+    // Allow free editing
     setTokenInput(value);
 
-    // Only update if the token is valid - regenerate ALL params from the token
-    if (validateToken(trimmedValue)) {
+    // Only regenerate params if the token is valid
+    const trimmedValue = value.trim();
+    if (trimmedValue && validateToken(trimmedValue)) {
       const newParams = generateFlowParamsFromToken(trimmedValue);
       setFlowParams(newParams);
     }
