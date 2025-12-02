@@ -68,40 +68,53 @@ const getDefaultTreeParams = (): TreeArtworkParams => ({
   isAnimating: true,
 });
 
-// Generate random initial flow params
-const generateRandomFlowParams = (): ArtworkParams => {
+// Generate flow params from a token (deterministic)
+const generateFlowParamsFromToken = (token: string): ArtworkParams => {
   // Detect if mobile (screen width < 768px)
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
 
+  // Import the seeded random function
+  const { createSeededRandom } = require('@/utils/token');
+  const rand = createSeededRandom(token);
+
+  // Use seeded random for all parameters
+  const { colors } = getRandomColors(5);
+
   return {
-    numPoints: isMobile ? 250 : 500,
+    numPoints: isMobile ? 250 : Math.floor(rand() * 400) + 100,
     backgroundFade: 20,
-    scaleValue: 0.001,
-    noiseSpeed: 0.002,
-    movementDistance: 20.00,
-    gaussianMean: 0.900,
-    gaussianStd: 0.050,
-    minIterations: 50,
-    maxIterations: 10,
-    circleSize: isMobile ? 10 : 15.10,
-    strokeWeightMin: 0.100,
-    strokeWeightMax: 5.70,
-    angleMultiplier1: 20,
-    angleMultiplier2: 15,
+    scaleValue: rand() * 0.02,
+    noiseSpeed: rand() * 0.003,
+    movementDistance: Math.floor(rand() * 15) + 3,
+    gaussianMean: rand() * 0.4 + 0.3,
+    gaussianStd: rand() * 0.25 + 0.05,
+    minIterations: Math.floor(rand() * 20) + 5,
+    maxIterations: Math.floor(rand() * 40) + 20,
+    circleSize: isMobile ? 10 : Math.floor(rand() * 30) + 5,
+    strokeWeightMin: rand() * 2 + 0.5,
+    strokeWeightMax: rand() * 4 + 2,
+    angleMultiplier1: Math.floor(rand() * 25) + 3,
+    angleMultiplier2: Math.floor(rand() * 25) + 5,
     canvasWidth: isMobile ? 400 : 630,
     canvasHeight: isMobile ? 500 : 790,
     targetWidth: 800,
     targetHeight: 1000,
-    color1: "#ff2929",
-    color2: "#ffc31f",
-    color3: "#004cff",
-    color4: "#ff0000",
-    color5: "#004cff",
+    color1: colors[0],
+    color2: colors[1],
+    color3: colors[2],
+    color4: colors[3],
+    color5: colors[4],
     exportWidth: 1600,
     exportHeight: 2000,
     isAnimating: true,
-    token: generateToken(),
+    token: token,
   };
+};
+
+// Generate random initial flow params (creates new token)
+const generateRandomFlowParams = (): ArtworkParams => {
+  const newToken = generateToken();
+  return generateFlowParamsFromToken(newToken);
 };
 
 // Generate random initial grid params
@@ -471,12 +484,10 @@ function StudioContent() {
     // Always update the input field (with untrimmed value for UX)
     setTokenInput(value);
 
-    // Only update the actual token (and trigger re-render) if valid
+    // Only update if the token is valid - regenerate ALL params from the token
     if (validateToken(trimmedValue)) {
-      setFlowParams((prev) => ({
-        ...prev,
-        token: trimmedValue,
-      }));
+      const newParams = generateFlowParamsFromToken(trimmedValue);
+      setFlowParams(newParams);
     }
   };
 
@@ -659,38 +670,9 @@ function StudioContent() {
   };
 
   const handleFlowRandomize = () => {
-    // Get 5 harmonious colors from a curated palette
-    const { colors } = getRandomColors(5);
-
-    setFlowParams({
-      numPoints: Math.floor(Math.random() * 400) + 100,
-      backgroundFade: 15,
-      scaleValue: Math.random() * 0.02,
-      noiseSpeed: Math.random() * 0.003,
-      movementDistance: Math.floor(Math.random() * 15) + 3,
-      gaussianMean: Math.random() * 0.4 + 0.3,
-      gaussianStd: Math.random() * 0.25 + 0.05,
-      minIterations: Math.floor(Math.random() * 20) + 5,
-      maxIterations: Math.floor(Math.random() * 40) + 20,
-      circleSize: Math.floor(Math.random() * 30) + 5,
-      strokeWeightMin: Math.random() * 2 + 0.5,
-      strokeWeightMax: Math.random() * 4 + 2,
-      angleMultiplier1: Math.floor(Math.random() * 25) + 3,
-      angleMultiplier2: Math.floor(Math.random() * 25) + 5,
-      canvasWidth: flowParams.canvasWidth,
-      canvasHeight: flowParams.canvasHeight,
-      targetWidth: 800,
-      targetHeight: 1000,
-      color1: colors[0],
-      color2: colors[1],
-      color3: colors[2],
-      color4: colors[3],
-      color5: colors[4],
-      exportWidth: 1600,
-      exportHeight: 2000,
-      isAnimating: flowParams.isAnimating,
-      token: generateToken(),
-    });
+    // Generate new params with new token
+    const newParams = generateRandomFlowParams();
+    setFlowParams(newParams);
   };
 
   const handleGridRandomize = () => {
