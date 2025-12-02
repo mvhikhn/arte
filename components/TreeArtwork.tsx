@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useImperativeHandle, forwardRef } from "react";
+import { tokenToSeed } from "@/utils/token";
 
 export interface TreeArtworkParams {
   // Tree Structure
@@ -50,7 +51,7 @@ export interface TreeArtworkParams {
   canvasHeight: number;
 
   // Technical
-  seed: number;
+  token: string;
   exportWidth: number; // Deprecated
   exportHeight: number; // Deprecated
   isAnimating: boolean;
@@ -107,7 +108,7 @@ const TreeArtwork = forwardRef<TreeArtworkRef, TreeArtworkProps>(
       if (sketchRef.current && sketchRef.current.resetSketch) {
         sketchRef.current.resetSketch();
       }
-    }, [params.seed, params.canvasWidth, params.canvasHeight, params.initialPaths, params.initialVelocity, params.branchProbability, params.diameterShrink, params.minDiameter, params.bumpMultiplier, params.velocityRetention, params.speedMin, params.speedMax, params.finishedCircleSize, params.strokeWeightMultiplier, params.stemColor1, params.stemColor2, params.stemColor3, params.tipColor1, params.tipColor2, params.tipColor3, params.backgroundColor, params.backgroundScale, params.grainAmount]);
+    }, [params.token, params.canvasWidth, params.canvasHeight, params.initialPaths, params.initialVelocity, params.branchProbability, params.diameterShrink, params.minDiameter, params.bumpMultiplier, params.velocityRetention, params.speedMin, params.speedMax, params.finishedCircleSize, params.strokeWeightMultiplier, params.stemColor1, params.stemColor2, params.stemColor3, params.tipColor1, params.tipColor2, params.tipColor3, params.backgroundColor, params.backgroundScale, params.grainAmount]);
 
     // Handle background image changes
     useEffect(() => {
@@ -371,8 +372,9 @@ const TreeArtwork = forwardRef<TreeArtworkRef, TreeArtworkProps>(
             p.pixelDensity(2);
             const canvas = p.createCanvas(paramsRef.current.canvasWidth, paramsRef.current.canvasHeight);
             canvas.parent(containerRef.current!);
-            p.randomSeed(paramsRef.current.seed);
-            p.noiseSeed(paramsRef.current.seed);
+            const seed = tokenToSeed(paramsRef.current.token);
+            p.randomSeed(seed);
+            p.noiseSeed(seed);
 
             // Initial load if param exists
             if (paramsRef.current.backgroundImage) {
@@ -464,7 +466,8 @@ const TreeArtwork = forwardRef<TreeArtworkRef, TreeArtworkProps>(
           };
 
           const resetSketch = () => {
-            p.randomSeed(paramsRef.current.seed);
+            const seed = tokenToSeed(paramsRef.current.token);
+            p.randomSeed(seed);
 
             // Resize canvas if dimensions changed
             if (p.width !== paramsRef.current.canvasWidth || p.height !== paramsRef.current.canvasHeight) {

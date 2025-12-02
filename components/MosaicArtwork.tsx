@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, forwardRef, useImperativeHandle } from "react";
+import { tokenToSeed } from "@/utils/token";
 
 export interface MosaicArtworkParams {
   color1: string;
@@ -24,7 +25,7 @@ export interface MosaicArtworkParams {
   minRecursionSize: number;
   canvasWidth: number;
   canvasHeight: number;
-  seed: number;
+  token: string;
   exportWidth: number; // Deprecated
   exportHeight: number; // Deprecated
 }
@@ -188,8 +189,9 @@ const MosaicArtwork = forwardRef<MosaicArtworkRef, MosaicArtworkProps>(({ params
         };
 
         const generateArtwork = (p: any) => {
-          p.randomSeed(paramsRef.current.seed);
-          p.noiseSeed(paramsRef.current.seed);
+          const seed = tokenToSeed(paramsRef.current.token);
+          p.randomSeed(seed);
+          p.noiseSeed(seed);
 
           COLORS = [
             paramsRef.current.color1,
@@ -333,7 +335,7 @@ const MosaicArtwork = forwardRef<MosaicArtworkRef, MosaicArtworkProps>(({ params
         sketchRef.current = null;
       }
     };
-  }, [params.seed, params.canvasWidth, params.canvasHeight]);
+  }, [params.token, params.canvasWidth, params.canvasHeight]);
 
   return (
     <div

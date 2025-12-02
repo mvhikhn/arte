@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, forwardRef, useImperativeHandle } from "react";
+import { tokenToSeed } from "@/utils/token";
 
 export interface GridArtworkParams {
   backgroundColor: string;
@@ -19,7 +20,7 @@ export interface GridArtworkParams {
   canvasWidth: number;
   canvasHeight: number;
   isAnimating: boolean;
-  seed: number;
+  token: string;
   exportWidth: number; // Deprecated
   exportHeight: number; // Deprecated
 }
@@ -178,11 +179,14 @@ const GridArtwork = forwardRef<GridArtworkRef, GridArtworkProps>(({ params }, re
           p.frameRate(60);
 
           // Initialize grid
-          p.randomSeed(paramsRef.current.seed);
+          // Set random seed for reproducible randomness based on token
+          const seed = tokenToSeed(paramsRef.current.token);
+          p.randomSeed(seed);
+          p.noiseSeed(seed);
           grid.columns = p.floor(p.random(paramsRef.current.minColumns, paramsRef.current.maxColumns + 1));
           grid.moduleSize = p.width / grid.columns;
           grid.rows = p.ceil(p.height / grid.moduleSize);
-          grid.seed = paramsRef.current.seed;
+          grid.seed = seed; // Update grid.seed to use the token-derived seed
 
           if (!paramsRef.current.isAnimating) {
             p.noLoop();
@@ -193,7 +197,8 @@ const GridArtwork = forwardRef<GridArtworkRef, GridArtworkProps>(({ params }, re
           p.background(255);
           p.stroke(paramsRef.current.borderColor);
           p.strokeWeight(2);
-          p.randomSeed(grid.seed);
+          const seed = tokenToSeed(paramsRef.current.token);
+          p.randomSeed(seed);
 
           const movement = (p.sin(p.frameCount * paramsRef.current.animationSpeed) + 1) / 2;
           grid.depth = 0;
@@ -315,7 +320,7 @@ const GridArtwork = forwardRef<GridArtworkRef, GridArtworkProps>(({ params }, re
         sketchRef.current = null;
       }
     };
-  }, [params.seed, params.canvasWidth, params.canvasHeight]);
+  }, [params.token, params.canvasWidth, params.canvasHeight]);
 
   useEffect(() => {
     if (sketchRef.current) {

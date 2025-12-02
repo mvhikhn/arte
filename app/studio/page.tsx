@@ -62,7 +62,8 @@ const getDefaultTreeParams = (): TreeArtworkParams => ({
   grainAmount: 0,
   canvasWidth: 400,
   canvasHeight: 400,
-  seed: 12345,
+
+  token: "fx-default-tree-token",
   exportWidth: 1600,
   exportHeight: 2000,
   isAnimating: true,
@@ -157,28 +158,86 @@ const generateRandomFlowParams = (): ArtworkParams => {
 };
 
 // Generate random initial grid params
-const generateRandomGridParams = (): GridArtworkParams => {
-  // Detect if mobile (screen width < 768px)
+// Generate grid params from token
+const generateGridParamsFromToken = (token: string): GridArtworkParams => {
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+  const { createSeededRandom } = require('@/utils/token');
+  const rand = createSeededRandom(token);
+
+  // Palette generation (simplified for now, can be expanded)
+  const palettes = [
+    ["#1B4332", "#52B788", "#2D6A4F", "#95D5B2", "#40916C", "#74C69D"],
+    ["#001219", "#005f73", "#0a9396", "#94d2bd", "#e9d8a6", "#ee9b00"],
+    ["#2b2d42", "#8d99ae", "#edf2f4", "#ef233c", "#d90429", "#2b2d42"],
+  ];
+  const palette = palettes[Math.floor(rand() * palettes.length)];
 
   return {
-    backgroundColor: "#1B4332",
-    borderColor: "#52B788",
-    color1: "#2D6A4F",
-    color2: "#95D5B2",
-    color3: "#40916C",
-    color4: "#74C69D",
-    animationSpeed: 0.065,
-    maxDepth: 2,
-    minModuleSize: 30,
-    subdivideChance: 0.62,
-    crossSize: 0.83,
-    minColumns: 5,
-    maxColumns: 10,
+    backgroundColor: palette[0],
+    borderColor: palette[1],
+    color1: palette[2],
+    color2: palette[3],
+    color3: palette[4],
+    color4: palette[5],
+    animationSpeed: rand() * 0.1 + 0.02,
+    maxDepth: Math.floor(rand() * 3) + 1,
+    minModuleSize: Math.floor(rand() * 30) + 20,
+    subdivideChance: rand() * 0.5 + 0.3,
+    crossSize: rand() * 0.5 + 0.4,
+    minColumns: Math.floor(rand() * 4) + 3,
+    maxColumns: Math.floor(rand() * 8) + 6,
     canvasWidth: isMobile ? 400 : 630,
     canvasHeight: isMobile ? 500 : 790,
     isAnimating: true,
-    seed: Date.now(),
+    token: token,
+    exportWidth: 1600,
+    exportHeight: 2000,
+  };
+};
+
+// Generate random initial grid params
+const generateRandomGridParams = (): GridArtworkParams => {
+  const newToken = generateToken();
+  return generateGridParamsFromToken(newToken);
+};
+
+// Generate random initial mosaic params
+// Generate mosaic params from token
+const generateMosaicParamsFromToken = (token: string): MosaicArtworkParams => {
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+  const { createSeededRandom } = require('@/utils/token');
+  const rand = createSeededRandom(token);
+
+  const palettes = [
+    ["#A8DADC", "#E63946", "#457B9D", "#1D3557"],
+    ["#264653", "#2a9d8f", "#e9c46a", "#f4a261"],
+    ["#cdb4db", "#ffc8dd", "#ffafcc", "#bde0fe"],
+  ];
+  const palette = palettes[Math.floor(rand() * palettes.length)];
+
+  return {
+    color1: palette[0],
+    color2: palette[1],
+    color3: palette[2],
+    color4: palette[3],
+    initialRectMinSize: rand() * 0.4 + 0.6,
+    initialRectMaxSize: 1.00,
+    gridDivisionChance: rand() * 0.3,
+    recursionChance: rand() * 0.3,
+    minGridRows: Math.floor(rand() * 3) + 1,
+    maxGridRows: Math.floor(rand() * 4) + 2,
+    minGridCols: Math.floor(rand() * 3) + 2,
+    maxGridCols: Math.floor(rand() * 5) + 3,
+    splitRatioMin: rand() * 0.3 + 0.1,
+    splitRatioMax: rand() * 0.4 + 0.5,
+    marginMultiplier: rand() * 0.08 + 0.01,
+    detailGridMin: Math.floor(rand() * 3) + 2,
+    detailGridMax: Math.floor(rand() * 4) + 4,
+    noiseDensity: rand() * 0.15,
+    minRecursionSize: Math.floor(rand() * 20) + 10,
+    canvasWidth: isMobile ? 400 : 630,
+    canvasHeight: isMobile ? 500 : 790,
+    token: token,
     exportWidth: 1600,
     exportHeight: 2000,
   };
@@ -186,32 +245,39 @@ const generateRandomGridParams = (): GridArtworkParams => {
 
 // Generate random initial mosaic params
 const generateRandomMosaicParams = (): MosaicArtworkParams => {
-  // Detect if mobile (screen width < 768px)
+  const newToken = generateToken();
+  return generateMosaicParamsFromToken(newToken);
+};
+
+// Generate random initial rotated grid params
+// Generate rotated grid params from token
+const generateRotatedGridParamsFromToken = (token: string): RotatedGridArtworkParams => {
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+  const { createSeededRandom } = require('@/utils/token');
+  const rand = createSeededRandom(token);
+
+  const palettes = [
+    ["#FF1493", "#FF69B4", "#FFB7C5", "#C71585", "#2C1810"],
+    ["#ffbe0b", "#fb5607", "#ff006e", "#8338ec", "#3a86ff"],
+    ["#000000", "#14213d", "#fca311", "#e5e5e5", "#ffffff"],
+  ];
+  const palette = palettes[Math.floor(rand() * palettes.length)];
 
   return {
-    color1: "#A8DADC",
-    color2: "#E63946",
-    color3: "#457B9D",
-    color4: "#1D3557",
-    initialRectMinSize: 0.80,
-    initialRectMaxSize: 1.00,
-    gridDivisionChance: 0.00,
-    recursionChance: 0.00,
-    minGridRows: 2,
-    maxGridRows: 3,
-    minGridCols: 4,
-    maxGridCols: 4,
-    splitRatioMin: 0.22,
-    splitRatioMax: 0.83,
-    marginMultiplier: 0.050,
-    detailGridMin: 3,
-    detailGridMax: 6,
-    noiseDensity: 0.075,
-    minRecursionSize: 20,
+    color1: palette[0],
+    color2: palette[1],
+    color3: palette[2],
+    color4: palette[3],
+    backgroundColor: palette[4],
+    offsetRatio: rand() * 0.04 + 0.005,
+    marginRatio: rand() * 0.4 + 0.3,
+    minCellCount: Math.floor(rand() * 3) + 1,
+    maxCellCount: Math.floor(rand() * 5) + 4,
+    minRecursionSize: rand() * 0.04 + 0.01,
+    strokeWeight: rand() * 4 + 1,
     canvasWidth: isMobile ? 400 : 630,
     canvasHeight: isMobile ? 500 : 790,
-    seed: Date.now(),
+    token: token,
     exportWidth: 1600,
     exportHeight: 2000,
   };
@@ -219,53 +285,43 @@ const generateRandomMosaicParams = (): MosaicArtworkParams => {
 
 // Generate random initial rotated grid params
 const generateRandomRotatedGridParams = (): RotatedGridArtworkParams => {
-  // Detect if mobile (screen width < 768px)
-  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
-
-  return {
-    color1: "#FF1493",
-    color2: "#FF69B4",
-    color3: "#FFB7C5",
-    color4: "#C71585",
-    backgroundColor: "#2C1810",
-    offsetRatio: 0.010,
-    marginRatio: 0.50,
-    minCellCount: 2,
-    maxCellCount: 6,
-    minRecursionSize: 0.030,
-    strokeWeight: 4.00,
-    canvasWidth: isMobile ? 400 : 630,
-    canvasHeight: isMobile ? 500 : 790,
-    seed: Date.now(),
-    exportWidth: 1600,
-    exportHeight: 2000,
-  };
+  const newToken = generateToken();
+  return generateRotatedGridParamsFromToken(newToken);
 };
 
 // Generate random tree params with darker stems and lighter tips
-const generateRandomTreeParams = (): TreeArtworkParams => {
-  // Detect if mobile (screen width < 768px)
+// Generate tree params from token
+const generateTreeParamsFromToken = (token: string): TreeArtworkParams => {
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+  const { createSeededRandom } = require('@/utils/token');
+  const rand = createSeededRandom(token);
+
+  const palettes = [
+    ["#8B4513", "#A0522D", "#CD853F", "#FF69B4", "#FFB6C1", "#FFC0CB", "#000000"],
+    ["#2f3e46", "#354f52", "#52796f", "#84a98c", "#cad2c5", "#f0f3bd", "#2f3e46"],
+    ["#5f0f40", "#9a031e", "#fb8b24", "#e36414", "#0f4c5c", "#5f0f40", "#000000"],
+  ];
+  const palette = palettes[Math.floor(rand() * palettes.length)];
 
   return {
-    initialPaths: 1,
-    initialVelocity: isMobile ? 10 : 14.04,
-    branchProbability: 0.17,
-    diameterShrink: 0.61,
-    minDiameter: 0.20,
-    bumpMultiplier: 0.29,
-    velocityRetention: 0.71,
-    speedMin: 4.13,
-    speedMax: 11.24,
-    finishedCircleSize: 10.07,
-    strokeWeightMultiplier: 1.29,
-    stemColor1: "#8B4513",
-    stemColor2: "#A0522D",
-    stemColor3: "#CD853F",
-    tipColor1: "#FF69B4",
-    tipColor2: "#FFB6C1",
-    tipColor3: "#FFC0CB",
-    backgroundColor: "#000000",
+    initialPaths: Math.floor(rand() * 3) + 1,
+    initialVelocity: isMobile ? 10 : rand() * 5 + 10,
+    branchProbability: rand() * 0.15 + 0.1,
+    diameterShrink: rand() * 0.1 + 0.6,
+    minDiameter: rand() * 0.2 + 0.1,
+    bumpMultiplier: rand() * 0.2 + 0.1,
+    velocityRetention: rand() * 0.2 + 0.7,
+    speedMin: rand() * 3 + 3,
+    speedMax: rand() * 5 + 8,
+    finishedCircleSize: rand() * 8 + 6,
+    strokeWeightMultiplier: rand() * 0.5 + 1,
+    stemColor1: palette[0],
+    stemColor2: palette[1],
+    stemColor3: palette[2],
+    tipColor1: palette[3],
+    tipColor2: palette[4],
+    tipColor3: palette[5],
+    backgroundColor: palette[6],
     textContent: "",
     textEnabled: true,
     fontSize: 24,
@@ -277,44 +333,59 @@ const generateRandomTreeParams = (): TreeArtworkParams => {
     fontFamily: 'Georgia',
     fontUrl: 'https://fonts.googleapis.com/css2?family=...',
     customFontFamily: '',
-    grainAmount: 50,
+    grainAmount: Math.floor(rand() * 50) + 20,
     canvasWidth: isMobile ? 400 : 630,
     canvasHeight: isMobile ? 500 : 790,
-    seed: Date.now(),
+    token: token,
     exportWidth: 1600,
     exportHeight: 2000,
     isAnimating: true,
   };
 };
 
+// Generate random tree params
+const generateRandomTreeParams = (): TreeArtworkParams => {
+  const newToken = generateToken();
+  return generateTreeParamsFromToken(newToken);
+};
+
 // Generate random text design params
-const generateRandomTextDesignParams = (): TextDesignArtworkParams => {
-  // Detect if mobile (screen width < 768px)
+// Generate text design params from token
+const generateTextDesignParamsFromToken = (token: string): TextDesignArtworkParams => {
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+  const { createSeededRandom } = require('@/utils/token');
+  const rand = createSeededRandom(token);
+
+  const palettes = [
+    ["#001ef1", "#FF9900", "#ff0000", "#fff4b8", "#D10000"],
+    ["#2b2d42", "#8d99ae", "#edf2f4", "#ef233c", "#d90429"],
+    ["#000000", "#ffffff", "#ff006e", "#8338ec", "#3a86ff"],
+  ];
+  const palette = palettes[Math.floor(rand() * palettes.length)];
 
   return {
-    backgroundColor: "#001ef1",
+    backgroundColor: palette[0],
     canvasWidth: isMobile ? 400 : 630,
     canvasHeight: isMobile ? 500 : 790,
-    grainAmount: 30,
+    grainAmount: Math.floor(rand() * 30) + 10,
     fontUrl: "https://example.com/font.ttf",
     customFontFamily: "Noto Sans Bengali",
     layer1: {
       text: "ZOHRAN",
       x: 0.500,
       y: 0.500,
-      size: 70,
+      size: Math.floor(rand() * 40) + 50,
       alignment: 'center',
-      fill: "#FF9900",
-      extrudeDepth: 4,
-      extrudeX: -1.80,
-      extrudeY: 0.80,
-      extrudeStart: "#ff0000",
-      extrudeEnd: "#ff0000",
-      highlight: "#fff4b8",
-      showHighlight: false,
+      fill: palette[1],
+      extrudeDepth: Math.floor(rand() * 10) + 2,
+      extrudeX: rand() * 4 - 2,
+      extrudeY: rand() * 4 - 2,
+      extrudeStart: palette[2],
+      extrudeEnd: palette[2],
+      highlight: palette[3],
+      showHighlight: rand() > 0.5,
       outlineThickness: 0,
-      outlineColor: "#D10000",
+      outlineColor: palette[4],
       fontUrl: "https://db.onlinewebfonts.com/t/05772fcddb0048a8a7d2279736c5790a.ttf",
     },
     layer2: {
@@ -323,16 +394,16 @@ const generateRandomTextDesignParams = (): TextDesignArtworkParams => {
       y: 0.68,
       size: 60,
       alignment: 'center',
-      fill: "#FF9900",
+      fill: palette[1],
       extrudeDepth: 12,
       extrudeX: 1.0,
       extrudeY: 1.0,
-      extrudeStart: "#D10000",
-      extrudeEnd: "#8A0000",
-      highlight: "#fff4b8",
+      extrudeStart: palette[4],
+      extrudeEnd: palette[4],
+      highlight: palette[3],
       showHighlight: false,
       outlineThickness: 4,
-      outlineColor: "#D10000",
+      outlineColor: palette[4],
       fontUrl: "",
     },
     layer3: {
@@ -341,22 +412,28 @@ const generateRandomTextDesignParams = (): TextDesignArtworkParams => {
       y: 0.68,
       size: 100,
       alignment: 'center',
-      fill: "#FF9900",
+      fill: palette[1],
       extrudeDepth: 12,
       extrudeX: 1.0,
       extrudeY: 1.0,
-      extrudeStart: "#D10000",
-      extrudeEnd: "#8A0000",
-      highlight: "#fff4b8",
+      extrudeStart: palette[4],
+      extrudeEnd: palette[4],
+      highlight: palette[3],
       showHighlight: false,
       outlineThickness: 4,
-      outlineColor: "#D10000",
+      outlineColor: palette[4],
       fontUrl: "",
     },
-    seed: Date.now(),
+    token: token,
     exportWidth: 1600,
     exportHeight: 2000,
   };
+};
+
+// Generate random text design params
+const generateRandomTextDesignParams = (): TextDesignArtworkParams => {
+  const newToken = generateToken();
+  return generateTextDesignParamsFromToken(newToken);
 };
 
 
@@ -402,9 +479,15 @@ function StudioContent() {
   const [tokenInput, setTokenInput] = useState<string>("");
 
   // Initialize token input when flowParams changes
+  // Initialize token input when params change
   useEffect(() => {
-    setTokenInput(flowParams.token);
-  }, [flowParams.token]);
+    if (currentArtwork === 'flow') setTokenInput(flowParams.token);
+    else if (currentArtwork === 'grid') setTokenInput(gridParams.token);
+    else if (currentArtwork === 'mosaic') setTokenInput(mosaicParams.token);
+    else if (currentArtwork === 'rotated') setTokenInput(rotatedGridParams.token);
+    else if (currentArtwork === 'tree') setTokenInput(treeParams.token);
+    else if (currentArtwork === 'textdesign') setTokenInput(textDesignParams.token);
+  }, [currentArtwork, flowParams.token, gridParams.token, mosaicParams.token, rotatedGridParams.token, treeParams.token, textDesignParams.token]);
 
   // Save current artwork state to localStorage
   const saveArtworkState = () => {
@@ -553,66 +636,120 @@ function StudioContent() {
   };
 
   const handleGridParamChange = (param: keyof GridArtworkParams, value: number) => {
-    setGridParams((prev) => ({
-      ...prev,
-      [param]: value,
-    }));
+    setGridParams((prev) => {
+      const newParams = { ...prev, [param]: value };
+      const newToken = generateToken();
+      return { ...newParams, token: newToken };
+    });
   };
 
   const handleGridColorChange = (param: keyof GridArtworkParams, value: string) => {
-    setGridParams((prev) => ({
-      ...prev,
-      [param]: value,
-    }));
+    setGridParams((prev) => {
+      const newParams = { ...prev, [param]: value };
+      const newToken = generateToken();
+      return { ...newParams, token: newToken };
+    });
+  };
+
+  const handleGridTokenChange = (value: string) => {
+    const trimmedValue = value.trim();
+    setTokenInput(value);
+    if (validateToken(trimmedValue)) {
+      const newParams = generateGridParamsFromToken(trimmedValue);
+      setGridParams(newParams);
+    }
   };
 
   const handleMosaicParamChange = (param: keyof MosaicArtworkParams, value: number) => {
-    setMosaicParams((prev) => ({
-      ...prev,
-      [param]: value,
-    }));
+    setMosaicParams((prev) => {
+      const newParams = { ...prev, [param]: value };
+      const newToken = generateToken();
+      return { ...newParams, token: newToken };
+    });
   };
 
   const handleMosaicColorChange = (param: keyof MosaicArtworkParams, value: string) => {
-    setMosaicParams((prev) => ({
-      ...prev,
-      [param]: value,
-    }));
+    setMosaicParams((prev) => {
+      const newParams = { ...prev, [param]: value };
+      const newToken = generateToken();
+      return { ...newParams, token: newToken };
+    });
+  };
+
+  const handleMosaicTokenChange = (value: string) => {
+    const trimmedValue = value.trim();
+    setTokenInput(value);
+    if (validateToken(trimmedValue)) {
+      const newParams = generateMosaicParamsFromToken(trimmedValue);
+      setMosaicParams(newParams);
+    }
   };
 
   const handleRotatedGridParamChange = (param: keyof RotatedGridArtworkParams, value: number) => {
-    setRotatedGridParams((prev) => ({
-      ...prev,
-      [param]: value,
-    }));
+    setRotatedGridParams((prev) => {
+      const newParams = { ...prev, [param]: value };
+      const newToken = generateToken();
+      return { ...newParams, token: newToken };
+    });
   };
 
   const handleRotatedGridColorChange = (param: keyof RotatedGridArtworkParams, value: string) => {
-    setRotatedGridParams((prev) => ({
-      ...prev,
-      [param]: value,
-    }));
+    setRotatedGridParams((prev) => {
+      const newParams = { ...prev, [param]: value };
+      const newToken = generateToken();
+      return { ...newParams, token: newToken };
+    });
+  };
+
+  const handleRotatedGridTokenChange = (value: string) => {
+    const trimmedValue = value.trim();
+    setTokenInput(value);
+    if (validateToken(trimmedValue)) {
+      const newParams = generateRotatedGridParamsFromToken(trimmedValue);
+      setRotatedGridParams(newParams);
+    }
   };
 
   const handleTreeParamChange = (param: keyof TreeArtworkParams, value: number) => {
-    setTreeParams((prev) => ({
-      ...prev,
-      [param]: param === 'textEnabled' ? Boolean(value) : value,
-    }));
+    setTreeParams((prev) => {
+      const newParams = { ...prev, [param]: param === 'textEnabled' ? Boolean(value) : value };
+      const newToken = generateToken();
+      return { ...newParams, token: newToken };
+    });
   };
 
   const handleTreeColorChange = (param: keyof TreeArtworkParams, value: string) => {
-    setTreeParams((prev) => ({
-      ...prev,
-      [param]: value,
-    }));
+    setTreeParams((prev) => {
+      const newParams = { ...prev, [param]: value };
+      const newToken = generateToken();
+      return { ...newParams, token: newToken };
+    });
+  };
+
+  const handleTreeTokenChange = (value: string) => {
+    const trimmedValue = value.trim();
+    setTokenInput(value);
+    if (validateToken(trimmedValue)) {
+      const newParams = generateTreeParamsFromToken(trimmedValue);
+      setTreeParams(newParams);
+    }
   };
 
   const handleTextDesignParamChange = (param: keyof TextDesignArtworkParams, value: any) => {
-    setTextDesignParams((prev) => ({
-      ...prev,
-      [param]: value,
-    }));
+    setTextDesignParams((prev) => {
+      const newParams = { ...prev, [param]: value };
+      const newToken = generateToken();
+      return { ...newParams, token: newToken };
+    });
+  };
+
+  const handleTextDesignTokenChange = (value: string) => {
+    const trimmedValue = value.trim();
+    setTokenInput(value);
+    if (validateToken(trimmedValue)) {
+      const newParams = generateTextDesignParamsFromToken(trimmedValue);
+      setTextDesignParams(newParams);
+    }
   };
 
   const handleExportImage = () => {
@@ -737,100 +874,32 @@ function StudioContent() {
   };
 
   const handleGridRandomize = () => {
-    // Get 6 harmonious colors from a curated palette (4 for shapes + background + border)
-    const { colors, background } = getRandomColors(6);
-
-    setGridParams({
-      backgroundColor: background || colors[0] || "#1d1d1b",
-      borderColor: colors[1] || "#f2f2e7",
-      color1: colors[2] || "#4793AF",
-      color2: colors[3] || "#FFC470",
-      color3: colors[4] || "#DD5746",
-      color4: colors[5] || "#8B322C",
-      animationSpeed: Math.random() * 0.1 + 0.01,
-      maxDepth: Math.floor(Math.random() * 3) + 1,
-      minModuleSize: Math.floor(Math.random() * 50) + 20,
-      subdivideChance: Math.random() * 0.6 + 0.2,
-      crossSize: Math.random() * 0.5 + 0.5,
-      minColumns: Math.floor(Math.random() * 3) + 4,
-      maxColumns: Math.floor(Math.random() * 4) + 7,
-      canvasWidth: gridParams.canvasWidth,
-      canvasHeight: gridParams.canvasHeight,
-      isAnimating: gridParams.isAnimating,
-      seed: Date.now(),
-      exportWidth: 1600,
-      exportHeight: 2000,
-    });
+    const newParams = generateRandomGridParams();
+    setGridParams(newParams);
   };
 
   const handleMosaicRandomize = () => {
-    // Get 4 harmonious colors from a curated palette
-    const { colors } = getRandomColors(4);
-
-    setMosaicParams({
-      color1: colors[0],
-      color2: colors[1],
-      color3: colors[2],
-      color4: colors[3],
-      initialRectMinSize: Math.random() * 0.4 + 0.2,
-      initialRectMaxSize: Math.random() * 0.3 + 0.6,
-      gridDivisionChance: Math.random() * 0.6 + 0.3,
-      recursionChance: Math.random() * 0.6 + 0.2,
-      minGridRows: Math.floor(Math.random() * 3) + 2,
-      maxGridRows: Math.floor(Math.random() * 5) + 4,
-      minGridCols: Math.floor(Math.random() * 3) + 2,
-      maxGridCols: Math.floor(Math.random() * 5) + 4,
-      splitRatioMin: Math.random() * 0.2 + 0.1,
-      splitRatioMax: Math.random() * 0.2 + 0.7,
-      marginMultiplier: Math.random() * 0.15 + 0.05,
-      detailGridMin: Math.floor(Math.random() * 2) + 2,
-      detailGridMax: Math.floor(Math.random() * 2) + 4,
-      noiseDensity: Math.random() * 0.2,
-      minRecursionSize: Math.floor(Math.random() * 40) + 30,
-      canvasWidth: mosaicParams.canvasWidth,
-      canvasHeight: mosaicParams.canvasHeight,
-      seed: Date.now(),
-      exportWidth: 1600,
-      exportHeight: 2000,
-    });
+    const newParams = generateRandomMosaicParams();
+    setMosaicParams(newParams);
   };
 
   const handleMosaicRegenerate = () => {
-    setMosaicParams((prev) => ({
-      ...prev,
-      seed: Date.now(),
-    }));
-  };
-
-  const handleRotatedGridRandomize = () => {
-    // Get 5 harmonious colors from a curated palette (4 for cells + background)
-    const { colors, background } = getRandomColors(5);
-
-    setRotatedGridParams({
-      color1: colors[0],
-      color2: colors[1],
-      color3: colors[2],
-      color4: colors[3],
-      backgroundColor: background || colors[4],
-      offsetRatio: Math.random() * 0.1 + 0.02,
-      marginRatio: Math.random() * 0.3 + 0.1,
-      minCellCount: Math.floor(Math.random() * 2) + 2,
-      maxCellCount: Math.floor(Math.random() * 3) + 3,
-      minRecursionSize: Math.random() * 0.08 + 0.04,
-      strokeWeight: Math.random() * 3 + 0.5,
-      canvasWidth: rotatedGridParams.canvasWidth,
-      canvasHeight: rotatedGridParams.canvasHeight,
-      seed: Date.now(),
-      exportWidth: 1600,
-      exportHeight: 2000,
+    setMosaicParams((prev) => {
+      const newToken = generateToken();
+      return { ...prev, token: newToken };
     });
   };
 
+  const handleRotatedGridRandomize = () => {
+    const newParams = generateRandomRotatedGridParams();
+    setRotatedGridParams(newParams);
+  };
+
   const handleRotatedGridRegenerate = () => {
-    setRotatedGridParams((prev) => ({
-      ...prev,
-      seed: Date.now(),
-    }));
+    setRotatedGridParams((prev) => {
+      const newToken = generateToken();
+      return { ...prev, token: newToken };
+    });
   };
 
   const handleTreeRandomize = () => {
@@ -842,10 +911,10 @@ function StudioContent() {
   };
 
   const handleTreeRegenerate = () => {
-    setTreeParams((prev) => ({
-      ...prev,
-      seed: Date.now(),
-    }));
+    setTreeParams((prev) => {
+      const newToken = generateToken();
+      return { ...prev, token: newToken };
+    });
   };
 
   const handleNextArtwork = () => {
@@ -1021,6 +1090,8 @@ function StudioContent() {
                     onExportGif={handleExportGif}
                     onExportWallpapers={handleExportWallpapers}
                     onToggleAnimation={handleToggleAnimation}
+                    tokenInput={tokenInput}
+                    onTokenChange={handleGridTokenChange}
                     onRandomize={handleGridRandomize}
                   />
                 )}
@@ -1029,6 +1100,8 @@ function StudioContent() {
                     params={mosaicParams}
                     onParamChange={handleMosaicParamChange}
                     onColorChange={handleMosaicColorChange}
+                    tokenInput={tokenInput}
+                    onTokenChange={handleMosaicTokenChange}
                     onExportImage={handleExportImage}
                     onExportWallpapers={handleExportWallpapers}
                     onRandomize={handleMosaicRandomize}
@@ -1040,6 +1113,8 @@ function StudioContent() {
                     params={rotatedGridParams}
                     onParamChange={handleRotatedGridParamChange}
                     onColorChange={handleRotatedGridColorChange}
+                    tokenInput={tokenInput}
+                    onTokenChange={handleRotatedGridTokenChange}
                     onExportImage={handleExportImage}
                     onExportWallpapers={handleExportWallpapers}
                     onRandomize={handleRotatedGridRandomize}
@@ -1051,6 +1126,8 @@ function StudioContent() {
                     params={treeParams}
                     onParamChange={handleTreeParamChange}
                     onColorChange={handleTreeColorChange}
+                    tokenInput={tokenInput}
+                    onTokenChange={handleTreeTokenChange}
                     onExportImage={handleExportImage}
                     onExportGif={handleExportGif}
                     onExportWallpapers={handleExportWallpapers}
@@ -1063,6 +1140,8 @@ function StudioContent() {
                   <TextDesignControls
                     params={textDesignParams}
                     onParamChange={handleTextDesignParamChange}
+                    tokenInput={tokenInput}
+                    onTokenChange={handleTextDesignTokenChange}
                     onExportImage={handleExportImage}
                     onExportWallpapers={handleExportWallpapers}
                   />

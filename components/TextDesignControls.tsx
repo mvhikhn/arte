@@ -11,6 +11,8 @@ interface TextDesignControlsProps {
     onParamChange: (param: keyof TextDesignArtworkParams, value: any) => void;
     onExportImage: () => void;
     onExportWallpapers: () => void;
+    tokenInput?: string;
+    onTokenChange?: (value: string) => void;
 }
 
 export default function TextDesignControls({
@@ -18,6 +20,8 @@ export default function TextDesignControls({
     onParamChange,
     onExportImage,
     onExportWallpapers,
+    tokenInput,
+    onTokenChange,
 }: TextDesignControlsProps) {
     const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
 
@@ -64,6 +68,9 @@ export default function TextDesignControls({
                 </button>
                 {isExpanded && (
                     <div className="px-3 pb-3 space-y-3">
+                        {/* Token Input */}
+
+
                         {/* Text Content */}
                         <div className="space-y-1">
                             <span className="text-[10px] text-zinc-500 tracking-wide">Text Content</span>
@@ -343,8 +350,9 @@ export default function TextDesignControls({
                             </div>
                         </div>
                     </div>
-                )}
-            </div>
+                )
+                }
+            </div >
         );
     };
 
@@ -366,6 +374,35 @@ export default function TextDesignControls({
                     <Monitor className="w-3.5 h-3.5" />
                     Export Wallpapers
                 </button>
+            </div>
+
+            {/* Token Input */}
+            <div className="border-b border-zinc-100">
+                <button
+                    onClick={() => toggleSection("Token")}
+                    className="w-full px-3 py-2 flex items-center justify-between hover:bg-zinc-50 transition-colors"
+                >
+                    <span className="font-medium text-xs tracking-wide text-zinc-700">Token</span>
+                    {expandedSections.has("Token") ? (
+                        <ChevronDown className="w-3 h-3 text-zinc-500" />
+                    ) : (
+                        <ChevronRight className="w-3 h-3 text-zinc-500" />
+                    )}
+                </button>
+                {expandedSections.has("Token") && (
+                    <div className="px-3 pb-3">
+                        <input
+                            type="text"
+                            value={tokenInput || params.token || ''}
+                            onChange={(e) => onTokenChange && onTokenChange(e.target.value)}
+                            className="w-full px-2 py-1.5 bg-zinc-50 border border-zinc-200 rounded text-xs font-mono text-zinc-600 focus:outline-none focus:border-zinc-400 focus:ring-0"
+                            placeholder="fx-..."
+                        />
+                        <p className="mt-1.5 text-[10px] text-zinc-400 leading-relaxed">
+                            This token uniquely identifies your artwork. Paste a previous token to restore it.
+                        </p>
+                    </div>
+                )}
             </div>
 
             {/* Global Settings */}

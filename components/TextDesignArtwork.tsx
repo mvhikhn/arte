@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useImperativeHandle, forwardRef } from "react";
+import { useEffect, useRef, useImperativeHandle, forwardRef, useCallback } from "react";
+import { tokenToSeed } from "@/utils/token";
 
 // Text layer configuration
 interface TextLayer {
@@ -40,8 +41,9 @@ export interface TextDesignArtworkParams {
     layer2: TextLayer;
     layer3: TextLayer;
 
+
     // Technical
-    seed: number;
+    token: string;
     exportWidth: number;
     exportHeight: number;
 }
@@ -67,7 +69,7 @@ const TextDesignArtwork = forwardRef<TextDesignArtworkRef, TextDesignArtworkProp
         }, [params]);
 
         // Helper to load fonts
-        const loadFonts = () => {
+        const loadFonts = useCallback(() => {
             if (!sketchRef.current || !sketchRef.current.loadFont) return;
 
             const load = (url: string | undefined, id: string) => {
@@ -90,12 +92,12 @@ const TextDesignArtwork = forwardRef<TextDesignArtworkRef, TextDesignArtworkProp
             load(params.layer1.fontUrl, 'layer1');
             load(params.layer2.fontUrl, 'layer2');
             load(params.layer3.fontUrl, 'layer3');
-        };
+        }, [params.fontUrl, params.layer1.fontUrl, params.layer2.fontUrl, params.layer3.fontUrl]);
 
         // Load fonts when URLs change
         useEffect(() => {
             loadFonts();
-        }, [params.fontUrl, params.layer1.fontUrl, params.layer2.fontUrl, params.layer3.fontUrl]);
+        }, [loadFonts]);
 
         // Handle background image changes
         useEffect(() => {
@@ -292,6 +294,10 @@ const TextDesignArtwork = forwardRef<TextDesignArtworkRef, TextDesignArtworkProp
 
                     p.setup = () => {
                         p.pixelDensity(2); // For crisp text rendering
+                        // Set seed
+                        const seed = tokenToSeed(paramsRef.current.token);
+                        p.randomSeed(seed);
+                        p.noiseSeed(seed);
                         const canvas = p.createCanvas(
                             paramsRef.current.canvasWidth,
                             paramsRef.current.canvasHeight

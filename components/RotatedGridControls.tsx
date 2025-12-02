@@ -14,6 +14,8 @@ interface RotatedGridControlsProps {
   onExportWallpapers: () => void;
   onRandomize: () => void;
   onRegenerate: () => void;
+  tokenInput?: string;
+  onTokenChange?: (value: string) => void;
 }
 
 interface ControlConfig {
@@ -53,7 +55,7 @@ const sections: Section[] = [
   },
 ];
 
-export default function RotatedGridControls({ params, onParamChange, onColorChange, onExportImage, onExportWallpapers, onRandomize, onRegenerate }: RotatedGridControlsProps) {
+export default function RotatedGridControls({ params, onParamChange, onColorChange, onExportImage, onExportWallpapers, onRandomize, onRegenerate, tokenInput, onTokenChange }: RotatedGridControlsProps) {
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
 
   const toggleSection = (title: string) => {
@@ -90,6 +92,35 @@ export default function RotatedGridControls({ params, onParamChange, onColorChan
         >
           Randomize
         </button>
+      </div>
+
+      {/* Token Input */}
+      <div className="border-b border-zinc-100">
+        <button
+          onClick={() => toggleSection("Token")}
+          className="w-full px-3 py-2 flex items-center justify-between hover:bg-zinc-50 transition-colors"
+        >
+          <span className="font-semibold text-xs tracking-wider text-zinc-500">Token</span>
+          {expandedSections.has("Token") ? (
+            <ChevronDown className="w-3 h-3 text-zinc-400" />
+          ) : (
+            <ChevronRight className="w-3 h-3 text-zinc-400" />
+          )}
+        </button>
+        {expandedSections.has("Token") && (
+          <div className="px-3 pb-3">
+            <input
+              type="text"
+              value={tokenInput || params.token || ''}
+              onChange={(e) => onTokenChange && onTokenChange(e.target.value)}
+              className="w-full px-2 py-1.5 bg-zinc-50 border border-zinc-200 rounded text-xs font-mono text-zinc-600 focus:outline-none focus:border-zinc-400 focus:ring-0"
+              placeholder="fx-..."
+            />
+            <p className="mt-1.5 text-[10px] text-zinc-400 leading-relaxed">
+              This token uniquely identifies your artwork. Paste a previous token to restore it.
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Collapsible Sections */}
