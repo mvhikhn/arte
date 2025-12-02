@@ -48,6 +48,20 @@ export function validateToken(token: string, artworkType?: ArtworkType): boolean
             return false;
         }
 
+        // Check if this is a v1 state token (encoded params)
+        // Format: fx-[type]-v1-[base64]
+        if (randomAndChecksum === 'v1') {
+            // It's a state token. We just need to verify it has data.
+            // The split above only gave us 3 parts, but a v1 token has 4 parts: fx-type-v1-data
+            // So we need to re-check the original token structure
+            const v1Parts = token.split('-');
+            if (v1Parts.length < 4) return false;
+
+            // Check if data part exists and is not empty
+            const dataPart = v1Parts[3];
+            return !!dataPart && dataPart.length > 0;
+        }
+
         // Validate length: 44 random + 2 checksum
         if (randomAndChecksum.length !== 46) {
             return false;
