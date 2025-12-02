@@ -77,21 +77,46 @@ const generateFlowParamsFromToken = (token: string): ArtworkParams => {
   const { createSeededRandom } = require('@/utils/token');
   const rand = createSeededRandom(token);
 
-  // Elegant monochromatic palette inspired by studioyorktown
-  // Black/dark background with light flowing lines
-  const bgShades = ['#000000', '#0a0a0a', '#0f0f0f', '#1a1a1a'];
-  const strokeShades = [
-    '#ffffff', '#f5f5f5', '#e8e8e8', '#d4d4d4', '#c0c0c0',
-    '#faf8f3', '#f0ede6', '#e6e3dc', // cream tones
+  // Multiple curated palette styles
+  const paletteStyles = [
+    {
+      name: 'studioyorktown',
+      backgrounds: ['#000000', '#0a0a0a', '#0f0f0f', '#1a1a1a'],
+      strokes: ['#ffffff', '#f5f5f5', '#e8e8e8', '#d4d4d4', '#c0c0c0', '#faf8f3', '#f0ede6', '#e6e3dc'],
+    },
+    {
+      name: 'nat_sarkissian',
+      backgrounds: ['#1a1614', '#2b2520', '#0d0c0b', '#1e1b18'],
+      strokes: ['#e8d5c4', '#f4e8d9', '#d4c0ab', '#c9b59a', '#f0e6d2', '#dcc8b3'],
+    },
+    {
+      name: 'vibrant_dark',
+      backgrounds: ['#0a0e27', '#1a1a2e', '#16213e', '#0f1419'],
+      strokes: ['#ff6b9d', '#c44569', '#f8b500', '#4a90e2', '#50c878', '#e94b3c'],
+    },
+    {
+      name: 'ocean_depths',
+      backgrounds: ['#001f3f', '#0a2f51', '#001a33', '#0d2b45'],
+      strokes: ['#7fcdcd', '#41b3d3', '#84fab0', '#8fd3f4', '#a8e6cf'],
+    },
+    {
+      name: 'sunset_minimal',
+      backgrounds: ['#2d1b2e', '#1a1423', '#2a1a2e', '#1e1326'],
+      strokes: ['#ff6b9d', '#ffa07a', '#ffb6c1', '#ffd700', '#ff8c94'],
+    },
   ];
 
-  // Pick background
-  const backgroundColor = bgShades[Math.floor(rand() * bgShades.length)];
+  // Pick a palette style
+  const paletteIndex = Math.floor(rand() * paletteStyles.length);
+  const palette = paletteStyles[paletteIndex];
 
-  // Pick 5 coordinated light strokes
+  // Pick background
+  const backgroundColor = palette.backgrounds[Math.floor(rand() * palette.backgrounds.length)];
+
+  // Pick 5 coordinated strokes
   const colors = [];
   for (let i = 0; i < 5; i++) {
-    colors.push(strokeShades[Math.floor(rand() * strokeShades.length)]);
+    colors.push(palette.strokes[Math.floor(rand() * palette.strokes.length)]);
   }
 
   return {
@@ -478,17 +503,39 @@ function StudioContent() {
 
 
   const handleFlowParamChange = (param: keyof ArtworkParams, value: number) => {
-    setFlowParams((prev) => ({
-      ...prev,
-      [param]: value,
-    }));
+    setFlowParams((prev) => {
+      // Create new params with the changed value
+      const newParams = {
+        ...prev,
+        [param]: value,
+      };
+
+      // Generate a new token to represent this state
+      const newToken = generateToken();
+
+      return {
+        ...newParams,
+        token: newToken,
+      };
+    });
   };
 
   const handleFlowColorChange = (param: keyof ArtworkParams, value: string) => {
-    setFlowParams((prev) => ({
-      ...prev,
-      [param]: value,
-    }));
+    setFlowParams((prev) => {
+      // Create new params with the changed color
+      const newParams = {
+        ...prev,
+        [param]: value,
+      };
+
+      // Generate a new token to represent this state
+      const newToken = generateToken();
+
+      return {
+        ...newParams,
+        token: newToken,
+      };
+    });
   };
 
   const handleFlowTokenChange = (value: string) => {
@@ -954,6 +1001,7 @@ function StudioContent() {
                 {currentArtwork === "flow" && (
                   <Controls
                     params={flowParams}
+                    tokenInput={tokenInput}
                     onParamChange={handleFlowParamChange}
                     onColorChange={handleFlowColorChange}
                     onTokenChange={handleFlowTokenChange}

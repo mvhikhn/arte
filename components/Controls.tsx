@@ -16,6 +16,7 @@ interface ControlsProps {
   onToggleAnimation: () => void;
   onRandomize: () => void;
   onTokenChange?: (value: string) => void;
+  tokenInput?: string;
 }
 
 interface ControlConfig {
@@ -78,7 +79,7 @@ const sections: Section[] = [
   },
 ];
 
-export default function Controls({ params, onParamChange, onColorChange, onExportImage, onExportGif, onExportWallpapers, onToggleAnimation, onRandomize, onTokenChange }: ControlsProps) {
+export default function Controls({ params, tokenInput, onParamChange, onColorChange, onExportImage, onExportGif, onExportWallpapers, onToggleAnimation, onRandomize, onTokenChange }: ControlsProps) {
   const [gifDuration, setGifDuration] = useState(3);
   const [gifFps, setGifFps] = useState(30);
   const [isExporting, setIsExporting] = useState(false);
@@ -159,8 +160,8 @@ export default function Controls({ params, onParamChange, onColorChange, onExpor
             <div className="px-3 pb-3 space-y-1.5">
               <input
                 type="text"
-                value={params.token}
-                onChange={(e) => onTokenChange(e.target.value)}
+                value={tokenInput || params.token}
+                onChange={(e) => onTokenChange && onTokenChange(e.target.value)}
                 className="w-full px-2 py-1.5 bg-zinc-50 border border-zinc-200 rounded-md font-mono text-[10px] text-zinc-600 focus:border-zinc-400 focus:text-zinc-900 focus:outline-none transition-colors"
                 placeholder="fx-..."
               />
