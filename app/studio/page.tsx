@@ -636,7 +636,7 @@ function StudioContent() {
         newToken: newToken,
         preservingColors: [prev.color1, prev.color2, prev.color3, prev.color4]
       });
-      return {
+      const finalParams = {
         ...newParams,
         colorSeed: preservedColorSeed,
         // Preserve actual color values
@@ -645,6 +645,10 @@ function StudioContent() {
         color3: prev.color3,
         color4: prev.color4,
       };
+      // Encode complete state into v1 token for URL
+      const encodedToken = encodeParams('mosaic', finalParams);
+      setTokenInput(encodedToken);
+      return finalParams;
     });
   };
 
@@ -657,16 +661,22 @@ function StudioContent() {
     const newToken = generateToken('rotated');
     const newParams = generateRotatedGridParamsFromToken(newToken);
     // Preserve colorSeed AND actual color values (layout changes, colors stay same)
-    setRotatedGridParams(prev => ({
-      ...newParams,
-      colorSeed: prev.colorSeed || prev.token,
-      // Preserve actual color values
-      color1: prev.color1,
-      color2: prev.color2,
-      color3: prev.color3,
-      color4: prev.color4,
-      backgroundColor: prev.backgroundColor,
-    }));
+    setRotatedGridParams(prev => {
+      const finalParams = {
+        ...newParams,
+        colorSeed: prev.colorSeed || prev.token,
+        // Preserve actual color values
+        color1: prev.color1,
+        color2: prev.color2,
+        color3: prev.color3,
+        color4: prev.color4,
+        backgroundColor: prev.backgroundColor,
+      };
+      // Encode complete state into v1 token for URL
+      const encodedToken = encodeParams('rotated', finalParams);
+      setTokenInput(encodedToken);
+      return finalParams;
+    });
   };
 
   const handleTreeRandomize = () => {
@@ -681,20 +691,26 @@ function StudioContent() {
     const newToken = generateToken('tree');
     const newParams = generateTreeParamsFromToken(newToken);
     // Preserve colorSeed, canvas dimensions, AND actual color values
-    setTreeParams(prev => ({
-      ...newParams,
-      canvasWidth: prev.canvasWidth,
-      canvasHeight: prev.canvasHeight,
-      colorSeed: prev.colorSeed || prev.token,
-      // Preserve actual color values
-      stemColor1: prev.stemColor1,
-      stemColor2: prev.stemColor2,
-      stemColor3: prev.stemColor3,
-      tipColor1: prev.tipColor1,
-      tipColor2: prev.tipColor2,
-      tipColor3: prev.tipColor3,
-      backgroundColor: prev.backgroundColor,
-    }));
+    setTreeParams(prev => {
+      const finalParams = {
+        ...newParams,
+        canvasWidth: prev.canvasWidth,
+        canvasHeight: prev.canvasHeight,
+        colorSeed: prev.colorSeed || prev.token,
+        // Preserve actual color values
+        stemColor1: prev.stemColor1,
+        stemColor2: prev.stemColor2,
+        stemColor3: prev.stemColor3,
+        tipColor1: prev.tipColor1,
+        tipColor2: prev.tipColor2,
+        tipColor3: prev.tipColor3,
+        backgroundColor: prev.backgroundColor,
+      };
+      // Encode complete state into v1 token for URL
+      const encodedToken = encodeParams('tree', finalParams);
+      setTokenInput(encodedToken);
+      return finalParams;
+    });
   };
 
   const handleNextArtwork = () => {
