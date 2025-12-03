@@ -18,6 +18,7 @@ export default function Home() {
     ];
 
     const blogPosts = [
+        { slug: "artwork-retrieval-system", title: "How Artwork Retrieval Works", date: "Dec 03, 2024" },
         { slug: "hello-world", title: "Hello World", date: "Nov 29, 2025" },
         { slug: "algorithmic-beauty", title: "The Beauty of Algorithms", date: "Dec 05, 2025" },
     ];
@@ -147,6 +148,12 @@ export default function Home() {
                             <div className="space-y-2 max-w-md">
                                 <h1 ref={nameRef} className="text-4xl font-medium tracking-tight text-black">Mahi Khan</h1>
                                 <p className="text-zinc-500 text-sm">est. 2004</p>
+                                <CleanLink
+                                    href="/view"
+                                    className="inline-flex items-center text-xs font-medium text-zinc-400 hover:text-zinc-900 transition-colors border-b border-zinc-200 hover:border-zinc-900 pb-0.5"
+                                >
+                                    Retrieve
+                                </CleanLink>
                             </div>
 
                             {/* Bio Content */}
