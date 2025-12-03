@@ -627,11 +627,25 @@ function StudioContent() {
   const handleMosaicRegenerate = () => {
     const newToken = generateToken('mosaic');
     const newParams = generateMosaicParamsFromToken(newToken);
-    // Preserve colorSeed (color remains locked, layout changes)
-    setMosaicParams(prev => ({
-      ...newParams,
-      colorSeed: prev.colorSeed || prev.token // Use existing colorSeed or fallback to old token
-    }));
+    // Preserve colorSeed AND actual color values (layout changes, colors stay same)
+    setMosaicParams(prev => {
+      const preservedColorSeed = prev.colorSeed || prev.token;
+      console.log('🔄 Mosaic Regenerate:', {
+        oldToken: prev.token,
+        oldColorSeed: prev.colorSeed,
+        newToken: newToken,
+        preservingColors: [prev.color1, prev.color2, prev.color3, prev.color4]
+      });
+      return {
+        ...newParams,
+        colorSeed: preservedColorSeed,
+        // Preserve actual color values
+        color1: prev.color1,
+        color2: prev.color2,
+        color3: prev.color3,
+        color4: prev.color4,
+      };
+    });
   };
 
   const handleRotatedGridRandomize = () => {
@@ -642,10 +656,16 @@ function StudioContent() {
   const handleRotatedGridRegenerate = () => {
     const newToken = generateToken('rotated');
     const newParams = generateRotatedGridParamsFromToken(newToken);
-    // Preserve colorSeed (color remains locked, layout changes)
+    // Preserve colorSeed AND actual color values (layout changes, colors stay same)
     setRotatedGridParams(prev => ({
       ...newParams,
-      colorSeed: prev.colorSeed || prev.token // Use existing colorSeed or fallback to old token
+      colorSeed: prev.colorSeed || prev.token,
+      // Preserve actual color values
+      color1: prev.color1,
+      color2: prev.color2,
+      color3: prev.color3,
+      color4: prev.color4,
+      backgroundColor: prev.backgroundColor,
     }));
   };
 
@@ -660,12 +680,20 @@ function StudioContent() {
   const handleTreeRegenerate = () => {
     const newToken = generateToken('tree');
     const newParams = generateTreeParamsFromToken(newToken);
-    // Preserve colorSeed and canvas dimensions
+    // Preserve colorSeed, canvas dimensions, AND actual color values
     setTreeParams(prev => ({
       ...newParams,
       canvasWidth: prev.canvasWidth,
       canvasHeight: prev.canvasHeight,
-      colorSeed: prev.colorSeed || prev.token // Use existing colorSeed or fallback to old token
+      colorSeed: prev.colorSeed || prev.token,
+      // Preserve actual color values
+      stemColor1: prev.stemColor1,
+      stemColor2: prev.stemColor2,
+      stemColor3: prev.stemColor3,
+      tipColor1: prev.tipColor1,
+      tipColor2: prev.tipColor2,
+      tipColor3: prev.tipColor3,
+      backgroundColor: prev.backgroundColor,
     }));
   };
 

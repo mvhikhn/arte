@@ -197,6 +197,11 @@ const MosaicArtwork = forwardRef<MosaicArtworkRef, MosaicArtworkProps>(({ params
           // Create separate RNG for color selection using colorSeed
           const colorSeed = paramsRef.current.colorSeed || paramsRef.current.token;
           const colorRng = createSeededRandom(colorSeed);
+          console.log('🎨 Mosaic Render:', {
+            layoutToken: paramsRef.current.token,
+            colorSeed: colorSeed,
+            colors: [paramsRef.current.color1, paramsRef.current.color2, paramsRef.current.color3, paramsRef.current.color4]
+          });
 
           COLORS = [
             paramsRef.current.color1,
