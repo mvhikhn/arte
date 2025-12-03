@@ -181,7 +181,7 @@ export default function ViewPage() {
 
                             <div className="flex gap-3">
                                 <Link
-                                    href={`/studio?artwork=${currentArtwork === 'text' ? 'textdesign' : currentArtwork}`}
+                                    href={`/studio?artwork=${currentArtwork === 'text' ? 'textdesign' : currentArtwork}&token=${encodeURIComponent(tokenInput.trim())}`}
                                     className="flex items-center gap-2 px-6 py-3 bg-black text-white rounded-full hover:bg-black/80 transition-all shadow-lg hover:shadow-xl active:scale-95"
                                 >
                                     <span>Open in Studio</span>

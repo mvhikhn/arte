@@ -172,7 +172,43 @@ function StudioContent() {
   // Separate state for token input to allow free editing
   const [tokenInput, setTokenInput] = useState<string>("");
 
-  // Initialize token input when flowParams changes
+  // Initialize from URL token if provided
+  useEffect(() => {
+    const urlToken = searchParams.get('token');
+    if (urlToken && validateToken(urlToken)) {
+      // Token is in URL, use it to initialize the artwork
+      const type = currentArtwork === 'textdesign' ? 'text' : currentArtwork;
+
+      try {
+        switch (type) {
+          case 'flow':
+            setFlowParams(generateFlowParamsFromToken(urlToken));
+            break;
+          case 'grid':
+            setGridParams(generateGridParamsFromToken(urlToken));
+            break;
+          case 'mosaic':
+            setMosaicParams(generateMosaicParamsFromToken(urlToken));
+            break;
+          case 'rotated':
+            setRotatedGridParams(generateRotatedGridParamsFromToken(urlToken));
+            break;
+          case 'tree':
+            setTreeParams(generateTreeParamsFromToken(urlToken));
+            break;
+          case 'text':
+            setTextDesignParams(generateTextDesignParamsFromToken(urlToken));
+            break;
+        }
+        setTokenInput(urlToken);
+      } catch (error) {
+        console.error('Failed to initialize from URL token:', error);
+      }
+    }
+    // Only run on mount or when URL changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // Initialize token input when params change
   useEffect(() => {
     if (currentArtwork === 'flow') setTokenInput(flowParams.token);
