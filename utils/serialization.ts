@@ -35,7 +35,13 @@ const encodeFlowParams = (params: ArtworkParams): string => {
         params.color3,
         params.color4,
         params.color5,
-        params.isAnimating ? 1 : 0
+        params.isAnimating ? 1 : 0,
+        params.canvasWidth,
+        params.canvasHeight,
+        params.targetWidth,
+        params.targetHeight,
+        params.exportWidth,
+        params.exportHeight
     ];
     return toBase64(JSON.stringify(data));
 };
@@ -64,6 +70,12 @@ const decodeFlowParams = (encoded: string, token: string): Partial<ArtworkParams
             color4: data[17],
             color5: data[18],
             isAnimating: Boolean(data[19]),
+            canvasWidth: data[20] || 630,
+            canvasHeight: data[21] || 790,
+            targetWidth: data[22] || 800,
+            targetHeight: data[23] || 1000,
+            exportWidth: data[24] || 1600,
+            exportHeight: data[25] || 2000,
             token: token
         };
     } catch (e) {
@@ -88,7 +100,11 @@ const encodeGridParams = (params: GridArtworkParams): string => {
         params.crossSize,
         params.minColumns,
         params.maxColumns,
-        params.isAnimating ? 1 : 0
+        params.isAnimating ? 1 : 0,
+        params.canvasWidth,
+        params.canvasHeight,
+        params.exportWidth,
+        params.exportHeight
     ];
     return toBase64(JSON.stringify(data));
 };
@@ -111,6 +127,10 @@ const decodeGridParams = (encoded: string, token: string): Partial<GridArtworkPa
             minColumns: data[11],
             maxColumns: data[12],
             isAnimating: Boolean(data[13]),
+            canvasWidth: data[14] || 630,
+            canvasHeight: data[15] || 790,
+            exportWidth: data[16] || 1600,
+            exportHeight: data[17] || 2000,
             token: token
         };
     } catch (e) {
@@ -140,7 +160,11 @@ const encodeMosaicParams = (params: MosaicArtworkParams): string => {
         params.detailGridMin,
         params.detailGridMax,
         params.noiseDensity,
-        params.minRecursionSize
+        params.minRecursionSize,
+        params.canvasWidth,
+        params.canvasHeight,
+        params.exportWidth,
+        params.exportHeight
     ];
     return toBase64(JSON.stringify(data));
 };
@@ -168,6 +192,10 @@ const decodeMosaicParams = (encoded: string, token: string): Partial<MosaicArtwo
             detailGridMax: data[16],
             noiseDensity: data[17],
             minRecursionSize: data[18],
+            canvasWidth: data[19] || 630,
+            canvasHeight: data[20] || 790,
+            exportWidth: data[21] || 1600,
+            exportHeight: data[22] || 2000,
             token: token
         };
     } catch (e) {
@@ -189,7 +217,11 @@ const encodeRotatedGridParams = (params: RotatedGridArtworkParams): string => {
         params.minCellCount,
         params.maxCellCount,
         params.minRecursionSize,
-        params.strokeWeight
+        params.strokeWeight,
+        params.canvasWidth,
+        params.canvasHeight,
+        params.exportWidth,
+        params.exportHeight
     ];
     return toBase64(JSON.stringify(data));
 };
@@ -209,6 +241,10 @@ const decodeRotatedGridParams = (encoded: string, token: string): Partial<Rotate
             maxCellCount: data[8],
             minRecursionSize: data[9],
             strokeWeight: data[10],
+            canvasWidth: data[11] || 630,
+            canvasHeight: data[12] || 790,
+            exportWidth: data[13] || 1600,
+            exportHeight: data[14] || 2000,
             token: token
         };
     } catch (e) {
@@ -239,7 +275,11 @@ const encodeTreeParams = (params: TreeArtworkParams): string => {
         params.tipColor3,
         params.backgroundColor,
         params.grainAmount,
-        params.isAnimating ? 1 : 0
+        params.isAnimating ? 1 : 0,
+        params.canvasWidth,
+        params.canvasHeight,
+        params.exportWidth,
+        params.exportHeight
     ];
     return toBase64(JSON.stringify(data));
 };
@@ -268,6 +308,10 @@ const decodeTreeParams = (encoded: string, token: string): Partial<TreeArtworkPa
             backgroundColor: data[17],
             grainAmount: data[18],
             isAnimating: Boolean(data[19]),
+            canvasWidth: data[20] || 630,
+            canvasHeight: data[21] || 790,
+            exportWidth: data[22] || 1600,
+            exportHeight: data[23] || 2000,
             token: token
         };
     } catch (e) {
@@ -306,6 +350,10 @@ const encodeTextDesignParams = (params: TextDesignArtworkParams): string => {
         params.grainAmount,
         params.fontUrl,
         params.customFontFamily,
+        params.canvasWidth,
+        params.canvasHeight,
+        params.exportWidth,
+        params.exportHeight,
         layer1,
         layer2,
         layer3
@@ -329,9 +377,13 @@ const decodeTextDesignParams = (encoded: string, token: string): Partial<TextDes
             grainAmount: data[1],
             fontUrl: data[2],
             customFontFamily: data[3],
-            layer1: mapLayer(data[4]),
-            layer2: mapLayer(data[5]),
-            layer3: mapLayer(data[6]),
+            canvasWidth: data[4] || 630,
+            canvasHeight: data[5] || 790,
+            exportWidth: data[6] || 1600,
+            exportHeight: data[7] || 2000,
+            layer1: mapLayer(data[8]),
+            layer2: mapLayer(data[9]),
+            layer3: mapLayer(data[10]),
             token: token
         };
     } catch (e) {
