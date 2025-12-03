@@ -615,7 +615,7 @@ function StudioContent() {
 
   const handleMosaicRegenerate = () => {
     setMosaicParams((prev) => {
-      const newToken = generateToken();
+      const newToken = generateToken('mosaic');
       return { ...prev, token: newToken };
     });
   };
@@ -627,7 +627,7 @@ function StudioContent() {
 
   const handleRotatedGridRegenerate = () => {
     setRotatedGridParams((prev) => {
-      const newToken = generateToken();
+      const newToken = generateToken('rotated');
       return { ...prev, token: newToken };
     });
   };
@@ -642,7 +642,7 @@ function StudioContent() {
 
   const handleTreeRegenerate = () => {
     setTreeParams((prev) => {
-      const newToken = generateToken();
+      const newToken = generateToken('tree');
       return { ...prev, token: newToken };
     });
   };

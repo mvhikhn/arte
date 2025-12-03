@@ -52,7 +52,7 @@
     font-size: 13px !important;
     overscroll-behavior: none;
     height: 100%;
-    overflow: hidden;
+    /* overflow: hidden; Removed to allow scrolling on blog pages */
     /* Prevent root scroll for snugness */
   }
 
