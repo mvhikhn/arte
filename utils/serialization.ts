@@ -392,6 +392,15 @@ const decodeTextDesignParams = (encoded: string, token: string): Partial<TextDes
     }
 };
 
+// Helper to calculate checksum from data
+const calculateChecksum = (data: string): string => {
+    let sum = 0;
+    for (let i = 0; i < data.length; i++) {
+        sum += data.charCodeAt(i);
+    }
+    return (sum % 65536).toString(16).padStart(4, '0');
+};
+
 // Main Export Functions
 export const encodeParams = (type: ArtworkType, params: any): string => {
     let encoded = "";
@@ -405,20 +414,37 @@ export const encodeParams = (type: ArtworkType, params: any): string => {
         // @ts-ignore - Handle legacy/alternate type name if needed
         case 'textdesign': encoded = encodeTextDesignParams(params); break;
     }
-    // Format: fx-[type]-v1-[encoded]
+
+    // Calculate checksum from the encoded data
+    const checksum = calculateChecksum(encoded);
+
+    // Format: fx-[type]-v1-[encoded]-[checksum]
     // Note: We use 'text' for textdesign in tokens for brevity
     // @ts-ignore
     const typeStr = type === 'textdesign' ? 'text' : type;
-    return `fx-${typeStr}-v1-${encoded}`;
+    return `fx-${typeStr}-v1-${encoded}-${checksum}`;
 };
 
 export const decodeParams = (token: string): any => {
-    // Token format: fx-[type]-v1-[encoded]
+    // Token format: fx-[type]-v1-[encoded]-[checksum]
     const parts = token.split('-');
+
+    // Support both old format (4 parts, no checksum) and new format (5 parts, with checksum)
     if (parts.length < 4 || parts[2] !== 'v1') return null;
 
     const type = parts[1] as ArtworkType;
     const encoded = parts[3];
+
+    // Validate checksum if present (5-part token)
+    if (parts.length === 5) {
+        const providedChecksum = parts[4];
+        const calculatedChecksum = calculateChecksum(encoded);
+
+        if (providedChecksum !== calculatedChecksum) {
+            console.error('State token checksum mismatch - token may be corrupted or tampered');
+            return null;
+        }
+    }
 
     switch (type) {
         case 'flow': return decodeFlowParams(encoded, token);
