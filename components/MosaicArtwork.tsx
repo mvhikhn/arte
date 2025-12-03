@@ -327,8 +327,10 @@ const MosaicArtwork = forwardRef<MosaicArtworkRef, MosaicArtworkProps>(({ params
         };
 
         const pickColors = (palette: string[], num: number, colorRng: () => number) => {
-          let shuffled = [...palette].sort(() => colorRng() - 0.5);
-          return shuffled.slice(0, num);
+          // Shuffle INDICES not VALUES - this way editing colors doesn't change distribution
+          const indices = Array.from({ length: palette.length }, (_, i) => i);
+          const shuffledIndices = indices.sort(() => colorRng() - 0.5);
+          return shuffledIndices.slice(0, num).map(i => palette[i]);
         };
       };
 

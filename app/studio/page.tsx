@@ -209,15 +209,9 @@ function StudioContent() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Initialize token input when params change
-  useEffect(() => {
-    if (currentArtwork === 'flow') setTokenInput(flowParams.token);
-    else if (currentArtwork === 'grid') setTokenInput(gridParams.token);
-    else if (currentArtwork === 'mosaic') setTokenInput(mosaicParams.token);
-    else if (currentArtwork === 'rotated') setTokenInput(rotatedGridParams.token);
-    else if (currentArtwork === 'tree') setTokenInput(treeParams.token);
-    else if (currentArtwork === 'textdesign') setTokenInput(textDesignParams.token);
-  }, [currentArtwork, flowParams.token, gridParams.token, mosaicParams.token, rotatedGridParams.token, treeParams.token, textDesignParams.token]);
+  // REMOVED: useEffect that syncs params to tokenInput
+  // This caused race conditions where random tokens from regeneration overwrote encoded v1 tokens.
+  // Now we explicitly update tokenInput in every handler (Regenerate, Randomize, Edit).
 
   // Save current artwork state to localStorage
   const saveArtworkState = () => {
@@ -612,16 +606,22 @@ function StudioContent() {
     // Generate new params with new token
     const newParams = generateRandomFlowParams();
     setFlowParams(newParams);
+    // Explicitly encode and update URL to v1 token
+    setTokenInput(encodeParams('flow', newParams));
   };
 
   const handleGridRandomize = () => {
     const newParams = generateRandomGridParams();
     setGridParams(newParams);
+    // Explicitly encode and update URL to v1 token
+    setTokenInput(encodeParams('grid', newParams));
   };
 
   const handleMosaicRandomize = () => {
     const newParams = generateRandomMosaicParams();
     setMosaicParams(newParams);
+    // Explicitly encode and update URL to v1 token
+    setTokenInput(encodeParams('mosaic', newParams));
   };
 
   const handleMosaicRegenerate = () => {
@@ -645,9 +645,8 @@ function StudioContent() {
         color3: prev.color3,
         color4: prev.color4,
       };
-      // Encode complete state into v1 token for URL
-      const encodedToken = encodeParams('mosaic', finalParams);
-      setTokenInput(encodedToken);
+      // Explicitly encode and update URL to v1 token
+      setTokenInput(encodeParams('mosaic', finalParams));
       return finalParams;
     });
   };
@@ -655,6 +654,8 @@ function StudioContent() {
   const handleRotatedGridRandomize = () => {
     const newParams = generateRandomRotatedGridParams();
     setRotatedGridParams(newParams);
+    // Explicitly encode and update URL to v1 token
+    setTokenInput(encodeParams('rotated', newParams));
   };
 
   const handleRotatedGridRegenerate = () => {
@@ -672,19 +673,21 @@ function StudioContent() {
         color4: prev.color4,
         backgroundColor: prev.backgroundColor,
       };
-      // Encode complete state into v1 token for URL
-      const encodedToken = encodeParams('rotated', finalParams);
-      setTokenInput(encodedToken);
+      // Explicitly encode and update URL to v1 token
+      setTokenInput(encodeParams('rotated', finalParams));
       return finalParams;
     });
   };
 
   const handleTreeRandomize = () => {
-    setTreeParams(prev => ({
+    const newParams = {
       ...generateRandomTreeParams(),
-      canvasWidth: prev.canvasWidth,
-      canvasHeight: prev.canvasHeight
-    }));
+      canvasWidth: treeParams.canvasWidth,
+      canvasHeight: treeParams.canvasHeight
+    };
+    setTreeParams(newParams);
+    // Explicitly encode and update URL to v1 token
+    setTokenInput(encodeParams('tree', newParams));
   };
 
   const handleTreeRegenerate = () => {
@@ -706,9 +709,8 @@ function StudioContent() {
         tipColor3: prev.tipColor3,
         backgroundColor: prev.backgroundColor,
       };
-      // Encode complete state into v1 token for URL
-      const encodedToken = encodeParams('tree', finalParams);
-      setTokenInput(encodedToken);
+      // Explicitly encode and update URL to v1 token
+      setTokenInput(encodeParams('tree', finalParams));
       return finalParams;
     });
   };
