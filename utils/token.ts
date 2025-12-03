@@ -36,7 +36,9 @@ export function validateToken(token: string, artworkType?: ArtworkType): boolean
     if (hasArtworkType) {
         // Token format: fx-[type]-[44 random chars][2 checksum]
         const parts = token.split('-');
-        if (parts.length !== 3 || parts[0] !== 'fx') {
+        // Standard token: fx-[type]-[hash+checksum] (3 parts)
+        // State token: fx-[type]-v1-[data] (4 parts)
+        if ((parts.length !== 3 && parts.length !== 4) || parts[0] !== 'fx') {
             return false;
         }
 
