@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, forwardRef, useImperativeHandle } from "react";
-import { tokenToSeed } from "@/utils/token";
+import { tokenToSeed, createSeededRandom } from "@/utils/token";
 
 export interface MosaicArtworkParams {
   color1: string;
@@ -26,6 +26,7 @@ export interface MosaicArtworkParams {
   canvasWidth: number;
   canvasHeight: number;
   token: string;
+  colorSeed?: string;
   exportWidth: number; // Deprecated
   exportHeight: number; // Deprecated
 }
@@ -193,6 +194,10 @@ const MosaicArtwork = forwardRef<MosaicArtworkRef, MosaicArtworkProps>(({ params
           p.randomSeed(seed);
           p.noiseSeed(seed);
 
+          // Create separate RNG for color selection using colorSeed
+          const colorSeed = paramsRef.current.colorSeed || paramsRef.current.token;
+          const colorRng = createSeededRandom(colorSeed);
+
           COLORS = [
             paramsRef.current.color1,
             paramsRef.current.color2,
@@ -217,7 +222,8 @@ const MosaicArtwork = forwardRef<MosaicArtworkRef, MosaicArtworkProps>(({ params
             p.width / 2 - rectWidth / 2,
             p.height / 2 - rectHeight / 2,
             rectWidth,
-            rectHeight
+            rectHeight,
+            colorRng
           );
 
           // Add noise texture
@@ -231,7 +237,7 @@ const MosaicArtwork = forwardRef<MosaicArtworkRef, MosaicArtworkProps>(({ params
           }
         };
 
-        const divideRectangle = (p: any, x: number, y: number, w: number, h: number) => {
+        const divideRectangle = (p: any, x: number, y: number, w: number, h: number, colorRng: () => number) => {
           if (p.random() > paramsRef.current.gridDivisionChance) {
             let rows = p.int(p.random(paramsRef.current.minGridRows, paramsRef.current.maxGridRows + 1));
             let cols = p.int(p.random(paramsRef.current.minGridCols, paramsRef.current.maxGridCols + 1));
@@ -242,7 +248,7 @@ const MosaicArtwork = forwardRef<MosaicArtworkRef, MosaicArtworkProps>(({ params
               for (let col = 0; col < cols; col++) {
                 let newX = x + col * cellWidth;
                 let newY = y + row * cellHeight;
-                createUnit(p, newX, newY, cellWidth, cellHeight);
+                createUnit(p, newX, newY, cellWidth, cellHeight, colorRng);
               }
             }
           } else {
@@ -251,32 +257,32 @@ const MosaicArtwork = forwardRef<MosaicArtworkRef, MosaicArtworkProps>(({ params
                 paramsRef.current.splitRatioMin,
                 paramsRef.current.splitRatioMax
               ) * w;
-              createUnit(p, x, y, splitWidth, h);
-              createUnit(p, x + splitWidth, y, w - splitWidth, h);
+              createUnit(p, x, y, splitWidth, h, colorRng);
+              createUnit(p, x + splitWidth, y, w - splitWidth, h, colorRng);
             } else {
               let splitHeight = p.random(
                 paramsRef.current.splitRatioMin,
                 paramsRef.current.splitRatioMax
               ) * h;
-              createUnit(p, x, y, w, splitHeight);
-              createUnit(p, x, y + splitHeight, w, h - splitHeight);
+              createUnit(p, x, y, w, splitHeight, colorRng);
+              createUnit(p, x, y + splitHeight, w, h - splitHeight, colorRng);
             }
           }
         };
 
-        const createUnit = (p: any, x: number, y: number, w: number, h: number) => {
+        const createUnit = (p: any, x: number, y: number, w: number, h: number, colorRng: () => number) => {
           let margin = p.random(5, p.min(w, h) * paramsRef.current.marginMultiplier);
 
           if (p.random() > paramsRef.current.recursionChance &&
             p.min(w, h) > paramsRef.current.minRecursionSize) {
-            divideRectangle(p, x, y, w, h);
+            divideRectangle(p, x, y, w, h, colorRng);
           } else {
-            drawRectangle(p, x + margin / 2, y + margin / 2, w - margin, h - margin);
+            drawRectangle(p, x + margin / 2, y + margin / 2, w - margin, h - margin, colorRng);
           }
         };
 
-        const drawRectangle = (p: any, x: number, y: number, w: number, h: number) => {
-          let colors = pickColors(p, COLORS, 2);
+        const drawRectangle = (p: any, x: number, y: number, w: number, h: number, colorRng: () => number) => {
+          let colors = pickColors(COLORS, 2, colorRng);
           p.fill(colors[0]);
           p.rect(x, y, w, h);
 
@@ -315,8 +321,8 @@ const MosaicArtwork = forwardRef<MosaicArtworkRef, MosaicArtworkProps>(({ params
           }
         };
 
-        const pickColors = (p: any, palette: string[], num: number) => {
-          let shuffled = [...palette].sort(() => p.random() - 0.5);
+        const pickColors = (palette: string[], num: number, colorRng: () => number) => {
+          let shuffled = [...palette].sort(() => colorRng() - 0.5);
           return shuffled.slice(0, num);
         };
       };

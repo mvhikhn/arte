@@ -54,6 +54,7 @@ export interface TreeArtworkParams {
   token: string;
   exportWidth: number; // Deprecated
   exportHeight: number; // Deprecated
+  colorSeed?: string;
   isAnimating: boolean;
 }
 

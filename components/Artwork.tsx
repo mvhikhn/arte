@@ -31,6 +31,7 @@ export interface ArtworkParams {
   exportHeight: number; // Deprecated, WYSIWYG export uses canvas dimensions
   isAnimating: boolean;
   token: string; // Unique token for deterministic rendering
+  colorSeed?: string;
 }
 
 export interface ArtworkRef {

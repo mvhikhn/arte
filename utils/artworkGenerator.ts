@@ -13,7 +13,7 @@ const randomInRange = (min: number, max: number) => Math.random() * (max - min) 
 // Generate flow params from a token (deterministic)
 export const generateFlowParamsFromToken = (token: string): ArtworkParams => {
     // Check for encoded params first
-    if (token.includes("-v1-")) {
+    if (token.includes("-v1-") || !token.startsWith("fx-")) {
         try {
             return decodeParams(token);
         } catch (error) {
@@ -96,13 +96,14 @@ export const generateFlowParamsFromToken = (token: string): ArtworkParams => {
         exportHeight: 2000,
         isAnimating: true,
         token: token,
+        colorSeed: token,
     };
 };
 
 // Generate grid params from token
 export const generateGridParamsFromToken = (token: string): GridArtworkParams => {
     // Check for encoded params first
-    if (token.includes("-v1-")) {
+    if (token.includes("-v1-") || !token.startsWith("fx-")) {
         try {
             return decodeParams(token);
         } catch (error) {
@@ -114,32 +115,32 @@ export const generateGridParamsFromToken = (token: string): GridArtworkParams =>
     const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
     const rand = createSeededRandom(token);
 
-    // Palette generation
     const palettes = [
-        ["#1B4332", "#52B788", "#2D6A4F", "#95D5B2", "#40916C", "#74C69D"],
-        ["#001219", "#005f73", "#0a9396", "#94d2bd", "#e9d8a6", "#ee9b00"],
-        ["#2b2d42", "#8d99ae", "#edf2f4", "#ef233c", "#d90429", "#2b2d42"],
+        ["#264653", "#2a9d8f", "#e9c46a", "#f4a261", "#e76f51"],
+        ["#000000", "#14213d", "#fca311", "#e5e5e5", "#ffffff"],
+        ["#3d5a80", "#98c1d9", "#e0fbfc", "#ee6c4d", "#293241"],
     ];
     const palette = palettes[Math.floor(rand() * palettes.length)];
 
     return {
         backgroundColor: palette[0],
         borderColor: palette[1],
-        color1: palette[2],
-        color2: palette[3],
-        color3: palette[4],
-        color4: palette[5],
-        animationSpeed: rand() * 0.1 + 0.02,
-        maxDepth: Math.floor(rand() * 3) + 1,
-        minModuleSize: Math.floor(rand() * 30) + 20,
-        subdivideChance: rand() * 0.5 + 0.3,
-        crossSize: rand() * 0.5 + 0.4,
-        minColumns: Math.floor(rand() * 4) + 3,
-        maxColumns: Math.floor(rand() * 8) + 6,
+        color1: palette[1],
+        color2: palette[2],
+        color3: palette[3],
+        color4: palette[4],
+        animationSpeed: rand() * 0.02 + 0.005,
+        maxDepth: Math.floor(rand() * 3) + 3,
+        minModuleSize: Math.floor(rand() * 20) + 10,
+        subdivideChance: rand() * 0.4 + 0.3,
+        crossSize: rand() * 0.4 + 0.1,
+        minColumns: Math.floor(rand() * 3) + 3,
+        maxColumns: Math.floor(rand() * 5) + 5,
+        isAnimating: true,
         canvasWidth: isMobile ? 400 : 630,
         canvasHeight: isMobile ? 500 : 790,
-        isAnimating: true,
         token: token,
+        colorSeed: token,
         exportWidth: 1600,
         exportHeight: 2000,
     };
@@ -148,7 +149,7 @@ export const generateGridParamsFromToken = (token: string): GridArtworkParams =>
 // Generate mosaic params from token
 export const generateMosaicParamsFromToken = (token: string): MosaicArtworkParams => {
     // Check for encoded params first
-    if (token.includes("-v1-")) {
+    if (token.includes("-v1-") || !token.startsWith("fx-")) {
         try {
             return decodeParams(token);
         } catch (error) {
@@ -190,6 +191,7 @@ export const generateMosaicParamsFromToken = (token: string): MosaicArtworkParam
         canvasWidth: isMobile ? 400 : 630,
         canvasHeight: isMobile ? 500 : 790,
         token: token,
+        colorSeed: token,
         exportWidth: 1600,
         exportHeight: 2000,
     };
@@ -198,7 +200,7 @@ export const generateMosaicParamsFromToken = (token: string): MosaicArtworkParam
 // Generate rotated grid params from token
 export const generateRotatedGridParamsFromToken = (token: string): RotatedGridArtworkParams => {
     // Check for encoded params first
-    if (token.includes("-v1-")) {
+    if (token.includes("-v1-") || !token.startsWith("fx-")) {
         try {
             return decodeParams(token);
         } catch (error) {
@@ -232,6 +234,7 @@ export const generateRotatedGridParamsFromToken = (token: string): RotatedGridAr
         canvasWidth: isMobile ? 400 : 630,
         canvasHeight: isMobile ? 500 : 790,
         token: token,
+        colorSeed: token,
         exportWidth: 1600,
         exportHeight: 2000,
     };
@@ -240,7 +243,7 @@ export const generateRotatedGridParamsFromToken = (token: string): RotatedGridAr
 // Generate tree params from token
 export const generateTreeParamsFromToken = (token: string): TreeArtworkParams => {
     // Check for encoded params first
-    if (token.includes("-v1-")) {
+    if (token.includes("-v1-") || !token.startsWith("fx-")) {
         try {
             return decodeParams(token);
         } catch (error) {
@@ -253,56 +256,69 @@ export const generateTreeParamsFromToken = (token: string): TreeArtworkParams =>
     const rand = createSeededRandom(token);
 
     const palettes = [
-        ["#8B4513", "#A0522D", "#CD853F", "#FF69B4", "#FFB6C1", "#FFC0CB", "#000000"],
-        ["#2f3e46", "#354f52", "#52796f", "#84a98c", "#cad2c5", "#f0f3bd", "#2f3e46"],
-        ["#5f0f40", "#9a031e", "#fb8b24", "#e36414", "#0f4c5c", "#5f0f40", "#000000"],
+        {
+            stem: ["#4a4e69", "#22223b", "#9a8c98"],
+            tip: ["#c9ada7", "#f2e9e4", "#9a8c98"],
+            bg: "#f2e9e4"
+        },
+        {
+            stem: ["#264653", "#2a9d8f", "#e9c46a"],
+            tip: ["#f4a261", "#e76f51", "#e9c46a"],
+            bg: "#f1faee"
+        },
+        {
+            stem: ["#000000", "#14213d", "#fca311"],
+            tip: ["#e5e5e5", "#ffffff", "#fca311"],
+            bg: "#000000"
+        }
     ];
     const palette = palettes[Math.floor(rand() * palettes.length)];
 
     return {
-        initialPaths: Math.floor(rand() * 3) + 1,
-        initialVelocity: isMobile ? 10 : rand() * 5 + 10,
-        branchProbability: rand() * 0.15 + 0.1,
-        diameterShrink: rand() * 0.1 + 0.6,
-        minDiameter: rand() * 0.2 + 0.1,
-        bumpMultiplier: rand() * 0.2 + 0.1,
-        velocityRetention: rand() * 0.2 + 0.7,
-        speedMin: rand() * 3 + 3,
-        speedMax: rand() * 5 + 8,
-        finishedCircleSize: rand() * 8 + 6,
-        strokeWeightMultiplier: rand() * 0.5 + 1,
-        stemColor1: palette[0],
-        stemColor2: palette[1],
-        stemColor3: palette[2],
-        tipColor1: palette[3],
-        tipColor2: palette[4],
-        tipColor3: palette[5],
-        backgroundColor: palette[6],
-        textContent: "",
-        textEnabled: true,
-        fontSize: 24,
-        textColor: "#ff1f1f",
-        textAlign: 'center' as 'left' | 'center' | 'right',
-        textX: isMobile ? 200 : 311,
-        textY: 50,
-        lineHeight: 1.5,
-        fontFamily: 'Georgia',
-        fontUrl: 'https://fonts.googleapis.com/css2?family=...',
-        customFontFamily: '',
-        grainAmount: Math.floor(rand() * 50) + 20,
+        initialPaths: Math.floor(rand() * 5) + 3,
+        initialVelocity: rand() * 2 + 3,
+        branchProbability: rand() * 0.02 + 0.01,
+        diameterShrink: rand() * 0.02 + 0.95,
+        minDiameter: rand() * 1 + 0.5,
+        bumpMultiplier: rand() * 0.05 + 0.01,
+        velocityRetention: rand() * 0.1 + 0.85,
+        speedMin: 0.5,
+        speedMax: 2,
+        finishedCircleSize: rand() * 3 + 1,
+        strokeWeightMultiplier: rand() * 0.5 + 0.5,
+        stemColor1: palette.stem[0],
+        stemColor2: palette.stem[1],
+        stemColor3: palette.stem[2],
+        tipColor1: palette.tip[0],
+        tipColor2: palette.tip[1],
+        tipColor3: palette.tip[2],
+        backgroundColor: palette.bg,
+        grainAmount: rand() * 0.1,
+        isAnimating: true,
         canvasWidth: isMobile ? 400 : 630,
         canvasHeight: isMobile ? 500 : 790,
         token: token,
         exportWidth: 1600,
         exportHeight: 2000,
-        isAnimating: true,
+        textContent: "ARTE",
+        textEnabled: false,
+        fontSize: 120,
+        textColor: "#000000",
+        textAlign: "center",
+        textX: 50,
+        textY: 50,
+        lineHeight: 1.2,
+        fontFamily: "Inter",
+        fontUrl: "",
+        customFontFamily: "Inter",
+        colorSeed: token
     };
 };
 
 // Generate text design params from token
 export const generateTextDesignParamsFromToken = (token: string): TextDesignArtworkParams => {
     // Check for encoded params first
-    if (token.includes("-v1-")) {
+    if (token.includes("-v1-") || !token.startsWith("fx-")) {
         try {
             return decodeParams(token);
         } catch (error) {
@@ -383,6 +399,7 @@ export const generateTextDesignParamsFromToken = (token: string): TextDesignArtw
             fontUrl: "",
         },
         token: token,
+        colorSeed: token,
         exportWidth: 1600,
         exportHeight: 2000,
     };

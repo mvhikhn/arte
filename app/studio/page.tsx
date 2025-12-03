@@ -627,7 +627,11 @@ function StudioContent() {
   const handleMosaicRegenerate = () => {
     const newToken = generateToken('mosaic');
     const newParams = generateMosaicParamsFromToken(newToken);
-    setMosaicParams(newParams);
+    // Preserve colorSeed (color remains locked, layout changes)
+    setMosaicParams(prev => ({
+      ...newParams,
+      colorSeed: prev.colorSeed || prev.token // Use existing colorSeed or fallback to old token
+    }));
   };
 
   const handleRotatedGridRandomize = () => {
@@ -638,7 +642,11 @@ function StudioContent() {
   const handleRotatedGridRegenerate = () => {
     const newToken = generateToken('rotated');
     const newParams = generateRotatedGridParamsFromToken(newToken);
-    setRotatedGridParams(newParams);
+    // Preserve colorSeed (color remains locked, layout changes)
+    setRotatedGridParams(prev => ({
+      ...newParams,
+      colorSeed: prev.colorSeed || prev.token // Use existing colorSeed or fallback to old token
+    }));
   };
 
   const handleTreeRandomize = () => {
@@ -652,12 +660,12 @@ function StudioContent() {
   const handleTreeRegenerate = () => {
     const newToken = generateToken('tree');
     const newParams = generateTreeParamsFromToken(newToken);
-    // Preserve canvas dimensions if needed, or let generator handle it
-    // The generator handles responsive sizing, but let's preserve current size for consistency with randomize
+    // Preserve colorSeed and canvas dimensions
     setTreeParams(prev => ({
       ...newParams,
       canvasWidth: prev.canvasWidth,
-      canvasHeight: prev.canvasHeight
+      canvasHeight: prev.canvasHeight,
+      colorSeed: prev.colorSeed || prev.token // Use existing colorSeed or fallback to old token
     }));
   };
 

@@ -7,8 +7,21 @@ import { TextDesignArtworkParams } from "@/components/TextDesignArtwork";
 import { ArtworkType } from "@/utils/token";
 
 // Helper to encode/decode Base64 safe for URLs
-const toBase64 = (str: string) => Buffer.from(str).toString('base64');
-const fromBase64 = (str: string) => Buffer.from(str, 'base64').toString();
+const toBase64 = (str: string) => {
+    if (typeof window === 'undefined') {
+        return Buffer.from(str).toString('base64');
+    } else {
+        return window.btoa(str);
+    }
+};
+
+const fromBase64 = (str: string) => {
+    if (typeof window === 'undefined') {
+        return Buffer.from(str, 'base64').toString();
+    } else {
+        return window.atob(str);
+    }
+};
 
 // Parameter Schemas (Order matters!)
 // We map object values to an array to save space, then JSON stringify and Base64 encode.
@@ -42,7 +55,9 @@ const encodeFlowParams = (params: ArtworkParams): string => {
         params.targetHeight,
         params.exportWidth,
         params.exportHeight,
-        params.token // Add token (seed) to data
+        params.exportHeight,
+        params.token, // Add token (seed) to data
+        params.colorSeed // Add colorSeed
     ];
     return toBase64(JSON.stringify(data));
 };
@@ -77,7 +92,8 @@ const decodeFlowParams = (encoded: string, token: string): Partial<ArtworkParams
             targetHeight: data[23] || 1000,
             exportWidth: data[24] || 1600,
             exportHeight: data[25] || 2000,
-            token: data[26] || token // Use encoded seed if present, else fallback to v1 token
+            token: data[26] || token, // Use encoded seed if present, else fallback to v1 token
+            colorSeed: data[27] // Optional colorSeed
         };
     } catch (e) {
         console.error("Failed to decode flow params", e);
@@ -133,7 +149,8 @@ const decodeGridParams = (encoded: string, token: string): Partial<GridArtworkPa
             canvasHeight: data[15] || 790,
             exportWidth: data[16] || 1600,
             exportHeight: data[17] || 2000,
-            token: data[18] || token // Use encoded seed
+            token: data[18] || token, // Use encoded seed
+            colorSeed: data[19]
         };
     } catch (e) {
         console.error("Failed to decode grid params", e);
@@ -199,7 +216,8 @@ const decodeMosaicParams = (encoded: string, token: string): Partial<MosaicArtwo
             canvasHeight: data[20] || 790,
             exportWidth: data[21] || 1600,
             exportHeight: data[22] || 2000,
-            token: data[23] || token // Use encoded seed
+            token: data[23] || token, // Use encoded seed
+            colorSeed: data[24]
         };
     } catch (e) {
         console.error("Failed to decode mosaic params", e);
@@ -249,7 +267,8 @@ const decodeRotatedGridParams = (encoded: string, token: string): Partial<Rotate
             canvasHeight: data[12] || 790,
             exportWidth: data[13] || 1600,
             exportHeight: data[14] || 2000,
-            token: data[15] || token // Use encoded seed
+            token: data[15] || token, // Use encoded seed
+            colorSeed: data[16]
         };
     } catch (e) {
         console.error("Failed to decode rotated grid params", e);
@@ -317,7 +336,8 @@ const decodeTreeParams = (encoded: string, token: string): Partial<TreeArtworkPa
             canvasHeight: data[21] || 790,
             exportWidth: data[22] || 1600,
             exportHeight: data[23] || 2000,
-            token: data[24] || token // Use encoded seed
+            token: data[24] || token, // Use encoded seed
+            colorSeed: data[25]
         };
     } catch (e) {
         console.error("Failed to decode tree params", e);
@@ -361,8 +381,10 @@ const encodeTextDesignParams = (params: TextDesignArtworkParams): string => {
         params.exportHeight,
         layer1,
         layer2,
+        layer2,
         layer3,
-        params.token // Add token (seed)
+        params.token, // Add token (seed)
+        params.colorSeed
     ];
     return toBase64(JSON.stringify(data));
 };
@@ -390,12 +412,25 @@ const decodeTextDesignParams = (encoded: string, token: string): Partial<TextDes
             layer1: mapLayer(data[8]),
             layer2: mapLayer(data[9]),
             layer3: mapLayer(data[10]),
-            token: data[11] || token // Use encoded seed
+            token: data[11] || token, // Use encoded seed
+            colorSeed: data[12]
         };
     } catch (e) {
         console.error("Failed to decode text design params", e);
         return {};
     }
+};
+
+// Encryption Key (Simple obfuscation)
+const ENCRYPTION_KEY = "ARTE_SECURE_2024";
+
+// Simple XOR encryption/decryption
+const xorCipher = (text: string): string => {
+    let result = "";
+    for (let i = 0; i < text.length; i++) {
+        result += String.fromCharCode(text.charCodeAt(i) ^ ENCRYPTION_KEY.charCodeAt(i % ENCRYPTION_KEY.length));
+    }
+    return result;
 };
 
 // Helper to calculate checksum from data
@@ -421,14 +456,32 @@ export const encodeParams = (type: ArtworkType, params: any): string => {
         case 'textdesign': encoded = encodeTextDesignParams(params); break;
     }
 
-    // Calculate checksum from the encoded data
-    const checksum = calculateChecksum(encoded);
+    // Encrypt the encoded string (which is Base64)
+    // We encrypt the Base64 string to keep it text-safe, then re-Base64 or just use it?
+    // Wait, encode...Params returns Base64.
+    // If we encrypt Base64, we get binary-looking string.
+    // We should encrypt the JSON string inside encode...Params?
+    // No, encode...Params is already defined.
 
-    // Format: fx-[type]-v1-[encoded]-[checksum]
-    // Note: We use 'text' for textdesign in tokens for brevity
+    // Let's encrypt the Base64 string.
+    // Result is binary-looking.
+    // We need to Base64 encode the result of encryption to make it URL safe.
+
+    // Better: Encrypt the raw JSON in encode...Params?
+    // Too invasive.
+
+    // Let's just encrypt the 'encoded' string (which is Base64).
+    const encrypted = xorCipher(encoded);
+    // Prefix with ENC: to identify
+    const finalData = "ENC:" + toBase64(encrypted);
+
+    // Calculate checksum from the FINAL data
+    const checksum = calculateChecksum(finalData);
+
+    // Format: fx-[type]-v1-[finalData]-[checksum]
     // @ts-ignore
     const typeStr = type === 'textdesign' ? 'text' : type;
-    return `fx-${typeStr}-v1-${encoded}-${checksum}`;
+    return `fx-${typeStr}-v1-${finalData}-${checksum}`;
 };
 
 export const decodeParams = (token: string): any => {
@@ -441,7 +494,7 @@ export const decodeParams = (token: string): any => {
     }
 
     const type = parts[1] as ArtworkType;
-    const encoded = parts[3];
+    let encoded = parts[3];
 
     // Validate checksum if present (5-part token)
     if (parts.length === 5) {
@@ -451,6 +504,16 @@ export const decodeParams = (token: string): any => {
         if (providedChecksum !== calculatedChecksum) {
             throw new Error('Token checksum mismatch - token may be corrupted or tampered with');
         }
+    }
+
+    // Check for encryption
+    if (encoded.startsWith("ENC:")) {
+        // Remove prefix
+        const encryptedBase64 = encoded.substring(4);
+        // Decode Base64 to get the XOR'd string
+        const encrypted = fromBase64(encryptedBase64);
+        // Decrypt (XOR is reversible)
+        encoded = xorCipher(encrypted);
     }
 
     try {
@@ -463,8 +526,7 @@ export const decodeParams = (token: string): any => {
             case 'text': return decodeTextDesignParams(encoded, token);
         }
     } catch (e) {
-        throw new Error(`Failed to decode artwork parameters: ${e instanceof Error ? e.message : 'Unknown error'}`);
+        console.error("Failed to decode params", e);
+        throw e;
     }
-
-    throw new Error(`Unknown artwork type: ${type}`);
 };

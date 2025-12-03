@@ -46,6 +46,7 @@ export interface TextDesignArtworkParams {
     token: string;
     exportWidth: number;
     exportHeight: number;
+    colorSeed?: string;
 }
 
 export interface TextDesignArtworkRef {

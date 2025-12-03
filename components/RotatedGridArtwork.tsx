@@ -18,6 +18,7 @@ export interface RotatedGridArtworkParams {
   canvasWidth: number;
   canvasHeight: number;
   token: string;
+  colorSeed?: string;
   exportWidth: number; // Deprecated
   exportHeight: number; // Deprecated
 }

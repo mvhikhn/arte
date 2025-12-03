@@ -21,6 +21,7 @@ export interface GridArtworkParams {
   canvasHeight: number;
   isAnimating: boolean;
   token: string;
+  colorSeed?: string;
   exportWidth: number; // Deprecated
   exportHeight: number; // Deprecated
 }
