@@ -234,7 +234,7 @@ export default function BlogPost() {
     }
 
     return (
-        <div className="min-h-screen bg-white flex flex-col">
+        <div className="min-h-screen bg-white flex flex-col overflow-y-auto no-scrollbar">
             {/* Progress Bar */}
             <div
                 className="fixed top-0 left-0 h-[1px] bg-zinc-900 z-50 transition-all duration-100 ease-out"
