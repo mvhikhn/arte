@@ -369,7 +369,8 @@ function StudioContent() {
     setGridParams((prev) => {
       const newParams = { ...prev, [param]: value };
       const newToken = encodeParams('grid', newParams);
-      return { ...newParams, token: newToken };
+      setTokenInput(newToken); // Update URL with v1 token
+      return { ...newParams, token: prev.token }; // Keep original seed for stable layout
     });
   };
 
@@ -377,7 +378,8 @@ function StudioContent() {
     setGridParams((prev) => {
       const newParams = { ...prev, [param]: value };
       const newToken = encodeParams('grid', newParams);
-      return { ...newParams, token: newToken };
+      setTokenInput(newToken); // Update URL with v1 token
+      return { ...newParams, token: prev.token }; // Keep original seed
     });
   };
 
@@ -394,7 +396,8 @@ function StudioContent() {
     setMosaicParams((prev) => {
       const newParams = { ...prev, [param]: value };
       const newToken = encodeParams('mosaic', newParams);
-      return { ...newParams, token: newToken };
+      setTokenInput(newToken);
+      return { ...newParams, token: prev.token };
     });
   };
 
@@ -402,7 +405,8 @@ function StudioContent() {
     setMosaicParams((prev) => {
       const newParams = { ...prev, [param]: value };
       const newToken = encodeParams('mosaic', newParams);
-      return { ...newParams, token: newToken };
+      setTokenInput(newToken);
+      return { ...newParams, token: prev.token };
     });
   };
 
@@ -419,7 +423,8 @@ function StudioContent() {
     setRotatedGridParams((prev) => {
       const newParams = { ...prev, [param]: value };
       const newToken = encodeParams('rotated', newParams);
-      return { ...newParams, token: newToken };
+      setTokenInput(newToken);
+      return { ...newParams, token: prev.token };
     });
   };
 
@@ -427,7 +432,8 @@ function StudioContent() {
     setRotatedGridParams((prev) => {
       const newParams = { ...prev, [param]: value };
       const newToken = encodeParams('rotated', newParams);
-      return { ...newParams, token: newToken };
+      setTokenInput(newToken);
+      return { ...newParams, token: prev.token };
     });
   };
 
@@ -444,7 +450,8 @@ function StudioContent() {
     setTreeParams((prev) => {
       const newParams = { ...prev, [param]: param === 'textEnabled' ? Boolean(value) : value };
       const newToken = encodeParams('tree', newParams);
-      return { ...newParams, token: newToken };
+      setTokenInput(newToken);
+      return { ...newParams, token: prev.token };
     });
   };
 
@@ -452,7 +459,8 @@ function StudioContent() {
     setTreeParams((prev) => {
       const newParams = { ...prev, [param]: value };
       const newToken = encodeParams('tree', newParams);
-      return { ...newParams, token: newToken };
+      setTokenInput(newToken);
+      return { ...newParams, token: prev.token };
     });
   };
 
@@ -469,7 +477,8 @@ function StudioContent() {
     setTextDesignParams((prev) => {
       const newParams = { ...prev, [param]: value };
       const newToken = encodeParams('text', newParams);
-      return { ...newParams, token: newToken };
+      setTokenInput(newToken);
+      return { ...newParams, token: prev.token };
     });
   };
 

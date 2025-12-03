@@ -41,7 +41,8 @@ const encodeFlowParams = (params: ArtworkParams): string => {
         params.targetWidth,
         params.targetHeight,
         params.exportWidth,
-        params.exportHeight
+        params.exportHeight,
+        params.token // Add token (seed) to data
     ];
     return toBase64(JSON.stringify(data));
 };
@@ -76,7 +77,7 @@ const decodeFlowParams = (encoded: string, token: string): Partial<ArtworkParams
             targetHeight: data[23] || 1000,
             exportWidth: data[24] || 1600,
             exportHeight: data[25] || 2000,
-            token: token
+            token: data[26] || token // Use encoded seed if present, else fallback to v1 token
         };
     } catch (e) {
         console.error("Failed to decode flow params", e);
@@ -104,7 +105,8 @@ const encodeGridParams = (params: GridArtworkParams): string => {
         params.canvasWidth,
         params.canvasHeight,
         params.exportWidth,
-        params.exportHeight
+        params.exportHeight,
+        params.token // Add token (seed)
     ];
     return toBase64(JSON.stringify(data));
 };
@@ -131,7 +133,7 @@ const decodeGridParams = (encoded: string, token: string): Partial<GridArtworkPa
             canvasHeight: data[15] || 790,
             exportWidth: data[16] || 1600,
             exportHeight: data[17] || 2000,
-            token: token
+            token: data[18] || token // Use encoded seed
         };
     } catch (e) {
         console.error("Failed to decode grid params", e);
@@ -164,7 +166,8 @@ const encodeMosaicParams = (params: MosaicArtworkParams): string => {
         params.canvasWidth,
         params.canvasHeight,
         params.exportWidth,
-        params.exportHeight
+        params.exportHeight,
+        params.token // Add token (seed)
     ];
     return toBase64(JSON.stringify(data));
 };
@@ -196,7 +199,7 @@ const decodeMosaicParams = (encoded: string, token: string): Partial<MosaicArtwo
             canvasHeight: data[20] || 790,
             exportWidth: data[21] || 1600,
             exportHeight: data[22] || 2000,
-            token: token
+            token: data[23] || token // Use encoded seed
         };
     } catch (e) {
         console.error("Failed to decode mosaic params", e);
@@ -221,7 +224,8 @@ const encodeRotatedGridParams = (params: RotatedGridArtworkParams): string => {
         params.canvasWidth,
         params.canvasHeight,
         params.exportWidth,
-        params.exportHeight
+        params.exportHeight,
+        params.token // Add token (seed)
     ];
     return toBase64(JSON.stringify(data));
 };
@@ -245,7 +249,7 @@ const decodeRotatedGridParams = (encoded: string, token: string): Partial<Rotate
             canvasHeight: data[12] || 790,
             exportWidth: data[13] || 1600,
             exportHeight: data[14] || 2000,
-            token: token
+            token: data[15] || token // Use encoded seed
         };
     } catch (e) {
         console.error("Failed to decode rotated grid params", e);
@@ -279,7 +283,8 @@ const encodeTreeParams = (params: TreeArtworkParams): string => {
         params.canvasWidth,
         params.canvasHeight,
         params.exportWidth,
-        params.exportHeight
+        params.exportHeight,
+        params.token // Add token (seed)
     ];
     return toBase64(JSON.stringify(data));
 };
@@ -312,7 +317,7 @@ const decodeTreeParams = (encoded: string, token: string): Partial<TreeArtworkPa
             canvasHeight: data[21] || 790,
             exportWidth: data[22] || 1600,
             exportHeight: data[23] || 2000,
-            token: token
+            token: data[24] || token // Use encoded seed
         };
     } catch (e) {
         console.error("Failed to decode tree params", e);
@@ -356,7 +361,8 @@ const encodeTextDesignParams = (params: TextDesignArtworkParams): string => {
         params.exportHeight,
         layer1,
         layer2,
-        layer3
+        layer3,
+        params.token // Add token (seed)
     ];
     return toBase64(JSON.stringify(data));
 };
@@ -384,7 +390,7 @@ const decodeTextDesignParams = (encoded: string, token: string): Partial<TextDes
             layer1: mapLayer(data[8]),
             layer2: mapLayer(data[9]),
             layer3: mapLayer(data[10]),
-            token: token
+            token: data[11] || token // Use encoded seed
         };
     } catch (e) {
         console.error("Failed to decode text design params", e);
