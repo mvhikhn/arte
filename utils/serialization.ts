@@ -430,7 +430,9 @@ export const decodeParams = (token: string): any => {
     const parts = token.split('-');
 
     // Support both old format (4 parts, no checksum) and new format (5 parts, with checksum)
-    if (parts.length < 4 || parts[2] !== 'v1') return null;
+    if (parts.length < 4 || parts[2] !== 'v1') {
+        throw new Error('Invalid state token format');
+    }
 
     const type = parts[1] as ArtworkType;
     const encoded = parts[3];
@@ -441,18 +443,22 @@ export const decodeParams = (token: string): any => {
         const calculatedChecksum = calculateChecksum(encoded);
 
         if (providedChecksum !== calculatedChecksum) {
-            console.error('State token checksum mismatch - token may be corrupted or tampered');
-            return null;
+            throw new Error('Token checksum mismatch - token may be corrupted or tampered with');
         }
     }
 
-    switch (type) {
-        case 'flow': return decodeFlowParams(encoded, token);
-        case 'grid': return decodeGridParams(encoded, token);
-        case 'mosaic': return decodeMosaicParams(encoded, token);
-        case 'rotated': return decodeRotatedGridParams(encoded, token);
-        case 'tree': return decodeTreeParams(encoded, token);
-        case 'text': return decodeTextDesignParams(encoded, token);
+    try {
+        switch (type) {
+            case 'flow': return decodeFlowParams(encoded, token);
+            case 'grid': return decodeGridParams(encoded, token);
+            case 'mosaic': return decodeMosaicParams(encoded, token);
+            case 'rotated': return decodeRotatedGridParams(encoded, token);
+            case 'tree': return decodeTreeParams(encoded, token);
+            case 'text': return decodeTextDesignParams(encoded, token);
+        }
+    } catch (e) {
+        throw new Error(`Failed to decode artwork parameters: ${e instanceof Error ? e.message : 'Unknown error'}`);
     }
-    return null;
+
+    throw new Error(`Unknown artwork type: ${type}`);
 };

@@ -69,26 +69,32 @@ export default function ViewPage() {
             setCurrentArtwork(type);
             setError(null);
 
-            // Generate params based on type
-            switch (type) {
-                case 'flow':
-                    setFlowParams(generateFlowParamsFromToken(trimmedToken));
-                    break;
-                case 'grid':
-                    setGridParams(generateGridParamsFromToken(trimmedToken));
-                    break;
-                case 'mosaic':
-                    setMosaicParams(generateMosaicParamsFromToken(trimmedToken));
-                    break;
-                case 'rotated':
-                    setRotatedGridParams(generateRotatedGridParamsFromToken(trimmedToken));
-                    break;
-                case 'tree':
-                    setTreeParams(generateTreeParamsFromToken(trimmedToken));
-                    break;
-                case 'text':
-                    setTextDesignParams(generateTextDesignParamsFromToken(trimmedToken));
-                    break;
+            // Generate params based on type - wrap in try-catch to detect decode errors
+            try {
+                switch (type) {
+                    case 'flow':
+                        setFlowParams(generateFlowParamsFromToken(trimmedToken));
+                        break;
+                    case 'grid':
+                        setGridParams(generateGridParamsFromToken(trimmedToken));
+                        break;
+                    case 'mosaic':
+                        setMosaicParams(generateMosaicParamsFromToken(trimmedToken));
+                        break;
+                    case 'rotated':
+                        setRotatedGridParams(generateRotatedGridParamsFromToken(trimmedToken));
+                        break;
+                    case 'tree':
+                        setTreeParams(generateTreeParamsFromToken(trimmedToken));
+                        break;
+                    case 'text':
+                        setTextDesignParams(generateTextDesignParamsFromToken(trimmedToken));
+                        break;
+                }
+            } catch (error) {
+                // Decode error (e.g., checksum mismatch)
+                setError(error instanceof Error ? error.message : "Failed to decode token");
+                setCurrentArtwork(null);
             }
         } else {
             setError("Invalid token. Checksum mismatch or tampered token.");

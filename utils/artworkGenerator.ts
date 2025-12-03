@@ -14,8 +14,12 @@ const randomInRange = (min: number, max: number) => Math.random() * (max - min) 
 export const generateFlowParamsFromToken = (token: string): ArtworkParams => {
     // Check for encoded params first
     if (token.includes("-v1-")) {
-        const decoded = decodeParams(token);
-        if (decoded) return decoded;
+        try {
+            return decodeParams(token);
+        } catch (error) {
+            // Re-throw decode errors (checksum mismatch, etc.)
+            throw error;
+        }
     }
 
     // Detect if mobile (screen width < 768px)
@@ -99,8 +103,12 @@ export const generateFlowParamsFromToken = (token: string): ArtworkParams => {
 export const generateGridParamsFromToken = (token: string): GridArtworkParams => {
     // Check for encoded params first
     if (token.includes("-v1-")) {
-        const decoded = decodeParams(token);
-        if (decoded) return decoded;
+        try {
+            return decodeParams(token);
+        } catch (error) {
+            // Re-throw decode errors (checksum mismatch, etc.)
+            throw error;
+        }
     }
 
     const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
@@ -141,8 +149,12 @@ export const generateGridParamsFromToken = (token: string): GridArtworkParams =>
 export const generateMosaicParamsFromToken = (token: string): MosaicArtworkParams => {
     // Check for encoded params first
     if (token.includes("-v1-")) {
-        const decoded = decodeParams(token);
-        if (decoded) return decoded;
+        try {
+            return decodeParams(token);
+        } catch (error) {
+            // Re-throw decode errors (checksum mismatch, etc.)
+            throw error;
+        }
     }
 
     const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
@@ -187,8 +199,12 @@ export const generateMosaicParamsFromToken = (token: string): MosaicArtworkParam
 export const generateRotatedGridParamsFromToken = (token: string): RotatedGridArtworkParams => {
     // Check for encoded params first
     if (token.includes("-v1-")) {
-        const decoded = decodeParams(token);
-        if (decoded) return decoded;
+        try {
+            return decodeParams(token);
+        } catch (error) {
+            // Re-throw decode errors (checksum mismatch, etc.)
+            throw error;
+        }
     }
 
     const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
@@ -225,8 +241,12 @@ export const generateRotatedGridParamsFromToken = (token: string): RotatedGridAr
 export const generateTreeParamsFromToken = (token: string): TreeArtworkParams => {
     // Check for encoded params first
     if (token.includes("-v1-")) {
-        const decoded = decodeParams(token);
-        if (decoded) return decoded;
+        try {
+            return decodeParams(token);
+        } catch (error) {
+            // Re-throw decode errors (checksum mismatch, etc.)
+            throw error;
+        }
     }
 
     const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
@@ -283,8 +303,12 @@ export const generateTreeParamsFromToken = (token: string): TreeArtworkParams =>
 export const generateTextDesignParamsFromToken = (token: string): TextDesignArtworkParams => {
     // Check for encoded params first
     if (token.includes("-v1-")) {
-        const decoded = decodeParams(token);
-        if (decoded) return decoded;
+        try {
+            return decodeParams(token);
+        } catch (error) {
+            // Re-throw decode errors (checksum mismatch, etc.)
+            throw error;
+        }
     }
 
     const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
