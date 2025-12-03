@@ -325,10 +325,11 @@ function StudioContent() {
 
       // Generate a new token to represent this state
       const newToken = encodeParams('flow', newParams);
+      setTokenInput(newToken); // Update URL with v1 token
 
       return {
         ...newParams,
-        token: newToken,
+        token: prev.token, // Keep original seed for stable layout
       };
     });
   };
@@ -343,10 +344,11 @@ function StudioContent() {
 
       // Generate a new token to represent this state
       const newToken = encodeParams('flow', newParams);
+      setTokenInput(newToken); // Update URL with v1 token
 
       return {
         ...newParams,
-        token: newToken,
+        token: prev.token, // Keep original seed
       };
     });
   };
