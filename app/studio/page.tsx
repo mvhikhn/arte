@@ -614,10 +614,9 @@ function StudioContent() {
   };
 
   const handleMosaicRegenerate = () => {
-    setMosaicParams((prev) => {
-      const newToken = generateToken('mosaic');
-      return { ...prev, token: newToken };
-    });
+    const newToken = generateToken('mosaic');
+    const newParams = generateMosaicParamsFromToken(newToken);
+    setMosaicParams(newParams);
   };
 
   const handleRotatedGridRandomize = () => {
@@ -626,10 +625,9 @@ function StudioContent() {
   };
 
   const handleRotatedGridRegenerate = () => {
-    setRotatedGridParams((prev) => {
-      const newToken = generateToken('rotated');
-      return { ...prev, token: newToken };
-    });
+    const newToken = generateToken('rotated');
+    const newParams = generateRotatedGridParamsFromToken(newToken);
+    setRotatedGridParams(newParams);
   };
 
   const handleTreeRandomize = () => {
@@ -641,10 +639,15 @@ function StudioContent() {
   };
 
   const handleTreeRegenerate = () => {
-    setTreeParams((prev) => {
-      const newToken = generateToken('tree');
-      return { ...prev, token: newToken };
-    });
+    const newToken = generateToken('tree');
+    const newParams = generateTreeParamsFromToken(newToken);
+    // Preserve canvas dimensions if needed, or let generator handle it
+    // The generator handles responsive sizing, but let's preserve current size for consistency with randomize
+    setTreeParams(prev => ({
+      ...newParams,
+      canvasWidth: prev.canvasWidth,
+      canvasHeight: prev.canvasHeight
+    }));
   };
 
   const handleNextArtwork = () => {
