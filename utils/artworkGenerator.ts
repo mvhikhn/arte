@@ -5,21 +5,20 @@ import { RotatedGridArtworkParams } from "@/components/RotatedGridArtwork";
 import { TreeArtworkParams } from "@/components/TreeArtwork";
 import { TextDesignArtworkParams } from "@/components/TextDesignArtwork";
 import { createSeededRandom } from "@/utils/token";
-import { decodeParams } from "@/utils/serialization";
+import { decodeParamsSync } from "@/utils/serialization";
 
 // Helper to generate random value within range
 const randomInRange = (min: number, max: number) => Math.random() * (max - min) + min;
 
 // Generate flow params from a token (deterministic)
 export const generateFlowParamsFromToken = (token: string): ArtworkParams => {
-    // Check for encoded params first
-    if (token.includes("-v1-") || !token.startsWith("fx-")) {
-        try {
-            return decodeParams(token);
-        } catch (error) {
-            // Re-throw decode errors (checksum mismatch, etc.)
-            throw error;
+    // Check for encoded params (v2 state tokens)
+    if (token.includes("-v2")) {
+        const result = decodeParamsSync(token);
+        if (result) {
+            return result.params as ArtworkParams;
         }
+        throw new Error('Invalid state token');
     }
 
     // Detect if mobile (screen width < 768px)
@@ -102,14 +101,13 @@ export const generateFlowParamsFromToken = (token: string): ArtworkParams => {
 
 // Generate grid params from token
 export const generateGridParamsFromToken = (token: string): GridArtworkParams => {
-    // Check for encoded params first
-    if (token.includes("-v1-") || !token.startsWith("fx-")) {
-        try {
-            return decodeParams(token);
-        } catch (error) {
-            // Re-throw decode errors (checksum mismatch, etc.)
-            throw error;
+    // Check for encoded params (v2 state tokens)
+    if (token.includes("-v2")) {
+        const result = decodeParamsSync(token);
+        if (result) {
+            return result.params as GridArtworkParams;
         }
+        throw new Error('Invalid state token');
     }
 
     const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
@@ -148,14 +146,13 @@ export const generateGridParamsFromToken = (token: string): GridArtworkParams =>
 
 // Generate mosaic params from token
 export const generateMosaicParamsFromToken = (token: string): MosaicArtworkParams => {
-    // Check for encoded params first
-    if (token.includes("-v1-") || !token.startsWith("fx-")) {
-        try {
-            return decodeParams(token);
-        } catch (error) {
-            // Re-throw decode errors (checksum mismatch, etc.)
-            throw error;
+    // Check for encoded params (v2 state tokens)
+    if (token.includes("-v2")) {
+        const result = decodeParamsSync(token);
+        if (result) {
+            return result.params as MosaicArtworkParams;
         }
+        throw new Error('Invalid state token');
     }
 
     const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
@@ -199,14 +196,13 @@ export const generateMosaicParamsFromToken = (token: string): MosaicArtworkParam
 
 // Generate rotated grid params from token
 export const generateRotatedGridParamsFromToken = (token: string): RotatedGridArtworkParams => {
-    // Check for encoded params first
-    if (token.includes("-v1-") || !token.startsWith("fx-")) {
-        try {
-            return decodeParams(token);
-        } catch (error) {
-            // Re-throw decode errors (checksum mismatch, etc.)
-            throw error;
+    // Check for encoded params (v2 state tokens)
+    if (token.includes("-v2")) {
+        const result = decodeParamsSync(token);
+        if (result) {
+            return result.params as RotatedGridArtworkParams;
         }
+        throw new Error('Invalid state token');
     }
 
     const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
@@ -242,14 +238,13 @@ export const generateRotatedGridParamsFromToken = (token: string): RotatedGridAr
 
 // Generate tree params from token
 export const generateTreeParamsFromToken = (token: string): TreeArtworkParams => {
-    // Check for encoded params first
-    if (token.includes("-v1-") || !token.startsWith("fx-")) {
-        try {
-            return decodeParams(token);
-        } catch (error) {
-            // Re-throw decode errors (checksum mismatch, etc.)
-            throw error;
+    // Check for encoded params (v2 state tokens)
+    if (token.includes("-v2")) {
+        const result = decodeParamsSync(token);
+        if (result) {
+            return result.params as TreeArtworkParams;
         }
+        throw new Error('Invalid state token');
     }
 
     const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
@@ -317,14 +312,13 @@ export const generateTreeParamsFromToken = (token: string): TreeArtworkParams =>
 
 // Generate text design params from token
 export const generateTextDesignParamsFromToken = (token: string): TextDesignArtworkParams => {
-    // Check for encoded params first
-    if (token.includes("-v1-") || !token.startsWith("fx-")) {
-        try {
-            return decodeParams(token);
-        } catch (error) {
-            // Re-throw decode errors (checksum mismatch, etc.)
-            throw error;
+    // Check for encoded params (v2 state tokens)
+    if (token.includes("-v2")) {
+        const result = decodeParamsSync(token);
+        if (result) {
+            return result.params as TextDesignArtworkParams;
         }
+        throw new Error('Invalid state token');
     }
 
     const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;

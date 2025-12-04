@@ -21,6 +21,7 @@
     "glob-parent": "^6.0.2",
     "gsap": "^3.13.0",
     "lucide-react": "^0.263.1",
+    "lz-string": "^1.5.0",
     "next": "^14.2.5",
     "p5": "^1.9.0",
     "react": "^18.3.1",
@@ -32,6 +33,7 @@
     "tailwind-merge": "^2.5.2"
   },
   "devDependencies": {
+    "@types/lz-string": "^1.5.0",
     "@types/node": "20.19.25",
     "@types/p5": "^1.7.6",
     "@types/react": "18.3.27",
