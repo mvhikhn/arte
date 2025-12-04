@@ -122,7 +122,8 @@ const encodeGridParams = (params: GridArtworkParams): string => {
         params.canvasHeight,
         params.exportWidth,
         params.exportHeight,
-        params.token // Add token (seed)
+        params.token, // Add token (seed)
+        params.colorSeed // Add colorSeed
     ];
     return toBase64(JSON.stringify(data));
 };
@@ -184,7 +185,8 @@ const encodeMosaicParams = (params: MosaicArtworkParams): string => {
         params.canvasHeight,
         params.exportWidth,
         params.exportHeight,
-        params.token // Add token (seed)
+        params.token, // Add token (seed)
+        params.colorSeed // Add colorSeed
     ];
     return toBase64(JSON.stringify(data));
 };
@@ -243,7 +245,8 @@ const encodeRotatedGridParams = (params: RotatedGridArtworkParams): string => {
         params.canvasHeight,
         params.exportWidth,
         params.exportHeight,
-        params.token // Add token (seed)
+        params.token, // Add token (seed)
+        params.colorSeed // Add colorSeed
     ];
     return toBase64(JSON.stringify(data));
 };
@@ -303,7 +306,8 @@ const encodeTreeParams = (params: TreeArtworkParams): string => {
         params.canvasHeight,
         params.exportWidth,
         params.exportHeight,
-        params.token // Add token (seed)
+        params.token, // Add token (seed)
+        params.colorSeed // Add colorSeed
     ];
     return toBase64(JSON.stringify(data));
 };
@@ -384,7 +388,7 @@ const encodeTextDesignParams = (params: TextDesignArtworkParams): string => {
         layer2,
         layer3,
         params.token, // Add token (seed)
-        params.colorSeed
+        params.colorSeed // Add colorSeed
     ];
     return toBase64(JSON.stringify(data));
 };
