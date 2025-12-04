@@ -165,19 +165,25 @@ export default function ViewPage() {
 
     return (
         <div className="min-h-screen bg-[#fafafa] flex flex-col items-center justify-center p-4 relative">
-            {/* Input Area Hover Detection Zone - Invisible but captures hover */}
+            {/* Home Button - Top Left */}
+            <Link
+                href="/"
+                className="absolute top-8 left-8 w-11 h-11 rounded-full bg-white border border-black/10 flex items-center justify-center hover:bg-black hover:text-white transition-all hover:scale-105 active:scale-95 shadow-lg z-30"
+                title="Return Home"
+            >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                </svg>
+            </Link>
+
+            {/* Input Area - Fixed hover detection */}
             <div
-                className="absolute top-0 left-1/2 -translate-x-1/2 w-[500px] max-w-[90vw] h-24 z-10"
+                className="absolute top-8 left-1/2 -translate-x-1/2 z-20 transition-opacity duration-300"
+                style={{ opacity: currentArtwork && !isHoveringInput ? 0 : 1 }}
                 onMouseEnter={() => setIsHoveringInput(true)}
                 onMouseLeave={() => setIsHoveringInput(false)}
-            />
-
-            {/* Input Area - Auto-hide when artwork is shown */}
-            <div
-                className="absolute top-8 left-1/2 -translate-x-1/2 z-20 transition-opacity duration-300 pointer-events-none"
-                style={{ opacity: currentArtwork && !isHoveringInput ? 0 : 1 }}
             >
-                <div className="w-[500px] max-w-[90vw] pointer-events-auto">
+                <div className="w-[500px] max-w-[90vw]">
                     <input
                         type="text"
                         value={tokenInput}
@@ -221,7 +227,7 @@ export default function ViewPage() {
             <div className="flex-1 w-full flex items-center justify-center" style={{ perspective: '1500px' }}>
                 {currentArtwork && !error ? (
                     <div className="relative">
-                        {/* 3D Card with Premium Physics */}
+                        {/* 3D Card with Premium Physics and White Frame */}
                         <div
                             ref={cardRef}
                             onMouseMove={handleCardMouseMove}
@@ -236,12 +242,12 @@ export default function ViewPage() {
                                 `,
                                 maxWidth: '90vw',
                                 maxHeight: '85vh',
-                                padding: '12px',
+                                border: '12px solid #ffffff',
                                 backgroundColor: '#ffffff',
                             }}
                         >
-                            <div className="relative bg-white overflow-hidden" style={{
-                                boxShadow: 'inset 0 0 0 1px rgba(0,0,0,0.03)'
+                            <div className="relative overflow-hidden" style={{
+                                outline: '1px solid rgba(0,0,0,0.08)'
                             }}>
                                 {currentArtwork === 'flow' && flowParams && (
                                     <Artwork ref={flowRef} params={flowParams} />
@@ -276,3 +282,4 @@ export default function ViewPage() {
         </div>
     );
 }
+

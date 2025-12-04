@@ -123,13 +123,24 @@ export default function MosaicControls({ params, onParamChange, onColorChange, o
         </button>
         {expandedSections.has("Token") && (
           <div className="px-3 pb-3">
-            <input
-              type="text"
-              value={tokenInput || params.token || ''}
-              onChange={(e) => onTokenChange && onTokenChange(e.target.value)}
-              className="w-full px-2 py-1.5 bg-zinc-50 border border-zinc-200 rounded text-xs font-mono text-zinc-600 focus:outline-none focus:border-zinc-400 focus:ring-0"
-              placeholder="fx-..."
-            />
+            <div className="flex gap-1">
+              <input
+                type="text"
+                value={tokenInput || params.token || ''}
+                onChange={(e) => onTokenChange && onTokenChange(e.target.value)}
+                className="flex-1 px-2 py-1.5 bg-zinc-50 border border-zinc-200 rounded text-xs font-mono text-zinc-600 focus:outline-none focus:border-zinc-400 focus:ring-0"
+                placeholder="fx-..."
+              />
+              <button
+                onClick={() => navigator.clipboard.writeText(tokenInput || params.token || '')}
+                className="px-2 py-1.5 bg-zinc-100 hover:bg-zinc-200 border border-zinc-200 rounded text-zinc-500 hover:text-zinc-700 transition-colors"
+                title="Copy Token"
+              >
+                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                </svg>
+              </button>
+            </div>
             <p className="mt-1.5 text-[10px] text-zinc-400 leading-relaxed">
               This token uniquely identifies your artwork. Paste a previous token to restore it.
             </p>

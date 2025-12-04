@@ -88,6 +88,11 @@ const TextDesignArtwork = forwardRef<TextDesignArtworkRef, TextDesignArtworkProp
                         },
                         (err: any) => console.error(`Failed to load font ${id}:`, err)
                     );
+                } else {
+                    delete customFontsRef.current[id];
+                    if (sketchRef.current && sketchRef.current.triggerRedraw) {
+                        sketchRef.current.triggerRedraw();
+                    }
                 }
             };
 

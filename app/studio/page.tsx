@@ -715,6 +715,13 @@ function StudioContent() {
     });
   };
 
+  const handleTextDesignRandomize = () => {
+    const newToken = generateToken('text');
+    const newParams = generateTextDesignParamsFromToken(newToken);
+    setTextDesignParams(newParams);
+    setTokenInput(newToken);
+  };
+
   const handleNextArtwork = () => {
     startTransition(() => {
       setCurrentArtwork((prev) => {
@@ -830,6 +837,7 @@ function StudioContent() {
                 if (currentArtwork === "mosaic") handleMosaicRandomize();
                 if (currentArtwork === "rotated") handleRotatedGridRandomize();
                 if (currentArtwork === "tree") handleTreeRandomize();
+                if (currentArtwork === "textdesign") handleTextDesignRandomize();
               }}
               className="group p-2 rounded-full text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 transition-colors"
               aria-label="Randomize"
@@ -942,6 +950,7 @@ function StudioContent() {
                     onTokenChange={handleTextDesignTokenChange}
                     onExportImage={handleExportImage}
                     onExportWallpapers={handleExportWallpapers}
+                    onRandomize={handleTextDesignRandomize}
                   />
                 )}
               </div>

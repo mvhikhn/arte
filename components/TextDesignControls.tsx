@@ -4,13 +4,14 @@ import { useState } from "react";
 import { TextDesignArtworkParams } from "./TextDesignArtwork";
 import { Label } from "./ui/label";
 import { Slider } from "./ui/slider";
-import { ChevronDown, ChevronRight, Download, Image as ImageIcon, Monitor } from "lucide-react";
+import { ChevronDown, ChevronRight, Download, Image as ImageIcon, Monitor, Shuffle } from "lucide-react";
 
 interface TextDesignControlsProps {
     params: TextDesignArtworkParams;
     onParamChange: (param: keyof TextDesignArtworkParams, value: any) => void;
     onExportImage: () => void;
     onExportWallpapers: () => void;
+    onRandomize?: () => void;
     tokenInput?: string;
     onTokenChange?: (value: string) => void;
 }
@@ -20,6 +21,7 @@ export default function TextDesignControls({
     onParamChange,
     onExportImage,
     onExportWallpapers,
+    onRandomize,
     tokenInput,
     onTokenChange,
 }: TextDesignControlsProps) {
@@ -360,6 +362,15 @@ export default function TextDesignControls({
         <div className="h-full overflow-y-auto overflow-x-hidden bg-white text-zinc-900 text-xs no-scrollbar">
             {/* Export Buttons */}
             <div className="px-3 py-3 border-b border-zinc-100 space-y-2">
+                {onRandomize && (
+                    <button
+                        onClick={onRandomize}
+                        className="w-full px-3 py-2 bg-zinc-100 hover:bg-zinc-200 rounded-md flex items-center justify-center gap-2 transition-colors font-medium text-xs"
+                    >
+                        <Shuffle className="w-3.5 h-3.5" />
+                        Shuffle
+                    </button>
+                )}
                 <button
                     onClick={onExportImage}
                     className="w-full px-3 py-2 bg-zinc-900 hover:bg-zinc-800 text-white rounded-md flex items-center justify-center gap-2 transition-colors font-medium text-xs"
@@ -391,13 +402,24 @@ export default function TextDesignControls({
                 </button>
                 {expandedSections.has("Token") && (
                     <div className="px-3 pb-3">
-                        <input
-                            type="text"
-                            value={tokenInput || params.token || ''}
-                            onChange={(e) => onTokenChange && onTokenChange(e.target.value)}
-                            className="w-full px-2 py-1.5 bg-zinc-50 border border-zinc-200 rounded text-xs font-mono text-zinc-600 focus:outline-none focus:border-zinc-400 focus:ring-0"
-                            placeholder="fx-..."
-                        />
+                        <div className="flex gap-1">
+                            <input
+                                type="text"
+                                value={tokenInput || params.token || ''}
+                                onChange={(e) => onTokenChange && onTokenChange(e.target.value)}
+                                className="flex-1 px-2 py-1.5 bg-zinc-50 border border-zinc-200 rounded text-xs font-mono text-zinc-600 focus:outline-none focus:border-zinc-400 focus:ring-0"
+                                placeholder="fx-..."
+                            />
+                            <button
+                                onClick={() => navigator.clipboard.writeText(tokenInput || params.token || '')}
+                                className="px-2 py-1.5 bg-zinc-100 hover:bg-zinc-200 border border-zinc-200 rounded text-zinc-500 hover:text-zinc-700 transition-colors"
+                                title="Copy Token"
+                            >
+                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                </svg>
+                            </button>
+                        </div>
                         <p className="mt-1.5 text-[10px] text-zinc-400 leading-relaxed">
                             This token uniquely identifies your artwork. Paste a previous token to restore it.
                         </p>

@@ -267,9 +267,9 @@ export const generateTreeParamsFromToken = (token: string): TreeArtworkParams =>
             bg: "#f1faee"
         },
         {
-            stem: ["#000000", "#14213d", "#fca311"],
-            tip: ["#e5e5e5", "#ffffff", "#fca311"],
-            bg: "#000000"
+            stem: ["#5d4e37", "#4a3c2a", "#6b5b4c"],
+            tip: ["#8fbc8f", "#90ee90", "#98fb98"],
+            bg: "#faf5ef"
         }
     ];
     const palette = palettes[Math.floor(rand() * palettes.length)];
@@ -342,8 +342,8 @@ export const generateTextDesignParamsFromToken = (token: string): TextDesignArtw
         canvasWidth: isMobile ? 400 : 630,
         canvasHeight: isMobile ? 500 : 790,
         grainAmount: Math.floor(rand() * 30) + 10,
-        fontUrl: "https://example.com/font.ttf",
-        customFontFamily: "Noto Sans Bengali",
+        fontUrl: "",
+        customFontFamily: "Inter",
         layer1: {
             text: "ZOHRAN",
             x: 0.500,

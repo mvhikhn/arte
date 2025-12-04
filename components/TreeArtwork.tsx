@@ -238,20 +238,35 @@ const TreeArtwork = forwardRef<TreeArtworkRef, TreeArtworkProps>(
       exportHighRes: (scale: number = 4) => {
         if (!sketchRef.current) return;
 
-        const currentDensity = sketchRef.current.pixelDensity();
         const p = sketchRef.current;
+        const currentDensity = p.pixelDensity();
+        const wasAnimating = paramsRef.current.isAnimating;
 
+        // Temporarily enable animation for drawing
+        paramsRef.current.isAnimating = true;
+
+        // 1. Setup High Res
         p.pixelDensity(scale);
-        p.resizeCanvas(paramsRef.current.canvasWidth, paramsRef.current.canvasHeight);
-        p.redraw();
 
-        setTimeout(() => {
-          p.saveCanvas(`tree-${Date.now()}-${scale}x`, 'png');
+        // 2. Reset and Draw Synchronously
+        if (p.resetSketch) {
+          p.resetSketch();
 
-          p.pixelDensity(currentDensity);
-          p.resizeCanvas(paramsRef.current.canvasWidth, paramsRef.current.canvasHeight);
-          p.redraw();
-        }, 100);
+          // Run loop until finished (max 5000 iterations to prevent infinite loop)
+          let iterations = 0;
+          while (!p.isFinished() && iterations < 5000) {
+            p.draw();
+            iterations++;
+          }
+        }
+
+        // 3. Save
+        p.saveCanvas(`tree-${Date.now()}-${scale}x`, 'png');
+
+        // 4. Restore
+        p.pixelDensity(currentDensity);
+        paramsRef.current.isAnimating = wasAnimating;
+        if (p.resetSketch) p.resetSketch();
       },
     }));
 
@@ -537,10 +552,12 @@ const TreeArtwork = forwardRef<TreeArtworkRef, TreeArtworkProps>(
             }
 
             p.ellipseMode(p.CENTER);
-            p.smooth();
-
+            // Reset paths
             paths = [];
-            for (let i = 0; i < paramsRef.current.initialPaths; i++) {
+
+            // Create initial paths
+            const count = paramsRef.current.initialPaths;
+            for (let i = 0; i < count; i++) {
               paths.push(new Pathfinder());
             }
 
@@ -550,6 +567,10 @@ const TreeArtwork = forwardRef<TreeArtworkRef, TreeArtworkProps>(
             grainApplied = false; // Reset grain flag
             p.loop();
           };
+
+          // Expose methods for exportHighRes
+          p.resetSketch = resetSketch;
+          p.isFinished = () => paths.length === 0;
 
           let grainApplied = false;
 
