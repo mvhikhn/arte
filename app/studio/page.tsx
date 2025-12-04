@@ -18,11 +18,11 @@ import TextDesignControls from "@/components/TextDesignControls";
 import { ExportPopup } from "@/components/ExportPopup";
 import { PaymentModal } from "@/components/PaymentModal";
 import { EmailVerificationModal } from "@/components/EmailVerificationModal";
-import { ArrowRight, ArrowLeft, SlidersHorizontal, RefreshCw, Shuffle, Download } from "lucide-react";
+import { ArrowRight, ArrowLeft, SlidersHorizontal, RefreshCw, Shuffle, Download, Link2, Check } from "lucide-react";
 import { getRandomColors } from "@/lib/colorPalettes";
 import { hasGifAccess, grantGifAccess } from "@/lib/paymentUtils";
 import { generateToken, validateToken } from "@/utils/token";
-import { encodeParams } from "@/utils/serialization";
+import { encodeParams, encodeParamsSecure } from "@/utils/serialization";
 
 type ArtworkType = "flow" | "grid" | "mosaic" | "rotated" | "tree" | "textdesign";
 
@@ -171,6 +171,36 @@ function StudioContent() {
 
   // Separate state for token input to allow free editing
   const [tokenInput, setTokenInput] = useState<string>("");
+
+  const [secureLinkStatus, setSecureLinkStatus] = useState({ loading: false, copied: false });
+
+  const handleGetSecureLink = async () => {
+    setSecureLinkStatus({ loading: true, copied: false });
+    try {
+      let token = "";
+      switch (currentArtwork) {
+        case 'flow': token = await encodeParamsSecure('flow', flowParams); break;
+        case 'grid': token = await encodeParamsSecure('grid', gridParams); break;
+        case 'mosaic': token = await encodeParamsSecure('mosaic', mosaicParams); break;
+        case 'rotated': token = await encodeParamsSecure('rotated', rotatedGridParams); break;
+        case 'tree': token = await encodeParamsSecure('tree', treeParams); break;
+        case 'textdesign': token = await encodeParamsSecure('text', textDesignParams); break;
+      }
+
+      // Copy to clipboard
+      await navigator.clipboard.writeText(token);
+      setSecureLinkStatus({ loading: false, copied: true });
+
+      // Reset copied state after 2 seconds
+      setTimeout(() => {
+        setSecureLinkStatus(prev => ({ ...prev, copied: false }));
+      }, 2000);
+    } catch (error) {
+      console.error("Failed to generate secure link:", error);
+      setSecureLinkStatus({ loading: false, copied: false });
+      alert("Failed to generate secure link. Please try again.");
+    }
+  };
 
   // Initialize from URL token if provided
   useEffect(() => {
@@ -843,6 +873,26 @@ function StudioContent() {
               aria-label="Randomize"
             >
               <Shuffle className="w-4 h-4" />
+            </button>
+
+            {/* Get Secure Link Button */}
+            <button
+              onClick={handleGetSecureLink}
+              disabled={secureLinkStatus.loading}
+              className={`group p-2 rounded-full transition-colors ${secureLinkStatus.copied
+                ? "text-green-600 bg-green-50 hover:bg-green-100"
+                : "text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100"
+                }`}
+              aria-label="Get Secure Link"
+              title="Get Secure Link (Encrypted)"
+            >
+              {secureLinkStatus.loading ? (
+                <div className="w-4 h-4 border-2 border-zinc-300 border-t-zinc-600 rounded-full animate-spin" />
+              ) : secureLinkStatus.copied ? (
+                <Check className="w-4 h-4" />
+              ) : (
+                <Link2 className="w-4 h-4" />
+              )}
             </button>
 
             {/* Export Button */}
