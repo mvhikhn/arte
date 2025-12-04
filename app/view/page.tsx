@@ -104,9 +104,9 @@ export default function ViewPage() {
                             case 'text': setTextDesignParams(generateTextDesignParamsFromToken(trimmedToken)); break;
                         }
                     }
-                } catch (error) {
+                } catch (error: any) {
                     console.error("Decoding error:", error);
-                    setError("Invalid key or decryption failed");
+                    setError(`Error: ${error.message || "Invalid key or decryption failed"}`);
                     setCurrentArtwork(null);
                 }
             };
