@@ -15,9 +15,9 @@
 import LZString from 'lz-string';
 import { ArtworkType } from '@/utils/token';
 
-// Cloudflare Worker endpoints - UPDATE THESE after deployment
-const ENCRYPT_ENDPOINT = process.env.NEXT_PUBLIC_ENCRYPT_ENDPOINT || '';
-const DECRYPT_ENDPOINT = process.env.NEXT_PUBLIC_DECRYPT_ENDPOINT || '';
+// Cloudflare Worker endpoints
+const ENCRYPT_ENDPOINT = process.env.NEXT_PUBLIC_ENCRYPT_ENDPOINT || 'https://arte-encrypt.mvhikhn.workers.dev';
+const DECRYPT_ENDPOINT = process.env.NEXT_PUBLIC_DECRYPT_ENDPOINT || 'https://arte-decrypt.mvhikhn.workers.dev';
 
 /**
  * Round floating-point numbers to fixed precision to ensure identical
