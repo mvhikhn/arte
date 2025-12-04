@@ -228,7 +228,9 @@ export const decodeParams = async (token: string): Promise<{ type: ArtworkType; 
 
             return { type: type as ArtworkType, params: JSON.parse(canonical) };
         } catch (error) {
-            console.warn('Decryption service failed, trying local decode:', error);
+        } catch (error) {
+            console.error('Decryption service failed:', error);
+            throw error;
         }
     }
 
