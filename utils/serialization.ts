@@ -416,7 +416,8 @@ const decodeTextDesignParams = (encoded: string, token: string): Partial<TextDes
             layer1: mapLayer(data[8]),
             layer2: mapLayer(data[9]),
             layer3: mapLayer(data[10]),
-            token: data[11] || token, // Use encoded seed
+            // Robust token extraction: check if data[11] is string, if not try data[12]
+            token: (typeof data[11] === 'string' ? data[11] : (typeof data[12] === 'string' ? data[12] : token)),
             colorSeed: data[12]
         };
     } catch (e) {

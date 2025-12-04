@@ -76,9 +76,12 @@ const TextDesignArtwork = forwardRef<TextDesignArtworkRef, TextDesignArtworkProp
             if (!sketchRef.current || !sketchRef.current.loadFont) return;
 
             const load = (url: string | undefined, id: string) => {
-                if (url && url.toLowerCase().endsWith('.ttf')) {
+                // Sanitize URL (fix common typos like hhttps)
+                const cleanUrl = url ? url.replace(/^hhttps:\/\//, 'https://') : url;
+
+                if (cleanUrl && cleanUrl.toLowerCase().endsWith('.ttf')) {
                     sketchRef.current.loadFont(
-                        url,
+                        cleanUrl,
                         (font: any) => {
                             customFontsRef.current[id] = font;
                             console.log(`Font loaded for ${id}`);
