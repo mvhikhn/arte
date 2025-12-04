@@ -403,22 +403,49 @@ const decodeTextDesignParams = (encoded: string, token: string): Partial<TextDes
             outlineThickness: l[13], outlineColor: l[14], fontUrl: l[15] || undefined
         });
 
-        return {
-            backgroundColor: data[0],
-            grainAmount: data[1],
-            fontUrl: data[2],
-            customFontFamily: data[3],
-            canvasWidth: data[4] || 630,
-            canvasHeight: data[5] || 790,
-            exportWidth: data[6] || 1600,
-            exportHeight: data[7] || 2000,
-            layer1: mapLayer(data[8]),
-            layer2: mapLayer(data[9]),
-            layer3: mapLayer(data[10]),
-            // Robust token extraction: check if data[11] is string, if not try data[12]
-            token: (typeof data[11] === 'string' ? data[11] : (typeof data[12] === 'string' ? data[12] : token)),
-            colorSeed: data[12]
-        };
+        // Detect OLD token format (14 elements with layer2 duplicated)
+        // vs NEW token format (13 elements, correct)
+        // OLD: [bg, grain, ..., layer1(8), layer2(9), layer2-dup(10), layer3(11), token(12), colorSeed(13)]
+        // NEW: [bg, grain, ..., layer1(8), layer2(9), layer3(10), token(11), colorSeed(12)]
+        // Detection: If data[11] is an array, it's OLD format (layer3 was at index 11)
+        const isOldFormat = Array.isArray(data[11]);
+
+        if (isOldFormat) {
+            // OLD FORMAT: data has 14 elements
+            return {
+                backgroundColor: data[0],
+                grainAmount: data[1],
+                fontUrl: data[2],
+                customFontFamily: data[3],
+                canvasWidth: data[4] || 630,
+                canvasHeight: data[5] || 790,
+                exportWidth: data[6] || 1600,
+                exportHeight: data[7] || 2000,
+                layer1: mapLayer(data[8]),
+                layer2: mapLayer(data[9]),
+                // Skip data[10] (duplicate of layer2)
+                layer3: mapLayer(data[11]), // Actual layer3 in old format
+                token: typeof data[12] === 'string' ? data[12] : token,
+                colorSeed: data[13]
+            };
+        } else {
+            // NEW FORMAT: data has 13 elements
+            return {
+                backgroundColor: data[0],
+                grainAmount: data[1],
+                fontUrl: data[2],
+                customFontFamily: data[3],
+                canvasWidth: data[4] || 630,
+                canvasHeight: data[5] || 790,
+                exportWidth: data[6] || 1600,
+                exportHeight: data[7] || 2000,
+                layer1: mapLayer(data[8]),
+                layer2: mapLayer(data[9]),
+                layer3: mapLayer(data[10]),
+                token: typeof data[11] === 'string' ? data[11] : token,
+                colorSeed: data[12]
+            };
+        }
     } catch (e) {
         console.error("Failed to decode text design params", e);
         return {};
