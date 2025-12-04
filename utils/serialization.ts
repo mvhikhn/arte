@@ -385,7 +385,6 @@ const encodeTextDesignParams = (params: TextDesignArtworkParams): string => {
         params.exportHeight,
         layer1,
         layer2,
-        layer2,
         layer3,
         params.token, // Add token (seed)
         params.colorSeed // Add colorSeed

@@ -25,64 +25,152 @@ const BLOG_POSTS: Record<string, { title: string; date: string; content: string 
       
       <p>We needed something better: a compact, shareable code that captures the complete state of an artwork.</p>
       
-      <h2>The Solution: Tokens</h2>
+      <hr style="margin: 3rem 0; border: none; border-top: 1px solid #e5e5e5;" />
       
-      <h3>What is a Token?</h3>
-      <p>A token is a compact string that uniquely identifies an artwork iteration. Think of it as a "save code" for your creation.</p>
+      <h2>System Architecture Overview</h2>
+      <pre style="background: #0a0a0a; color: #a0a0a0; padding: 1.5rem; border-radius: 8px; overflow-x: auto; font-size: 11px; line-height: 1.4;"><code>┌─────────────────────────────────────────────────────────────────────────────┐
+│                        ARTE TOKEN SYSTEM                                     │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  ┌──────────────┐     ┌──────────────┐     ┌──────────────┐                 │
+│  │    STUDIO    │     │    VIEWER    │     │   URL/SHARE  │                 │
+│  │   /studio    │     │    /view     │     │    ?token=   │                 │
+│  └──────┬───────┘     └──────┬───────┘     └──────┬───────┘                 │
+│         │                    │                    │                          │
+│         └────────────────────┴────────────────────┘                          │
+│                              │                                               │
+│                              ▼                                               │
+│  ┌───────────────────────────────────────────────────────────┐              │
+│  │                     TOKEN ROUTER                           │              │
+│  │                                                            │              │
+│  │   Token Format Detection:                                  │              │
+│  │   ┌─────────────────────────────────────────────────────┐ │              │
+│  │   │ fx-{type}-{hash}{checksum}      → Random Seed       │ │              │
+│  │   │ fx-{type}-v1-{data}-{checksum}  → State Token       │ │              │
+│  │   │ fx-{type}-v1-ENC:{data}-{chk}   → Encrypted Token   │ │              │
+│  │   └─────────────────────────────────────────────────────┘ │              │
+│  └───────────────────────────────────────────────────────────┘              │
+│                              │                                               │
+│              ┌───────────────┴───────────────┐                              │
+│              ▼                               ▼                               │
+│  ┌─────────────────────┐        ┌─────────────────────────┐                 │
+│  │   utils/token.ts    │        │ utils/serialization.ts  │                 │
+│  │                     │        │                         │                 │
+│  │  • generateToken()  │        │  • encodeParams()       │                 │
+│  │  • validateToken()  │        │  • decodeParams()       │                 │
+│  │  • tokenToSeed()    │        │  • xorCipher()          │                 │
+│  │  • hashToken()      │        │  • calculateChecksum()  │                 │
+│  └──────────┬──────────┘        └───────────┬─────────────┘                 │
+│             │                               │                                │
+│             └───────────────┬───────────────┘                                │
+│                             ▼                                                │
+│  ┌───────────────────────────────────────────────────────────┐              │
+│  │                 utils/artworkGenerator.ts                  │              │
+│  │                                                            │              │
+│  │  Artwork-specific parameter generators:                    │              │
+│  │  • generateFlowParamsFromToken()                          │              │
+│  │  • generateMosaicParamsFromToken()                        │              │
+│  │  • generateTreeParamsFromToken()                          │              │
+│  │  • generateTextDesignParamsFromToken()                    │              │
+│  └───────────────────────────────────────────────────────────┘              │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘</code></pre>
+
+      <hr style="margin: 3rem 0; border: none; border-top: 1px solid #e5e5e5;" />
       
-      <pre><code>Example Tokens:
-fx-mosaic-3xKpR9YbM2nT...vb81          (Random seed token)
-fx-mosaic-v1-eyJjb2xvcjEi...-a3f9      (State-encoded token)</code></pre>
+      <h2>Token Types Deep Dive</h2>
       
-      <h3>Token Anatomy</h3>
-      <pre><code>┌──────────────── Token Format ────────────────┐
-│                                               │
-│  fx - TYPE - VERSION - DATA - CHECKSUM       │
-│  │    │       │        │       │             │
-│  │    │       │        │       └─ Tamper detection
-│  │    │       │        └───────── Encoded parameters
-│  │    │       └────────────────── v1 = state token
-│  │    └────────────────────────── Artwork type
-│  └─────────────────────────────── Platform prefix
-│                                               │
-└───────────────────────────────────────────────┘</code></pre>
+      <h3>Type 1: Random Seed Tokens</h3>
+      <p><strong>Format:</strong> <code>fx-{type}-{44-char random hash}{2-char checksum}</code></p>
+      <p><strong>Example:</strong> <code>fx-mosaic-3xKpR9YbM2nTqWe5...vb81</code></p>
       
-      <h2>Two Token Types</h2>
+      <pre style="background: #0a0a0a; color: #a0a0a0; padding: 1.5rem; border-radius: 8px; overflow-x: auto; font-size: 11px; line-height: 1.4;"><code>              RANDOM TOKEN STRUCTURE
+┌─────────────────────────────────────────────────┐
+│                                                 │
+│  fx-mosaic-3xKpR9YbM2nTqWe5...vb81             │
+│  ││  │      │                    ││             │
+│  ││  │      │                    │└─ Checksum   │
+│  ││  │      │                    │   (2 hex)    │
+│  ││  │      │                    │              │
+│  ││  │      └────────────────────┴─ Random Hash │
+│  ││  │                               (44 chars) │
+│  ││  │                                          │
+│  ││  └─ Artwork Type                            │
+│  │└─ Separator                                  │
+│  └─ Platform Prefix                             │
+│                                                 │
+└─────────────────────────────────────────────────┘</code></pre>
+
+      <h3>Type 2: State-Encoded Tokens (v1)</h3>
+      <p><strong>Format:</strong> <code>fx-{type}-v1-{base64 data}-{4-char checksum}</code></p>
+      <p>When you manually change any parameter (color, size, etc.), the entire artwork state is captured and encoded.</p>
       
-      <h3>1. Random Seed Tokens</h3>
-      <p><strong>Format:</strong> <code>fx-[type]-[randomhash][checksum]</code></p>
-      <p><strong>Use Case:</strong> Initial random generation</p>
-      <p><strong>Key insight:</strong> The same hash always produces the same artwork because it seeds a pseudo-random number generator (PRNG).</p>
+      <pre style="background: #0a0a0a; color: #a0a0a0; padding: 1.5rem; border-radius: 8px; overflow-x: auto; font-size: 11px; line-height: 1.4;"><code>           STATE TOKEN ENCODING
+┌─────────────────────────────────────────────────┐
+│                                                 │
+│  User changes color #A8DADC → #FF0000          │
+│                    │                            │
+│                    ▼                            │
+│  ┌─────────────────────────────────────────┐   │
+│  │ Current Parameters Object:               │   │
+│  │ {                                        │   │
+│  │   color1: "#FF0000",  // Changed!        │   │
+│  │   color2: "#E63946",                     │   │
+│  │   color3: "#457B9D",                     │   │
+│  │   ...23 more parameters...               │   │
+│  │   canvasWidth: 630,                      │   │
+│  │   canvasHeight: 790                      │   │
+│  │ }                                        │   │
+│  └─────────────────┬───────────────────────┘   │
+│                    │                            │
+│                    ▼                            │
+│  ┌─────────────────────────────────────────┐   │
+│  │ Convert to compact array (drop keys):    │   │
+│  │ ["#FF0000","#E63946","#457B9D",...]     │   │
+│  └─────────────────┬───────────────────────┘   │
+│                    │                            │
+│                    ▼                            │
+│  ┌─────────────────────────────────────────┐   │
+│  │ JSON.stringify → Base64 → XOR Encrypt   │   │
+│  └─────────────────┬───────────────────────┘   │
+│                    │                            │
+│                    ▼                            │
+│  fx-mosaic-v1-ENC:FisdLx...-a3f9               │
+│                                                 │
+└─────────────────────────────────────────────────┘</code></pre>
+
+      <h3>Type 3: Encrypted State Tokens</h3>
+      <p>For added obfuscation, v1 tokens are XOR-encrypted with a symmetric key:</p>
       
-      <h3>2. State-Encoded Tokens</h3>
-      <p><strong>Format:</strong> <code>fx-[type]-v1-[base64data]-[checksum]</code></p>
-      <p><strong>Use Case:</strong> Preserving manual edits</p>
-      <p>When you change a color or any parameter, all settings are encoded into a Base64 string with a checksum for integrity verification.</p>
+      <pre style="background: #0a0a0a; color: #a0a0a0; padding: 1.5rem; border-radius: 8px; overflow-x: auto; font-size: 11px; line-height: 1.4;"><code>            ENCRYPTION LAYER
+┌─────────────────────────────────────────────────┐
+│                                                 │
+│  Plain Base64: "WyIjRkYwMDAw..."               │
+│                    │                            │
+│                    ▼                            │
+│  ┌─────────────────────────────────────────┐   │
+│  │ XOR Cipher with Key:                     │   │
+│  │                                          │   │
+│  │ for each char in plaintext:             │   │
+│  │   encrypted[i] = plain[i] XOR key[i%16] │   │
+│  └─────────────────┬───────────────────────┘   │
+│                    │                            │
+│                    ▼                            │
+│  ┌─────────────────────────────────────────┐   │
+│  │ Base64-encode result → Prefix "ENC:"    │   │
+│  │ "ENC:FisdLxIXBDsPBRw..."                │   │
+│  └─────────────────────────────────────────┘   │
+│                                                 │
+│  XOR is symmetric: encrypt(encrypt(x)) = x     │
+│                                                 │
+└─────────────────────────────────────────────────┘</code></pre>
+
+      <hr style="margin: 3rem 0; border: none; border-top: 1px solid #e5e5e5;" />
+
+      <h2>The PRNG: sfc32 Algorithm</h2>
+      <p>For random seed tokens, we use the <strong>sfc32</strong> (Simple Fast Counter) algorithm, the same PRNG used by fxhash:</p>
       
-      <h2>Security: Checksums</h2>
-      <p>Every token includes a checksum to detect corruption or tampering.</p>
-      
-      <pre><code>// Random Token Checksum
-const checksumSource = \`\${artworkType}\${randomPart}\`;
-let sum = 0;
-for (let i = 0; i &lt; checksumSource.length; i++) {
-    sum += checksumSource.charCodeAt(i);
-}
-const checksum = (sum % 256).toString(16).padStart(2, '0');</code></pre>
-      
-      <p>This binds the artwork type to the token. Changing <code>fx-grid-</code> to <code>fx-mosaic-</code> invalidates the checksum.</p>
-      
-      <p><strong>Why checksums matter:</strong></p>
-      <ul>
-        <li>Copy-paste errors detected immediately</li>
-        <li>Prevents URL corruption</li>
-        <li>Explicit "Invalid token" message instead of broken artwork</li>
-      </ul>
-      
-      <h2>The Deterministic PRNG</h2>
-      <p>For random tokens, we use the sfc32 algorithm (simple fast counter):</p>
-      
-      <pre><code>function sfc32(a, b, c, d) {
+      <pre style="background: #0a0a0a; color: #a0a0a0; padding: 1.5rem; border-radius: 8px; overflow-x: auto; font-size: 12px;"><code>function sfc32(a, b, c, d) {
     return function() {
         a &gt;&gt;&gt;= 0; b &gt;&gt;&gt;= 0; c &gt;&gt;&gt;= 0; d &gt;&gt;&gt;= 0;
         let t = (a + b) | 0;
@@ -98,70 +186,155 @@ const checksum = (sum % 256).toString(16).padStart(2, '0');</code></pre>
       
       <p><strong>Why sfc32?</strong></p>
       <ul>
-        <li>Deterministic: Same seed → Same sequence</li>
-        <li>Fast: Optimized for generative art</li>
-        <li>Good distribution: Passes randomness tests</li>
-        <li>Used by fxhash: Battle-tested</li>
+        <li><strong>Deterministic:</strong> Same seed → identical sequence</li>
+        <li><strong>Fast:</strong> Optimized for real-time art</li>
+        <li><strong>Period: 2^128:</strong> Won't repeat in human lifetimes</li>
+        <li><strong>Battle-tested:</strong> Used by fxhash platform</li>
       </ul>
+
+      <hr style="margin: 3rem 0; border: none; border-top: 1px solid #e5e5e5;" />
+
+      <h2>Color Locking: Regenerate vs Randomize</h2>
+      <p>A key feature is separating layout randomness from color choices:</p>
       
-      <h2>Complete Workflow</h2>
+      <pre style="background: #0a0a0a; color: #a0a0a0; padding: 1.5rem; border-radius: 8px; overflow-x: auto; font-size: 11px; line-height: 1.4;"><code>            REGENERATE (Layout Only)
+┌─────────────────────────────────────────────────┐
+│                                                 │
+│  Current State:                                 │
+│  ┌─────────────────────────────────────────┐   │
+│  │ token: "fx-mosaic-abc123"               │   │
+│  │ colorSeed: "fx-mosaic-abc123"           │   │
+│  │ color1: "#A8DADC" (user-picked)         │   │
+│  └─────────────────────────────────────────┘   │
+│                    │                            │
+│                    ▼ Click "Regenerate"         │
+│  ┌─────────────────────────────────────────┐   │
+│  │ NEW token: "fx-mosaic-xyz789"           │   │
+│  │ KEEP colorSeed: "fx-mosaic-abc123"      │   │
+│  │ KEEP colors: "#A8DADC"...               │   │
+│  │ NEW layout params from xyz789           │   │
+│  └─────────────────────────────────────────┘   │
+│                                                 │
+│  Result: Different layout, SAME colors!        │
+│                                                 │
+└─────────────────────────────────────────────────┘</code></pre>
+
+      <hr style="margin: 3rem 0; border: none; border-top: 1px solid #e5e5e5;" />
+
+      <h2>Complete Data Flow</h2>
       
-      <h3>Creating Art</h3>
-      <pre><code>┌──────────┐
-│  Studio  │
-└────┬─────┘
-     │
-     ├─ Click Randomize ──&gt; Generate random token
-     │                      └─&gt; Seed PRNG → Parameters
-     │
-     ├─ Tweak color ─────&gt; Encode all params → v1 token
-     │
-     └─ Copy token ──────&gt; Share with world</code></pre>
+      <pre style="background: #0a0a0a; color: #a0a0a0; padding: 1.5rem; border-radius: 8px; overflow-x: auto; font-size: 11px; line-height: 1.4;"><code>┌─────────────────────────────────────────────────────────────────────────────┐
+│                           STUDIO → VIEWER FLOW                               │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  [1] USER CREATES IN STUDIO                                                 │
+│  ─────────────────────────                                                  │
+│                                                                              │
+│  ┌────────────────┐                                                         │
+│  │ Click Randomize│───▶ generateToken('mosaic')                            │
+│  └────────────────┘              │                                          │
+│                                  ▼                                          │
+│                     "fx-mosaic-3xKpR9YbM2nT..."                             │
+│                                  │                                          │
+│                                  ▼                                          │
+│                     generateMosaicParamsFromToken()                         │
+│                                  │                                          │
+│                                  ▼                                          │
+│                     Artwork renders on canvas                               │
+│                                                                              │
+│  [2] USER EDITS PARAMETERS                                                  │
+│  ─────────────────────────                                                  │
+│                                                                              │
+│  ┌────────────────┐                                                         │
+│  │ Change color   │───▶ setParams({ ...params, color1: "#FF0000" })        │
+│  └────────────────┘              │                                          │
+│                                  ▼                                          │
+│                     encodeParams('mosaic', params)                          │
+│                                  │                                          │
+│                                  ▼                                          │
+│                     "fx-mosaic-v1-ENC:FisdLx...-a3f9"                       │
+│                                                                              │
+│  [3] RECIPIENT VIEWS IN VIEWER                                              │
+│  ────────────────────────────────                                           │
+│                                                                              │
+│  ┌────────────────┐                                                         │
+│  │ Paste token    │───▶ validateToken() ✓                                  │
+│  └────────────────┘              │                                          │
+│                                  ▼                                          │
+│                     decodeParams() → { color1: "#FF0000", ... }             │
+│                                  │                                          │
+│                                  ▼                                          │
+│                     Artwork renders EXACTLY as creator saw it               │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘</code></pre>
+
+      <hr style="margin: 3rem 0; border: none; border-top: 1px solid #e5e5e5;" />
+
+      <h2>File Structure</h2>
       
-      <h3>Viewing Art</h3>
-      <pre><code>┌──────────┐
-│  Viewer  │
-└────┬─────┘
-     │
-     ├─ Paste token
-     │    └─&gt; Validate format &amp; checksum
-     │
-     ├─ Detect type ──────&gt; Mosaic / Grid / Tree / etc.
-     │
-     ├─ Check version ────&gt; Random or v1 state?
-     │    │
-     │    ├─ Random ─────&gt; tokenToSeed() → PRNG → Params
-     │    └─ v1 ────────&gt; decodeParams() → Exact params
-     │
-     └─&gt; Render artwork</code></pre>
+      <pre style="background: #0a0a0a; color: #a0a0a0; padding: 1.5rem; border-radius: 8px; overflow-x: auto; font-size: 12px;"><code>utils/
+├── token.ts              # Token generation & validation
+│   ├── generateToken()   # Create random token
+│   ├── validateToken()   # Check format & checksum
+│   ├── tokenToSeed()     # Convert to numeric seed
+│   └── createSeededRandom() # Create PRNG
+│
+├── serialization.ts      # Parameter encoding/decoding
+│   ├── encodeParams()    # Params → encrypted token
+│   ├── decodeParams()    # Token → params object
+│   ├── xorCipher()       # Symmetric encryption
+│   └── calculateChecksum() # Integrity verification
+│
+└── artworkGenerator.ts   # Artwork-specific generators
+    ├── generateFlowParamsFromToken()
+    ├── generateMosaicParamsFromToken()
+    ├── generateTreeParamsFromToken()
+    └── generateTextDesignParamsFromToken()</code></pre>
+
+      <hr style="margin: 3rem 0; border: none; border-top: 1px solid #e5e5e5;" />
+
+      <h2>Security: Checksum Binding</h2>
+      <p>Checksums bind the artwork type to the token data, preventing type spoofing:</p>
       
-      <h2>Cross-Artwork Protection</h2>
-      <p>Tokens are artwork-specific. A Mosaic token won't work on a Grid artwork.</p>
-      <p><strong>Why?</strong> Prevents confusion, provides clear error messages, and ensures type safety.</p>
-      
-      <h2>URL Integration</h2>
-      <p>Tokens flow seamlessly between pages. Studio reads <code>?token=</code> from URL and initializes the artwork state, allowing you to share exact creations via URL.</p>
-      
-      <h2>Technical Stack</h2>
+      <pre style="background: #0a0a0a; color: #a0a0a0; padding: 1.5rem; border-radius: 8px; overflow-x: auto; font-size: 11px; line-height: 1.4;"><code>           CHECKSUM VALIDATION
+┌─────────────────────────────────────────────────┐
+│                                                 │
+│  Attacker tries to change:                      │
+│  fx-grid-abc123... → fx-mosaic-abc123...       │
+│        │                    │                   │
+│        ▼                    ▼                   │
+│  Original checksum    New type mismatch!        │
+│  = hash("grid" + data)  ≠ hash("mosaic" + data)│
+│                                                 │
+│  → REJECT: "Token checksum mismatch"           │
+│                                                 │
+└─────────────────────────────────────────────────┘</code></pre>
+
+      <p><strong>Why checksums matter:</strong></p>
       <ul>
-        <li><strong>Frontend:</strong> Next.js 14 (App Router), TypeScript, p5.js</li>
-        <li><strong>Token System:</strong> <code>utils/token.ts</code>, <code>utils/serialization.ts</code>, <code>utils/artworkGenerator.ts</code></li>
+        <li>Copy-paste errors detected immediately</li>
+        <li>Prevents URL corruption</li>
+        <li>Explicit "Invalid token" message instead of broken artwork</li>
       </ul>
-      
+
+      <hr style="margin: 3rem 0; border: none; border-top: 1px solid #e5e5e5;" />
+
       <h2>Lessons Learned</h2>
       
-      <h3>1. Canvas Dimensions Matter</h3>
-      <p>Initially, state tokens didn't include <code>canvasWidth</code>, <code>canvasHeight</code>, etc. This caused artworks to render at default dimensions instead of actual size.</p>
-      <p><strong>Fix:</strong> Added dimension fields to all encode/decode functions.</p>
+      <h3>1. Canvas Dimensions Are Critical</h3>
+      <p>Initially, state tokens didn't include <code>canvasWidth</code> and <code>canvasHeight</code>. Artworks rendered at default 630×790 instead of custom sizes.</p>
+      <p><strong>Fix:</strong> Added dimension fields to all encode/decode schemas.</p>
       
-      <h3>2. Error Propagation is Critical</h3>
-      <p>When checksums failed, the code silently fell back to random generation. Users saw a different artwork instead of an error.</p>
+      <h3>2. Silent Failures Are Dangerous</h3>
+      <p>When checksum validation failed, code silently fell back to random generation. Users saw completely different artwork without any error.</p>
       <p><strong>Fix:</strong> Made <code>decodeParams()</code> throw errors that propagate to the UI.</p>
       
       <h3>3. Type Binding Prevents Spoofing</h3>
-      <p>Without binding artwork type to checksum, users could change <code>fx-grid-</code> to <code>fx-mosaic-</code> and bypass validation.</p>
+      <p>Without binding artwork type to the checksum, users could change <code>fx-grid-</code> to <code>fx-mosaic-</code> and bypass validation.</p>
       <p><strong>Fix:</strong> Include <code>artworkType</code> in checksum calculation.</p>
-      
+
+      <hr style="margin: 3rem 0; border: none; border-top: 1px solid #e5e5e5;" />
+
       <h2>Try It Yourself</h2>
       <ol>
         <li>Visit the <a href="/studio">Studio</a></li>
@@ -172,13 +345,15 @@ const checksum = (sum % 256).toString(16).padStart(2, '0');</code></pre>
         <li>See your exact custom artwork render</li>
       </ol>
       <p>Then try tampering with the token—change a single character. You'll get an explicit error instead of a broken image.</p>
-      
+
+      <hr style="margin: 3rem 0; border: none; border-top: 1px solid #e5e5e5;" />
+
       <h2>Conclusion</h2>
       <p>This token system embodies three principles:</p>
       <ol>
-        <li><strong>Determinism</strong> - Same token → Same artwork, always</li>
-        <li><strong>Portability</strong> - Share art with a string, not gigabytes</li>
-        <li><strong>Security</strong> - Checksums prevent corruption &amp; tampering</li>
+        <li><strong>Determinism</strong> — Same token → Same artwork, always</li>
+        <li><strong>Portability</strong> — Share art with a string, not gigabytes</li>
+        <li><strong>Security</strong> — Checksums prevent corruption & tampering</li>
       </ol>
       <p>It's a foundation that makes generative art accessible, shareable, and permanent.</p>
       
