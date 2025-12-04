@@ -113,9 +113,9 @@ export default function ViewPage() {
         const mouseY = e.clientY;
 
         // Calculate rotation based on distance from center
-        // Max rotation: 15 degrees
-        const rotateY = ((mouseX - centerX) / (rect.width / 2)) * 15;
-        const rotateX = -((mouseY - centerY) / (rect.height / 2)) * 15;
+        // Reduced to 8 degrees max for heavier, more premium feel
+        const rotateY = ((mouseX - centerX) / (rect.width / 2)) * 8;
+        const rotateX = -((mouseY - centerY) / (rect.height / 2)) * 8;
 
         setTiltX(rotateX);
         setTiltY(rotateY);
@@ -165,14 +165,19 @@ export default function ViewPage() {
 
     return (
         <div className="min-h-screen bg-[#fafafa] flex flex-col items-center justify-center p-4 relative">
-            {/* Input Area - Auto-hide when artwork is shown */}
+            {/* Input Area Hover Detection Zone - Invisible but captures hover */}
             <div
-                className="absolute top-8 left-1/2 -translate-x-1/2 z-20 transition-opacity duration-300"
-                style={{ opacity: currentArtwork && !isHoveringInput ? 0 : 1, pointerEvents: currentArtwork && !isHoveringInput ? 'none' : 'auto' }}
+                className="absolute top-0 left-1/2 -translate-x-1/2 w-[500px] max-w-[90vw] h-24 z-10"
                 onMouseEnter={() => setIsHoveringInput(true)}
                 onMouseLeave={() => setIsHoveringInput(false)}
+            />
+
+            {/* Input Area - Auto-hide when artwork is shown */}
+            <div
+                className="absolute top-8 left-1/2 -translate-x-1/2 z-20 transition-opacity duration-300 pointer-events-none"
+                style={{ opacity: currentArtwork && !isHoveringInput ? 0 : 1 }}
             >
-                <div className="w-[500px] max-w-[90vw]">
+                <div className="w-[500px] max-w-[90vw] pointer-events-auto">
                     <input
                         type="text"
                         value={tokenInput}
@@ -192,63 +197,71 @@ export default function ViewPage() {
                 </div>
             </div>
 
+            {/* Buttons - Top Right of Page (outside canvas) */}
+            {currentArtwork && !error && (
+                <div className="absolute top-8 right-8 flex gap-3 z-30">
+                    <button
+                        onClick={handleDownload}
+                        className="w-11 h-11 rounded-full bg-white border border-black/10 flex items-center justify-center hover:bg-black hover:text-white transition-all hover:scale-105 active:scale-95 shadow-lg"
+                        title="Download (4x Resolution)"
+                    >
+                        <Download className="w-4 h-4" />
+                    </button>
+                    <Link
+                        href={`/studio?artwork=${currentArtwork === 'text' ? 'textdesign' : currentArtwork}&token=${encodeURIComponent(tokenInput.trim())}`}
+                        className="w-11 h-11 rounded-full bg-white border border-black/10 flex items-center justify-center hover:bg-black hover:text-white transition-all hover:scale-105 active:scale-95 shadow-lg"
+                        title="Open in Studio"
+                    >
+                        <ExternalLink className="w-4 h-4" />
+                    </Link>
+                </div>
+            )}
+
             {/* Artwork Display */}
-            <div className="flex-1 w-full flex items-center justify-center" style={{ perspective: '2000px' }}>
+            <div className="flex-1 w-full flex items-center justify-center" style={{ perspective: '1500px' }}>
                 {currentArtwork && !error ? (
                     <div className="relative">
-                        {/* 3D Card */}
+                        {/* 3D Card with Premium Physics */}
                         <div
                             ref={cardRef}
                             onMouseMove={handleCardMouseMove}
                             onMouseLeave={handleCardMouseLeave}
-                            className="relative bg-white rounded-sm overflow-hidden transition-all duration-300 ease-out"
+                            className="relative rounded-sm overflow-hidden transition-all duration-500 ease-out"
                             style={{
-                                transform: `rotateX(${tiltX}deg) rotateY(${tiltY}deg)`,
+                                transform: `rotateX(${tiltX}deg) rotateY(${tiltY}deg) translateZ(20px)`,
                                 boxShadow: `
-                                    ${-tiltY * 2}px ${tiltX * 2}px 40px rgba(0, 0, 0, 0.1),
-                                    ${-tiltY * 1}px ${tiltX * 1}px 20px rgba(0, 0, 0, 0.05),
-                                    0 10px 60px rgba(0, 0, 0, 0.08)
+                                    ${-tiltY * 3}px ${tiltX * 3}px 60px rgba(0, 0, 0, 0.15),
+                                    ${-tiltY * 1.5}px ${tiltX * 1.5}px 30px rgba(0, 0, 0, 0.1),
+                                    0 20px 80px rgba(0, 0, 0, 0.12)
                                 `,
                                 maxWidth: '90vw',
                                 maxHeight: '85vh',
+                                padding: '12px',
+                                backgroundColor: '#ffffff',
                             }}
                         >
-                            {currentArtwork === 'flow' && flowParams && (
-                                <Artwork ref={flowRef} params={flowParams} />
-                            )}
-                            {currentArtwork === 'grid' && gridParams && (
-                                <GridArtwork ref={gridRef} params={gridParams} />
-                            )}
-                            {currentArtwork === 'mosaic' && mosaicParams && (
-                                <MosaicArtwork ref={mosaicRef} params={mosaicParams} />
-                            )}
-                            {currentArtwork === 'rotated' && rotatedGridParams && (
-                                <RotatedGridArtwork ref={rotatedRef} params={rotatedGridParams} />
-                            )}
-                            {currentArtwork === 'tree' && treeParams && (
-                                <TreeArtwork ref={treeRef} params={treeParams} />
-                            )}
-                            {currentArtwork === 'text' && textDesignParams && (
-                                <TextDesignArtwork ref={textRef} params={textDesignParams} />
-                            )}
-                        </div>
-
-                        {/* Minimal Buttons - Top Right */}
-                        <div className="absolute top-4 right-4 flex gap-2">
-                            <button
-                                onClick={handleDownload}
-                                className="w-10 h-10 rounded-full bg-white/90 backdrop-blur-sm border border-black/10 flex items-center justify-center hover:bg-white transition-all hover:scale-110 active:scale-95"
-                                title="Download (4x Resolution)"
-                            >
-                                <Download className="w-4 h-4 text-black/60" />
-                            </button>
-                            <Link
-                                href={`/studio?artwork=${currentArtwork === 'text' ? 'textdesign' : currentArtwork}&token=${encodeURIComponent(tokenInput.trim())}`}
-                                className="w-10 h-10 rounded-full bg-white/90 backdrop-blur-sm border border-black/10 flex items-center justify-center hover:bg-white transition-all hover:scale-110 active:scale-95"
-                                title="Open in Studio"
-                            >
-                                <ExternalLink className="w-4 h-4 text-black/60" />
-                            </Link>
+                            <div className="relative bg-white overflow-hidden" style={{
+                                boxShadow: 'inset 0 0 0 1px rgba(0,0,0,0.03)'
+                            }}>
+                                {currentArtwork === 'flow' && flowParams && (
+                                    <Artwork ref={flowRef} params={flowParams} />
+                                )}
+                                {currentArtwork === 'grid' && gridParams && (
+                                    <GridArtwork ref={gridRef} params={gridParams} />
+                                )}
+                                {currentArtwork === 'mosaic' && mosaicParams && (
+                                    <MosaicArtwork ref={mosaicRef} params={mosaicParams} />
+                                )}
+                                {currentArtwork === 'rotated' && rotatedGridParams && (
+                                    <RotatedGridArtwork ref={rotatedRef} params={rotatedGridParams} />
+                                )}
+                                {currentArtwork === 'tree' && treeParams && (
+                                    <TreeArtwork ref={treeRef} params={treeParams} />
+                                )}
+                                {currentArtwork === 'text' && textDesignParams && (
+                                    <TextDesignArtwork ref={textRef} params={textDesignParams} />
+                                )}
+                            </div>
                         </div>
                     </div>
                 ) : (
