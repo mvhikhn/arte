@@ -35,6 +35,15 @@ export function validateToken(token: string, artworkType?: ArtworkType): boolean
 
     if (hasArtworkType) {
         // Token format: fx-[type]-[44 random chars][2 checksum]
+        // Check if this is a v2/v2e state token (new secure format)
+        // Format: fx-[type]-v2.[hash].[data]
+        // Format: fx-[type]-v2e.[hash].[data]
+        // Check this FIRST because data can contain hyphens, breaking the split('-') logic below
+        if (token.includes('-v2.') || token.includes('-v2e.')) {
+            // Simple regex check for format
+            return /^fx-(flow|grid|mosaic|rotated|tree|text)-v2e?\.([a-f0-9]+)\.(.+)$/.test(token);
+        }
+
         const parts = token.split('-');
         // Standard token: fx-[type]-[hash+checksum] (3 parts)
         // State token (legacy): fx-[type]-v1-[data] (4 parts)
@@ -63,13 +72,7 @@ export function validateToken(token: string, artworkType?: ArtworkType): boolean
             return true;
         }
 
-        // Check if this is a v2/v2e state token (new secure format)
-        // Format: fx-[type]-v2.[hash].[data]
-        // Format: fx-[type]-v2e.[hash].[data]
-        if (token.includes('-v2.') || token.includes('-v2e.')) {
-            // Simple regex check for format
-            return /^fx-(flow|grid|mosaic|rotated|tree|text)-v2e?\.([a-f0-9]+)\.(.+)$/.test(token);
-        }
+
 
         // Validate length: 44 random + 2 checksum
         if (randomAndChecksum.length !== 46) {
