@@ -27,6 +27,7 @@ export interface RotatedGridArtworkRef {
   exportImage: () => void;
   exportWallpapers: () => void;
   regenerate: () => void;
+  exportHighRes: (scale?: number) => void;
 }
 
 interface RotatedGridArtworkProps {
@@ -116,6 +117,24 @@ const RotatedGridArtwork = forwardRef<RotatedGridArtworkRef, RotatedGridArtworkP
       if (sketchRef.current) {
         sketchRef.current.redraw();
       }
+    },
+    exportHighRes: (scale: number = 4) => {
+      if (!sketchRef.current) return;
+
+      const currentDensity = sketchRef.current.pixelDensity();
+      const p = sketchRef.current;
+
+      p.pixelDensity(scale);
+      p.resizeCanvas(paramsRef.current.canvasWidth, paramsRef.current.canvasHeight);
+      p.redraw();
+
+      setTimeout(() => {
+        p.saveCanvas(`rotated-grid-${Date.now()}-${scale}x`, 'png');
+
+        p.pixelDensity(currentDensity);
+        p.resizeCanvas(paramsRef.current.canvasWidth, paramsRef.current.canvasHeight);
+        p.redraw();
+      }, 100);
     },
   }));
 

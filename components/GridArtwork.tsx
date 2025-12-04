@@ -28,9 +28,11 @@ export interface GridArtworkParams {
 
 export interface GridArtworkRef {
   exportImage: () => void;
-  exportGif: (duration: number, fps: number) => void;
   exportWallpapers: () => void;
+  exportGif: (duration: number, fps: number) => Promise<void>;
   toggleAnimation: () => void;
+  regenerate: () => void;
+  exportHighRes: (scale?: number) => void;
 }
 
 interface GridArtworkProps {
@@ -141,6 +143,29 @@ const GridArtwork = forwardRef<GridArtworkRef, GridArtworkProps>(({ params }, re
           sketchRef.current.noLoop();
         }
       }
+    },
+    regenerate: () => {
+      if (sketchRef.current) {
+        sketchRef.current.redraw();
+      }
+    },
+    exportHighRes: (scale: number = 4) => {
+      if (!sketchRef.current) return;
+
+      const currentDensity = sketchRef.current.pixelDensity();
+      const p = sketchRef.current;
+
+      p.pixelDensity(scale);
+      p.resizeCanvas(paramsRef.current.canvasWidth, paramsRef.current.canvasHeight);
+      p.redraw();
+
+      setTimeout(() => {
+        p.saveCanvas(`grid-${Date.now()}-${scale}x`, 'png');
+
+        p.pixelDensity(currentDensity);
+        p.resizeCanvas(paramsRef.current.canvasWidth, paramsRef.current.canvasHeight);
+        p.redraw();
+      }, 100);
     },
   }));
 

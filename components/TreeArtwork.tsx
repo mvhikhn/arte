@@ -64,6 +64,7 @@ export interface TreeArtworkRef {
   exportWallpapers: () => void;
   toggleAnimation: () => void;
   regenerate: () => void;
+  exportHighRes: (scale?: number) => void;
 }
 
 interface TreeArtworkProps {
@@ -233,6 +234,24 @@ const TreeArtwork = forwardRef<TreeArtworkRef, TreeArtworkProps>(
         if (sketchRef.current) {
           sketchRef.current.loop();
         }
+      },
+      exportHighRes: (scale: number = 4) => {
+        if (!sketchRef.current) return;
+
+        const currentDensity = sketchRef.current.pixelDensity();
+        const p = sketchRef.current;
+
+        p.pixelDensity(scale);
+        p.resizeCanvas(paramsRef.current.canvasWidth, paramsRef.current.canvasHeight);
+        p.redraw();
+
+        setTimeout(() => {
+          p.saveCanvas(`tree-${Date.now()}-${scale}x`, 'png');
+
+          p.pixelDensity(currentDensity);
+          p.resizeCanvas(paramsRef.current.canvasWidth, paramsRef.current.canvasHeight);
+          p.redraw();
+        }, 100);
       },
     }));
 

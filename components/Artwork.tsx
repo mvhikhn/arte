@@ -36,9 +36,10 @@ export interface ArtworkParams {
 
 export interface ArtworkRef {
   exportImage: () => void;
-  exportGif: (duration: number, fps: number) => void;
+  exportGif: (duration: number, fps: number) => Promise<void>;
   exportWallpapers: () => void;
   toggleAnimation: () => void;
+  exportHighRes: (scale?: number) => void;
 }
 
 interface ArtworkProps {
@@ -184,6 +185,24 @@ const Artwork = forwardRef<ArtworkRef, ArtworkProps>(({ params }, ref) => {
           sketchRef.current.loop();
         }
       }
+    },
+    exportHighRes: (scale: number = 4) => {
+      if (!sketchRef.current) return;
+
+      const currentDensity = sketchRef.current.pixelDensity();
+      const p = sketchRef.current;
+
+      p.pixelDensity(scale);
+      p.resizeCanvas(paramsRef.current.canvasWidth, paramsRef.current.canvasHeight);
+      p.redraw();
+
+      setTimeout(() => {
+        p.saveCanvas(`flow-${Date.now()}-${scale}x`, 'png');
+
+        p.pixelDensity(currentDensity);
+        p.resizeCanvas(paramsRef.current.canvasWidth, paramsRef.current.canvasHeight);
+        p.redraw();
+      }, 100);
     },
   }));
 

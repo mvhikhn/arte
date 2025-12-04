@@ -35,6 +35,7 @@ export interface MosaicArtworkRef {
   exportImage: () => void;
   exportWallpapers: () => void;
   regenerate: () => void;
+  exportHighRes: (scale?: number) => void;
 }
 
 interface MosaicArtworkProps {
@@ -124,6 +125,27 @@ const MosaicArtwork = forwardRef<MosaicArtworkRef, MosaicArtworkProps>(({ params
       if (sketchRef.current) {
         sketchRef.current.redraw();
       }
+    },
+    exportHighRes: (scale: number = 4) => {
+      if (!sketchRef.current) return;
+
+      const currentDensity = sketchRef.current.pixelDensity();
+      const p = sketchRef.current;
+
+      // Temporarily increase pixel density for high-res export
+      p.pixelDensity(scale);
+      p.resizeCanvas(paramsRef.current.canvasWidth, paramsRef.current.canvasHeight);
+      p.redraw();
+
+      // Wait a frame for redraw to complete, then save
+      setTimeout(() => {
+        p.saveCanvas(`mosaic-${Date.now()}-${scale}x`, 'png');
+
+        // Restore original density
+        p.pixelDensity(currentDensity);
+        p.resizeCanvas(paramsRef.current.canvasWidth, paramsRef.current.canvasHeight);
+        p.redraw();
+      }, 100);
     },
   }));
 
