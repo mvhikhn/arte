@@ -50,8 +50,12 @@ export default function ViewPage() {
         const value = e.target.value;
         setTokenInput(value);
         setError(null);
+    };
 
-        const trimmedToken = value.trim();
+    // Debounced token validation and decoding
+    useEffect(() => {
+        const trimmedToken = tokenInput.trim();
+
         if (!trimmedToken) {
             setCurrentArtwork(null);
             return;
@@ -71,36 +75,48 @@ export default function ViewPage() {
             setCurrentArtwork(type);
             setError(null);
 
-            try {
-                switch (type) {
-                    case 'flow':
-                        setFlowParams(generateFlowParamsFromToken(trimmedToken));
-                        break;
-                    case 'grid':
-                        setGridParams(generateGridParamsFromToken(trimmedToken));
-                        break;
-                    case 'mosaic':
-                        setMosaicParams(generateMosaicParamsFromToken(trimmedToken));
-                        break;
-                    case 'rotated':
-                        setRotatedGridParams(generateRotatedGridParamsFromToken(trimmedToken));
-                        break;
-                    case 'tree':
-                        setTreeParams(generateTreeParamsFromToken(trimmedToken));
-                        break;
-                    case 'text':
-                        setTextDesignParams(generateTextDesignParamsFromToken(trimmedToken));
-                        break;
+            // Async decoding to support v2e (encrypted) tokens
+            const decode = async () => {
+                try {
+                    // Import dynamically to avoid circular deps if any
+                    const { decodeParams } = await import("@/utils/serialization");
+
+                    // For v1/v2 local tokens, we can try sync generators first for speed
+                    // But for v2e, we must use decodeParams
+                    if (trimmedToken.includes("-v2e.")) {
+                        const result = await decodeParams(trimmedToken);
+                        switch (type) {
+                            case 'flow': setFlowParams(result.params); break;
+                            case 'grid': setGridParams(result.params); break;
+                            case 'mosaic': setMosaicParams(result.params); break;
+                            case 'rotated': setRotatedGridParams(result.params); break;
+                            case 'tree': setTreeParams(result.params); break;
+                            case 'text': setTextDesignParams(result.params); break;
+                        }
+                    } else {
+                        // Use sync generators for v2 local / v1 legacy
+                        switch (type) {
+                            case 'flow': setFlowParams(generateFlowParamsFromToken(trimmedToken)); break;
+                            case 'grid': setGridParams(generateGridParamsFromToken(trimmedToken)); break;
+                            case 'mosaic': setMosaicParams(generateMosaicParamsFromToken(trimmedToken)); break;
+                            case 'rotated': setRotatedGridParams(generateRotatedGridParamsFromToken(trimmedToken)); break;
+                            case 'tree': setTreeParams(generateTreeParamsFromToken(trimmedToken)); break;
+                            case 'text': setTextDesignParams(generateTextDesignParamsFromToken(trimmedToken)); break;
+                        }
+                    }
+                } catch (error) {
+                    console.error("Decoding error:", error);
+                    setError("Invalid key or decryption failed");
+                    setCurrentArtwork(null);
                 }
-            } catch (error) {
-                setError("Invalid key");
-                setCurrentArtwork(null);
-            }
+            };
+
+            decode();
         } else {
             setError("Invalid key");
             setCurrentArtwork(null);
         }
-    };
+    }, [tokenInput]);
 
     const handleCardMouseMove = (e: MouseEvent<HTMLDivElement>) => {
         if (!cardRef.current) return;
