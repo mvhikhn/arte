@@ -275,17 +275,17 @@ export const generateTreeParamsFromToken = (token: string): TreeArtworkParams =>
     const palette = palettes[Math.floor(rand() * palettes.length)];
 
     return {
-        initialPaths: Math.floor(rand() * 5) + 3,
-        initialVelocity: rand() * 2 + 3,
-        branchProbability: rand() * 0.02 + 0.01,
-        diameterShrink: rand() * 0.02 + 0.95,
-        minDiameter: rand() * 1 + 0.5,
-        bumpMultiplier: rand() * 0.05 + 0.01,
-        velocityRetention: rand() * 0.1 + 0.85,
-        speedMin: 0.5,
-        speedMax: 2,
-        finishedCircleSize: rand() * 3 + 1,
-        strokeWeightMultiplier: rand() * 0.5 + 0.5,
+        initialPaths: Math.floor(rand() * 3) + 1, // 1 to 3
+        initialVelocity: rand() * 5 + 10, // 10 to 15
+        branchProbability: rand() * 0.05 + 0.15, // 0.15 to 0.20
+        diameterShrink: rand() * 0.1 + 0.55, // 0.55 to 0.65
+        minDiameter: rand() * 0.2 + 0.1, // 0.1 to 0.3
+        bumpMultiplier: rand() * 0.2 + 0.2, // 0.2 to 0.4
+        velocityRetention: rand() * 0.2 + 0.6, // 0.6 to 0.8
+        speedMin: rand() * 2 + 3, // 3 to 5
+        speedMax: rand() * 4 + 8, // 8 to 12
+        finishedCircleSize: rand() * 4 + 8, // 8 to 12
+        strokeWeightMultiplier: rand() * 0.5 + 1.0, // 1.0 to 1.5
         stemColor1: palette.stem[0],
         stemColor2: palette.stem[1],
         stemColor3: palette.stem[2],
