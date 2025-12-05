@@ -376,6 +376,208 @@ const BLOG_POSTS: Record<string, { title: string; date: string; content: string 
       <p>When we think of algorithms, we often think of efficiency, sorting, or data processing. But algorithms can also be expressive.</p>
       <p>In my work with flow fields and recursive trees, I've found that simple rules can lead to emergent complexity that mimics nature in surprising ways.</p>
     `
+    },
+    "secure-token-architecture": {
+        title: "Building an Evergreen Secure Token System",
+        date: "December 05, 2024",
+        content: `
+      <p>When you create generative art, every slider tweak, color choice, and parameter adjustment defines a unique piece. But how do you <strong>share</strong> that creation without revealing the recipe? How do you let someone view your art while keeping your creative parameters hidden?</p>
+      
+      <p>This post documents the complete journey of building a <strong>zero-cost, evergreen, cryptographically-secure</strong> token system for the ARTE generative art platform.</p>
+
+      <hr style="margin: 3rem 0; border: none; border-top: 1px solid #e5e5e5;" />
+
+      <h2>The Challenge</h2>
+      <p>Traditional generative art platforms face a fundamental tension:</p>
+      <ul>
+        <li><strong>Save as image</strong> → Easy to share, but loses interactivity</li>
+        <li><strong>Save parameters as JSON</strong> → Preserves state, but exposes your creative recipe</li>
+        <li><strong>Client-side encryption</strong> → Hides parameters, but key is exposed in browser code</li>
+      </ul>
+      <p>We needed: compact URLs, hidden parameters, zero server costs, and evergreen operation.</p>
+
+      <hr style="margin: 3rem 0; border: none; border-top: 1px solid #e5e5e5;" />
+
+      <h2>The Solution: Hybrid Token Architecture</h2>
+      <p>We built a <strong>dual-token system</strong> that optimizes for both speed and security:</p>
+      
+      <table style="width: 100%; border-collapse: collapse; margin: 1.5rem 0;">
+        <thead>
+          <tr style="border-bottom: 2px solid #e5e5e5;">
+            <th style="text-align: left; padding: 0.75rem;">Token</th>
+            <th style="text-align: left; padding: 0.75rem;">Format</th>
+            <th style="text-align: left; padding: 0.75rem;">Use Case</th>
+            <th style="text-align: left; padding: 0.75rem;">Speed</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom: 1px solid #e5e5e5;">
+            <td style="padding: 0.75rem;"><strong>v2</strong></td>
+            <td style="padding: 0.75rem; font-family: monospace; font-size: 12px;">fx-mosaic-v2.{hash}.{data}</td>
+            <td style="padding: 0.75rem;">Live editing in Studio</td>
+            <td style="padding: 0.75rem;">⚡ Instant (no network)</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #e5e5e5;">
+            <td style="padding: 0.75rem;"><strong>v2e</strong></td>
+            <td style="padding: 0.75rem; font-family: monospace; font-size: 12px;">fx-mosaic-v2e.{hash}.{data}</td>
+            <td style="padding: 0.75rem;">Sharing/selling artwork</td>
+            <td style="padding: 0.75rem;">🔐 ~200ms (encrypted)</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>Why Two Types?</h3>
+      <p>When you're creating art, you move sliders constantly. Each adjustment regenerates the token. Making a network call for every slider movement would be painfully slow.</p>
+      <p>But when you're sharing, security matters more than speed. The encrypted token ensures your parameters are completely hidden.</p>
+
+      <hr style="margin: 3rem 0; border: none; border-top: 1px solid #e5e5e5;" />
+
+      <h2>Technical Deep Dive</h2>
+
+      <h3>Token Structure</h3>
+      <pre style="background: #0a0a0a; color: #a0a0a0; padding: 1.5rem; border-radius: 8px; overflow-x: auto; font-size: 12px;"><code>fx-mosaic-v2e.7e0019cc96d321d2.koymarpzu8bVMZjZuu1fM2GMSnYu...
+│  │      │   │                │
+│  │      │   │                └── AES-256-GCM Encrypted + Base64
+│  │      │   └── SHA-256 Hash (first 16 chars)
+│  │      └── Version + Encryption flag
+│  └── Artwork type (mosaic, flow, tree, etc.)
+└── Prefix (always "fx")</code></pre>
+
+      <h3>The Encryption Pipeline</h3>
+      <ol>
+        <li><strong>Canonicalize</strong> — Sort keys alphabetically, round floats to 4 decimals</li>
+        <li><strong>Stringify</strong> — JSON.stringify for consistent serialization</li>
+        <li><strong>Compress</strong> — LZ-String reduces payload by ~60%</li>
+        <li><strong>Hash</strong> — SHA-256 for integrity verification</li>
+        <li><strong>Encrypt</strong> — Send to Cloudflare Worker for AES-256-GCM encryption</li>
+        <li><strong>Assemble</strong> — Combine prefix + hash + encrypted data</li>
+      </ol>
+
+      <hr style="margin: 3rem 0; border: none; border-top: 1px solid #e5e5e5;" />
+
+      <h2>Cloudflare Workers: The Secret Sauce</h2>
+      <p>The encryption/decryption logic runs on Cloudflare Workers—serverless functions that:</p>
+      <ul>
+        <li>✅ Cost $0 (free tier: 100K requests/day)</li>
+        <li>✅ Run on Cloudflare's global edge network</li>
+        <li>✅ Store the secret key in secure environment variables</li>
+        <li>✅ Never expose the key to the browser</li>
+      </ul>
+
+      <h3>Why AES-256-GCM?</h3>
+      <p>AES-GCM is <strong>authenticated encryption</strong>. The "GCM" mode includes an authentication tag. If decryption succeeds, the data is mathematically guaranteed to be untampered. This means we don't need a separate hash validation step on the server—AES-GCM handles it automatically.</p>
+
+      <hr style="margin: 3rem 0; border: none; border-top: 1px solid #e5e5e5;" />
+
+      <h2>Security Measures</h2>
+      <table style="width: 100%; border-collapse: collapse; margin: 1.5rem 0;">
+        <thead>
+          <tr style="border-bottom: 2px solid #e5e5e5;">
+            <th style="text-align: left; padding: 0.75rem;">Measure</th>
+            <th style="text-align: left; padding: 0.75rem;">Implementation</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom: 1px solid #e5e5e5;">
+            <td style="padding: 0.75rem;">Secret key isolation</td>
+            <td style="padding: 0.75rem;">Only exists in Cloudflare environment variables</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #e5e5e5;">
+            <td style="padding: 0.75rem;">No client-side key</td>
+            <td style="padding: 0.75rem;">Browser never sees the encryption key</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #e5e5e5;">
+            <td style="padding: 0.75rem;">Authenticated encryption</td>
+            <td style="padding: 0.75rem;">AES-256-GCM validates integrity automatically</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #e5e5e5;">
+            <td style="padding: 0.75rem;">No silent fallbacks</td>
+            <td style="padding: 0.75rem;">Encryption failure = user alert, not unencrypted token</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #e5e5e5;">
+            <td style="padding: 0.75rem;">Hidden Studio button</td>
+            <td style="padding: 0.75rem;">v2e tokens hide "Open in Studio" to prevent reverse-engineering</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <hr style="margin: 3rem 0; border: none; border-top: 1px solid #e5e5e5;" />
+
+      <h2>Cost Analysis: Truly Evergreen</h2>
+      <table style="width: 100%; border-collapse: collapse; margin: 1.5rem 0;">
+        <thead>
+          <tr style="border-bottom: 2px solid #e5e5e5;">
+            <th style="text-align: left; padding: 0.75rem;">Component</th>
+            <th style="text-align: left; padding: 0.75rem;">Provider</th>
+            <th style="text-align: left; padding: 0.75rem;">Cost</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom: 1px solid #e5e5e5;">
+            <td style="padding: 0.75rem;">Frontend hosting</td>
+            <td style="padding: 0.75rem;">Vercel/Netlify/GitHub Pages</td>
+            <td style="padding: 0.75rem;">$0</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #e5e5e5;">
+            <td style="padding: 0.75rem;">Encryption API</td>
+            <td style="padding: 0.75rem;">Cloudflare Workers (100K req/day free)</td>
+            <td style="padding: 0.75rem;">$0</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #e5e5e5;">
+            <td style="padding: 0.75rem;">Secret storage</td>
+            <td style="padding: 0.75rem;">CF Worker environment variables</td>
+            <td style="padding: 0.75rem;">$0</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #e5e5e5;">
+            <td style="padding: 0.75rem;">Database</td>
+            <td style="padding: 0.75rem;">None needed (stateless tokens)</td>
+            <td style="padding: 0.75rem;">$0</td>
+          </tr>
+          <tr style="border-bottom: 2px solid #e5e5e5; font-weight: bold;">
+            <td style="padding: 0.75rem;">Total monthly cost</td>
+            <td style="padding: 0.75rem;"></td>
+            <td style="padding: 0.75rem;">$0</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <hr style="margin: 3rem 0; border: none; border-top: 1px solid #e5e5e5;" />
+
+      <h2>Lessons Learned</h2>
+      
+      <h3>1. AES-GCM Makes Re-Hashing Redundant</h3>
+      <p>Our initial design validated tokens by decrypting, re-hashing, and comparing. But AES-GCM already includes an authentication tag. If decryption succeeds, the data is untampered. Re-hashing added no security, just complexity.</p>
+
+      <h3>2. Synchronous SHA-256 is Possible</h3>
+      <p>The Web Crypto API is async-only. But for instant-feedback UI, we needed synchronous hashing. Solution: a pure JavaScript SHA-256 implementation (~100 lines).</p>
+
+      <h3>3. Silent Fallbacks Are Dangerous</h3>
+      <p>Our first version silently returned unencrypted tokens if encryption failed. Users could click "Get Secure Link" and receive an unencrypted v2 token without knowing. We fixed this to throw an error instead.</p>
+
+      <hr style="margin: 3rem 0; border: none; border-top: 1px solid #e5e5e5;" />
+
+      <h2>Future Directions</h2>
+      <ul>
+        <li><strong>Key Rotation</strong> — Version-prefixed keys for backward compatibility</li>
+        <li><strong>Token Expiration</strong> — Time-limited sharing for gallery previews</li>
+        <li><strong>Rate Limiting</strong> — Cloudflare's built-in rate limiting</li>
+        <li><strong>NFT Integration</strong> — Encrypted tokens as on-chain metadata</li>
+      </ul>
+
+      <hr style="margin: 3rem 0; border: none; border-top: 1px solid #e5e5e5;" />
+
+      <h2>Conclusion</h2>
+      <p>We built a token system that:</p>
+      <ul>
+        <li>✅ <strong>Works forever</strong> without ongoing costs</li>
+        <li>✅ <strong>Protects artist parameters</strong> with AES-256-GCM encryption</li>
+        <li>✅ <strong>Stays fast</strong> with hybrid local/encrypted tokens</li>
+        <li>✅ <strong>Fails safely</strong> with explicit error handling</li>
+      </ul>
+      <p>The entire system runs on Cloudflare's free tier with no database, no sessions, and no maintenance required.</p>
+
+      <p style="margin-top: 2rem; font-style: italic; color: #888;">Implementation details available in the <a href="https://github.com/mvhikhn/arte/tree/main/cloudflare-workers">source code</a>.</p>
+    `
     }
 };
 
