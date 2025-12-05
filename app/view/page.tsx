@@ -29,6 +29,8 @@ export default function ViewPage() {
     // 3D card tilt state
     const [tiltX, setTiltX] = useState(0);
     const [tiltY, setTiltY] = useState(0);
+    const [holoX, setHoloX] = useState(50);  // Hologram gradient position
+    const [holoY, setHoloY] = useState(50);
     const cardRef = useRef<HTMLDivElement>(null);
 
     // Params state
@@ -135,13 +137,21 @@ export default function ViewPage() {
         const rotateY = ((mouseX - centerX) / (rect.width / 2)) * 8;
         const rotateX = -((mouseY - centerY) / (rect.height / 2)) * 8;
 
+        // Calculate hologram gradient position (0-100 for percentage)
+        const holoXPos = ((mouseX - rect.left) / rect.width) * 100;
+        const holoYPos = ((mouseY - rect.top) / rect.height) * 100;
+
         setTiltX(rotateX);
         setTiltY(rotateY);
+        setHoloX(holoXPos);
+        setHoloY(holoYPos);
     };
 
     const handleCardMouseLeave = () => {
         setTiltX(0);
         setTiltY(0);
+        setHoloX(50);
+        setHoloY(50);
     };
 
     const handleDownload = () => {
@@ -247,28 +257,36 @@ export default function ViewPage() {
             <div className="flex-1 w-full flex items-center justify-center" style={{ perspective: '1500px' }}>
                 {currentArtwork && !error ? (
                     <div className="relative">
-                        {/* 3D Card with Premium Physics and White Frame */}
+                        {/* 3D Card with Premium Physics, Tight Frame, and Holographic Effect */}
                         <div
                             ref={cardRef}
                             onMouseMove={handleCardMouseMove}
                             onMouseLeave={handleCardMouseLeave}
-                            className="relative rounded-sm overflow-hidden transition-all duration-500 ease-out"
+                            className="relative rounded-lg overflow-hidden transition-all duration-300 ease-out"
                             style={{
-                                transform: `rotateX(${tiltX}deg) rotateY(${tiltY}deg) translateZ(20px)`,
+                                transform: `rotateX(${tiltX}deg) rotateY(${tiltY}deg) translateZ(30px)`,
                                 boxShadow: `
-                                    ${-tiltY * 3}px ${tiltX * 3}px 60px rgba(0, 0, 0, 0.15),
-                                    ${-tiltY * 1.5}px ${tiltX * 1.5}px 30px rgba(0, 0, 0, 0.1),
-                                    0 20px 80px rgba(0, 0, 0, 0.12)
+                                    0 2px 4px rgba(0, 0, 0, 0.08),
+                                    0 4px 8px rgba(0, 0, 0, 0.08),
+                                    0 8px 16px rgba(0, 0, 0, 0.08),
+                                    0 16px 32px rgba(0, 0, 0, 0.1),
+                                    0 32px 64px rgba(0, 0, 0, 0.12),
+                                    ${-tiltY * 2}px ${tiltX * 2}px 40px rgba(0, 0, 0, 0.15),
+                                    inset 0 0 0 1px rgba(255, 255, 255, 0.1)
                                 `,
                                 maxWidth: '90vw',
                                 maxHeight: '85vh',
-                                border: '12px solid #ffffff',
-                                backgroundColor: '#ffffff',
+                                padding: '4px',
+                                background: 'linear-gradient(145deg, #ffffff 0%, #f8f8f8 100%)',
                             }}
                         >
-                            <div className="relative overflow-hidden" style={{
-                                outline: '1px solid rgba(0,0,0,0.08)'
-                            }}>
+                            {/* Inner card with tight border */}
+                            <div
+                                className="relative overflow-hidden rounded-md"
+                                style={{
+                                    boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.06), 0 0 0 1px rgba(0,0,0,0.04)',
+                                }}
+                            >
                                 {currentArtwork === 'flow' && flowParams && (
                                     <Artwork ref={flowRef} params={flowParams} />
                                 )}
@@ -287,6 +305,66 @@ export default function ViewPage() {
                                 {currentArtwork === 'text' && textDesignParams && (
                                     <TextDesignArtwork ref={textRef} params={textDesignParams} />
                                 )}
+
+                                {/* Holographic Light Reflection Overlay */}
+                                <div
+                                    className="absolute inset-0 pointer-events-none transition-opacity duration-300"
+                                    style={{
+                                        background: `
+                                            radial-gradient(
+                                                ellipse 80% 50% at ${holoX}% ${holoY}%,
+                                                rgba(255, 0, 128, 0.15) 0%,
+                                                rgba(255, 128, 0, 0.12) 15%,
+                                                rgba(255, 255, 0, 0.1) 30%,
+                                                rgba(0, 255, 128, 0.08) 45%,
+                                                rgba(0, 128, 255, 0.1) 60%,
+                                                rgba(128, 0, 255, 0.12) 75%,
+                                                rgba(255, 0, 128, 0.08) 90%,
+                                                transparent 100%
+                                            )
+                                        `,
+                                        mixBlendMode: 'overlay',
+                                        opacity: Math.abs(tiltX) + Math.abs(tiltY) > 1 ? 1 : 0.3,
+                                    }}
+                                />
+
+                                {/* Shimmer/Glare Effect */}
+                                <div
+                                    className="absolute inset-0 pointer-events-none transition-all duration-200"
+                                    style={{
+                                        background: `
+                                            linear-gradient(
+                                                ${135 + (holoX - 50) * 0.5}deg,
+                                                transparent 0%,
+                                                transparent ${40 + (holoY - 50) * 0.3}%,
+                                                rgba(255, 255, 255, 0.4) ${50 + (holoY - 50) * 0.3}%,
+                                                transparent ${60 + (holoY - 50) * 0.3}%,
+                                                transparent 100%
+                                            )
+                                        `,
+                                        opacity: Math.abs(tiltX) + Math.abs(tiltY) > 2 ? 0.6 : 0.2,
+                                    }}
+                                />
+
+                                {/* Iridescent Edge Highlight */}
+                                <div
+                                    className="absolute inset-0 pointer-events-none"
+                                    style={{
+                                        background: `
+                                            conic-gradient(
+                                                from ${(holoX + holoY) * 1.8}deg at ${holoX}% ${holoY}%,
+                                                rgba(255, 0, 100, 0.05),
+                                                rgba(255, 200, 0, 0.05),
+                                                rgba(0, 255, 150, 0.05),
+                                                rgba(0, 150, 255, 0.05),
+                                                rgba(200, 0, 255, 0.05),
+                                                rgba(255, 0, 100, 0.05)
+                                            )
+                                        `,
+                                        mixBlendMode: 'color-dodge',
+                                        opacity: Math.abs(tiltX) + Math.abs(tiltY) > 1 ? 0.8 : 0.3,
+                                    }}
+                                />
                             </div>
                         </div>
                     </div>
@@ -299,7 +377,7 @@ export default function ViewPage() {
                     </div>
                 )}
             </div>
-        </div>
+        </div >
     );
 }
 
