@@ -14,6 +14,7 @@
 
 import LZString from 'lz-string';
 import { ArtworkType } from '@/utils/token';
+import { sha256Sync } from '@/utils/sha256';
 
 // Cloudflare Worker endpoints
 const ENCRYPT_ENDPOINT = process.env.NEXT_PUBLIC_ENCRYPT_ENDPOINT || 'https://arte-encrypt.mvhikhn.workers.dev';
@@ -73,27 +74,6 @@ const canonicalize = (params: any): string => {
 
 /**
  * Calculate SHA-256 hash (first 16 hex chars for compactness).
- * Synchronous version using a simple hash for client-side use.
- */
-const simpleHash = (data: string): string => {
-    // djb2 hash - fast and deterministic
-    let hash = 5381;
-    for (let i = 0; i < data.length; i++) {
-        hash = ((hash << 5) + hash) ^ data.charCodeAt(i);
-    }
-    // Convert to positive hex and pad
-    const hex = (hash >>> 0).toString(16);
-    // Create more entropy by hashing again with different seed
-    let hash2 = 0;
-    for (let i = 0; i < data.length; i++) {
-        hash2 = data.charCodeAt(i) + ((hash2 << 6) + (hash2 << 16) - hash2);
-    }
-    const hex2 = (hash2 >>> 0).toString(16);
-    return (hex + hex2).padStart(16, '0').substring(0, 16);
-};
-
-/**
- * Calculate SHA-256 hash (first 16 hex chars for compactness).
  * Async version for server-side or when crypto.subtle is available.
  */
 const sha256Async = async (data: string): Promise<string> => {
@@ -102,15 +82,10 @@ const sha256Async = async (data: string): Promise<string> => {
         const hashBuffer = await crypto.subtle.digest('SHA-256', encoder.encode(data));
         const hashArray = Array.from(new Uint8Array(hashBuffer));
         return hashArray.map(b => b.toString(16).padStart(2, '0')).join('').substring(0, 16);
-    } else if (typeof require !== 'undefined') {
-        try {
-            const crypto = require('crypto');
-            return crypto.createHash('sha256').update(data).digest('hex').substring(0, 16);
-        } catch {
-            return simpleHash(data);
-        }
+    } else {
+        // Fallback to sync implementation if crypto.subtle unavailable
+        return sha256Sync(data);
     }
-    return simpleHash(data);
 };
 
 /**
@@ -137,12 +112,13 @@ const decompress = (data: string): string | null => {
 /**
  * Synchronous encode - for instant UI feedback.
  * Creates a locally verifiable token without server encryption.
+ * Uses synchronous SHA-256 for bulletproof hashing.
  * 
  * Token format: fx-{type}-v2.{hash}.{compressed}
  */
 export const encodeParams = (type: ArtworkType, params: any): string => {
     const canonical = canonicalize(params);
-    const hash = simpleHash(canonical);
+    const hash = sha256Sync(canonical);
     const compressed = compress(canonical);
     return `fx-${type}-v2.${hash}.${compressed}`;
 };
@@ -227,6 +203,9 @@ export const decodeParams = async (token: string): Promise<{ type: ArtworkType; 
                 throw new Error(`Decompression failed. Data start: ${result.data?.substring(0, 50)}...`);
             }
 
+            // For v2e tokens, we TRUST the server's validation.
+            // The server already validated the hash against the decrypted data.
+            // We do NOT need to re-validate locally.
             return { type: type as ArtworkType, params: JSON.parse(canonical) };
         } catch (error) {
             console.error('Decryption service failed:', error);
@@ -234,23 +213,17 @@ export const decodeParams = async (token: string): Promise<{ type: ArtworkType; 
         }
     }
 
-    // Local token or fallback - decompress directly
+    // Local token (v2) - decompress and validate locally
     const canonical = decompress(data);
     if (!canonical) {
         throw new Error('Token decompression failed');
     }
 
-    // Validate hash
-    // v2e tokens use SHA-256 (via sha256Async)
-    // v2 tokens use simpleHash
-    let calculatedHash: string;
-    if (encrypted === 'e') {
-        calculatedHash = await sha256Async(canonical);
-    } else {
-        calculatedHash = simpleHash(canonical);
-    }
+    // Validate hash using SHA-256 (Sync)
+    const calculatedHash = sha256Sync(canonical);
 
     if (calculatedHash !== providedHash) {
+        console.error(`Hash mismatch! Calculated: ${calculatedHash}, Provided: ${providedHash}`);
         throw new Error('Token validation failed - hash mismatch (tampering detected)');
     }
 
@@ -275,7 +248,8 @@ export const decodeParamsSync = (token: string): { type: ArtworkType; params: an
         return null;
     }
 
-    const calculatedHash = simpleHash(canonical);
+    // Validate hash using SHA-256 (Sync)
+    const calculatedHash = sha256Sync(canonical);
     if (calculatedHash !== providedHash) {
         return null;
     }
