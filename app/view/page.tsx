@@ -24,6 +24,7 @@ export default function ViewPage() {
     const [currentArtwork, setCurrentArtwork] = useState<ArtworkType | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [isHoveringInput, setIsHoveringInput] = useState(false);
+    const [isEncrypted, setIsEncrypted] = useState(false);
 
     // 3D card tilt state
     const [tiltX, setTiltX] = useState(0);
@@ -74,6 +75,7 @@ export default function ViewPage() {
         if (validateToken(trimmedToken, type)) {
             setCurrentArtwork(type);
             setError(null);
+            setIsEncrypted(trimmedToken.includes('-v2e.'));
 
             // Async decoding to support v2e (encrypted) tokens
             const decode = async () => {
@@ -229,13 +231,15 @@ export default function ViewPage() {
                     >
                         <Download className="w-4 h-4" />
                     </button>
-                    <Link
-                        href={`/studio?artwork=${currentArtwork === 'text' ? 'textdesign' : currentArtwork}&token=${encodeURIComponent(tokenInput.trim())}`}
-                        className="w-11 h-11 rounded-full bg-white border border-black/10 flex items-center justify-center hover:bg-black hover:text-white transition-all hover:scale-105 active:scale-95 shadow-lg"
-                        title="Open in Studio"
-                    >
-                        <ExternalLink className="w-4 h-4" />
-                    </Link>
+                    {!isEncrypted && (
+                        <Link
+                            href={`/studio?artwork=${currentArtwork === 'text' ? 'textdesign' : currentArtwork}&token=${encodeURIComponent(tokenInput.trim())}`}
+                            className="w-11 h-11 rounded-full bg-white border border-black/10 flex items-center justify-center hover:bg-black hover:text-white transition-all hover:scale-105 active:scale-95 shadow-lg"
+                            title="Open in Studio"
+                        >
+                            <ExternalLink className="w-4 h-4" />
+                        </Link>
+                    )}
                 </div>
             )}
 
