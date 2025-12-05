@@ -17,12 +17,6 @@ export default function Home() {
         { id: "textdesign", title: "Text Design", description: "Typography experiments" },
     ];
 
-    const blogPosts = [
-        { slug: "artwork-retrieval-system", title: "How Artwork Retrieval Works", date: "Dec 03, 2024" },
-        { slug: "hello-world", title: "Hello World", date: "Nov 29, 2025" },
-        { slug: "algorithmic-beauty", title: "The Beauty of Algorithms", date: "Dec 05, 2025" },
-    ];
-
     // Generate random pastel colors for each artwork
     const [artworkColors, setArtworkColors] = useState<string[]>([]);
     const [isGalleryOpen, setIsGalleryOpen] = useState(false);
@@ -169,27 +163,15 @@ export default function Home() {
                                 </p>
                             </div>
 
-                            {/* Blog Section */}
-                            <div className="space-y-6 pt-6 max-w-md">
-                                <h2 className="text-xs font-medium uppercase tracking-widest text-zinc-400">Journal</h2>
-                                <div className="space-y-4">
-                                    {blogPosts.map((post) => (
-                                        <CleanLink
-                                            key={post.slug}
-                                            href={`/blog/${post.slug}`}
-                                            className="group block"
-                                        >
-                                            <div className="flex items-baseline justify-between border-b border-zinc-100 pb-2 group-hover:border-zinc-300 transition-colors">
-                                                <h3 className="text-sm font-medium text-zinc-700 group-hover:text-zinc-900 transition-colors">
-                                                    {post.title}
-                                                </h3>
-                                                <span className="text-xs text-zinc-400 font-mono group-hover:text-zinc-500 transition-colors">
-                                                    {post.date}
-                                                </span>
-                                            </div>
-                                        </CleanLink>
-                                    ))}
-                                </div>
+                            {/* Blog Link */}
+                            <div className="pt-6 max-w-md">
+                                <CleanLink
+                                    href="/blog"
+                                    className="group inline-flex items-center gap-2 text-sm font-medium text-zinc-600 hover:text-zinc-900 transition-colors"
+                                >
+                                    <span className="text-xs font-medium uppercase tracking-widest text-zinc-400 group-hover:text-zinc-600 transition-colors">Blog</span>
+                                    <span className="text-zinc-300 group-hover:text-zinc-500 transition-colors">→</span>
+                                </CleanLink>
                             </div>
 
                             {/* Mobile Gallery Toggle */}
