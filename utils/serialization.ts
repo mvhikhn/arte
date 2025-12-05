@@ -224,11 +224,10 @@ export const decodeParams = async (token: string): Promise<{ type: ArtworkType; 
             const canonical = decompress(result.data);
             if (!canonical) {
                 console.error("Decompression failed. Received data:", result.data);
-                throw new Error('Decompression failed');
+                throw new Error(`Decompression failed. Data start: ${result.data?.substring(0, 50)}...`);
             }
 
             return { type: type as ArtworkType, params: JSON.parse(canonical) };
-        } catch (error) {
         } catch (error) {
             console.error('Decryption service failed:', error);
             throw error;
