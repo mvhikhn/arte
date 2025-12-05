@@ -125,6 +125,11 @@ export default function ViewPage() {
     const handleCardMouseMove = (e: MouseEvent<HTMLDivElement>) => {
         if (!cardRef.current) return;
 
+        // Disable tilt on touch devices or screens that don't support hover
+        if (typeof window !== 'undefined' && window.matchMedia('(hover: none)').matches) {
+            return;
+        }
+
         const rect = cardRef.current.getBoundingClientRect();
         const centerX = rect.left + rect.width / 2;
         const centerY = rect.top + rect.height / 2;
@@ -196,11 +201,11 @@ export default function ViewPage() {
             {/* Home Button - Top Left */}
             <Link
                 href="/"
-                className="absolute top-8 left-8 w-11 h-11 rounded-full bg-white border border-black/10 flex items-center justify-center hover:bg-black hover:text-white transition-all hover:scale-105 active:scale-95 shadow-lg z-30"
+                className="absolute top-6 left-6 group p-2 rounded-full text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 transition-colors z-30"
                 title="Return Home"
             >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                 </svg>
             </Link>
 
@@ -233,21 +238,21 @@ export default function ViewPage() {
 
             {/* Buttons - Top Right of Page (outside canvas) */}
             {currentArtwork && !error && (
-                <div className="absolute top-8 right-8 flex gap-3 z-30">
+                <div className="absolute top-6 right-6 flex gap-2 z-30">
                     <button
                         onClick={handleDownload}
-                        className="w-11 h-11 rounded-full bg-white border border-black/10 flex items-center justify-center hover:bg-black hover:text-white transition-all hover:scale-105 active:scale-95 shadow-lg"
+                        className="group p-2 rounded-full text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 transition-colors"
                         title="Download (4x Resolution)"
                     >
-                        <Download className="w-4 h-4" />
+                        <Download className="w-5 h-5" />
                     </button>
                     {!isEncrypted && (
                         <Link
                             href={`/studio?artwork=${currentArtwork === 'text' ? 'textdesign' : currentArtwork}&token=${encodeURIComponent(tokenInput.trim())}`}
-                            className="w-11 h-11 rounded-full bg-white border border-black/10 flex items-center justify-center hover:bg-black hover:text-white transition-all hover:scale-105 active:scale-95 shadow-lg"
+                            className="group p-2 rounded-full text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 transition-colors"
                             title="Open in Studio"
                         >
-                            <ExternalLink className="w-4 h-4" />
+                            <ExternalLink className="w-5 h-5" />
                         </Link>
                     )}
                 </div>
@@ -274,8 +279,8 @@ export default function ViewPage() {
                                     ${-tiltY * 2}px ${tiltX * 2}px 40px rgba(0, 0, 0, 0.15),
                                     inset 0 0 0 1px rgba(255, 255, 255, 0.1)
                                 `,
-                                maxWidth: '90vw',
-                                maxHeight: '85vh',
+                                maxWidth: '85vw',
+                                maxHeight: '70vh',
                                 padding: '4px',
                                 background: 'linear-gradient(145deg, #ffffff 0%, #f8f8f8 100%)',
                             }}

@@ -1,6 +1,7 @@
 import { getBlogPost, getAllBlogSlugs } from '@/utils/blog';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
+import { ArrowLeft } from "lucide-react";
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
@@ -28,8 +29,8 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
       {/* Header */}
       <header className="border-b border-black/5 bg-white/50 backdrop-blur-sm sticky top-0 z-50">
         <div className="max-w-3xl mx-auto px-6 py-4 flex items-center justify-between">
-          <Link href="/blog" className="text-sm font-medium text-black/60 hover:text-black transition-colors">
-            ← All Posts
+          <Link href="/blog" className="group p-2 rounded-full text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 transition-colors" title="Back to Blog">
+            <ArrowLeft className="w-5 h-5" />
           </Link>
           <time className="text-xs text-black/40 uppercase tracking-wider">
             {post.date}

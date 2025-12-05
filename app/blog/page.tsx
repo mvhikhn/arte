@@ -1,5 +1,6 @@
 import { getAllBlogPosts } from '@/utils/blog';
 import Link from 'next/link';
+import { ArrowLeft } from "lucide-react";
 
 export default function BlogIndex() {
     const posts = getAllBlogPosts();
@@ -9,8 +10,8 @@ export default function BlogIndex() {
             {/* Header */}
             <header className="border-b border-black/5 bg-white/50 backdrop-blur-sm sticky top-0 z-50">
                 <div className="max-w-3xl mx-auto px-6 py-4 flex items-center justify-between">
-                    <Link href="/" className="text-sm font-medium text-black/60 hover:text-black transition-colors">
-                        ← Home
+                    <Link href="/" className="group p-2 rounded-full text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 transition-colors" title="Return Home">
+                        <ArrowLeft className="w-5 h-5" />
                     </Link>
                     <h1 className="text-sm font-medium">Blog</h1>
                     <div className="w-12" /> {/* Spacer for centering */}
