@@ -223,6 +223,7 @@ export const decodeParams = async (token: string): Promise<{ type: ArtworkType; 
 
             const canonical = decompress(result.data);
             if (!canonical) {
+                console.error("Decompression failed. Received data:", result.data);
                 throw new Error('Decompression failed');
             }
 
