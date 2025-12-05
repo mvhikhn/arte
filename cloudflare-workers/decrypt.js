@@ -94,17 +94,9 @@ export default {
             const decoder = new TextDecoder();
             const decryptedData = decoder.decode(decryptedBuffer);
 
-            // Validate hash (bulletproof check)
-            const hashBuffer = await crypto.subtle.digest('SHA-256', encoder.encode(decryptedData));
-            const hashArray = Array.from(new Uint8Array(hashBuffer));
-            const calculatedHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('').substring(0, 16);
-
-            if (calculatedHash !== providedHash) {
-                return new Response(JSON.stringify({ error: 'Token validation failed - hash mismatch' }), {
-                    status: 400,
-                    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-                });
-            }
+            // AES-GCM provides authenticated encryption.
+            // If decryption succeeds, the data is guaranteed to be untampered.
+            // No need for additional hash validation.
 
             return new Response(JSON.stringify({ type, data: decryptedData }), {
                 headers: { ...corsHeaders, 'Content-Type': 'application/json' },
