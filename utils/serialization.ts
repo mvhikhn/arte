@@ -159,8 +159,8 @@ export const encodeParamsSecure = async (type: ArtworkType, params: any): Promis
         // Return encrypted token with 'e' suffix to indicate encrypted
         return token.replace('-v2.', '-v2e.');
     } catch (error) {
-        console.warn('Encryption service unavailable, using local token:', error);
-        return `fx-${type}-v2.${hash}.${compressed}`;
+        console.error('Encryption service failed:', error);
+        throw new Error('Encryption failed. Please check your connection and try again.');
     }
 };
 
