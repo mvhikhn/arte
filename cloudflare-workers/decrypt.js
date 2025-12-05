@@ -40,8 +40,8 @@ export default {
                 });
             }
 
-            // Parse token: fx-{type}-v1.{hash}.{encryptedData}
-            const match = token.match(/^fx-(\w+)-v1\.([a-f0-9]+)\.(.+)$/);
+            // Parse token: fx-{type}-v2e.{hash}.{encryptedData}
+            const match = token.match(/^fx-(\w+)-v2e\.([a-f0-9]+)\.(.+)$/);
             if (!match) {
                 return new Response(JSON.stringify({ error: 'Invalid token format' }), {
                     status: 400,

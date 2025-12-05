@@ -241,7 +241,15 @@ export const decodeParams = async (token: string): Promise<{ type: ArtworkType; 
     }
 
     // Validate hash
-    const calculatedHash = simpleHash(canonical);
+    // v2e tokens use SHA-256 (via sha256Async)
+    // v2 tokens use simpleHash
+    let calculatedHash: string;
+    if (encrypted === 'e') {
+        calculatedHash = await sha256Async(canonical);
+    } else {
+        calculatedHash = simpleHash(canonical);
+    }
+
     if (calculatedHash !== providedHash) {
         throw new Error('Token validation failed - hash mismatch (tampering detected)');
     }

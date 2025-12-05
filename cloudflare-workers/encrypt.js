@@ -83,7 +83,7 @@ export default {
                 .replace(/=+$/, '');
 
             // Construct final token
-            const token = `fx-${type}-v1.${hash}.${base64}`;
+            const token = `fx-${type}-v2.${hash}.${base64}`;
 
             return new Response(JSON.stringify({ token }), {
                 headers: { ...corsHeaders, 'Content-Type': 'application/json' },
