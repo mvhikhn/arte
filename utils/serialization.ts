@@ -116,7 +116,7 @@ const decompress = (data: string): string | null => {
  * 
  * Token format: fx-{type}-v2.{hash}.{compressed}
  */
-export const encodeParams = (type: ArtworkType, params: any): string => {
+export const encodeParams = (type: string, params: any): string => {
     const canonical = canonicalize(params);
     const hash = sha256Sync(canonical);
     const compressed = compress(canonical);
@@ -129,7 +129,7 @@ export const encodeParams = (type: ArtworkType, params: any): string => {
  * 
  * Token format: fx-{type}-v2e.{hash}.{encrypted}
  */
-export const encodeParamsSecure = async (type: ArtworkType, params: any): Promise<string> => {
+export const encodeParamsSecure = async (type: string, params: any): Promise<string> => {
     const canonical = canonicalize(params);
     const hash = await sha256Async(canonical);
     const compressed = compress(canonical);

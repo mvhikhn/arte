@@ -1,5 +1,5 @@
 // fxhash-style token generation and seeding with artwork type
-export type ArtworkType = 'flow' | 'grid' | 'mosaic' | 'rotated' | 'tree' | 'text';
+export type ArtworkType = 'flow' | 'grid' | 'mosaic' | 'rotated' | 'tree' | 'text' | 'lamb';
 
 export function generateToken(artworkType?: ArtworkType): string {
     const chars = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
@@ -29,9 +29,9 @@ export function generateToken(artworkType?: ArtworkType): string {
     return `fx-${randomPart}${checksum}`;
 }
 
-export function validateToken(token: string, artworkType?: ArtworkType): boolean {
+export function validateToken(token: string, artworkType?: string): boolean {
     // Check if token has artwork type prefix
-    const hasArtworkType = token.match(/^fx-(flow|grid|mosaic|rotated|tree|text)-/);
+    const hasArtworkType = token.match(/^fx-(flow|grid|mosaic|rotated|tree|text|lamb)-/);
 
     if (hasArtworkType) {
         // Token format: fx-[type]-[44 random chars][2 checksum]
@@ -41,7 +41,7 @@ export function validateToken(token: string, artworkType?: ArtworkType): boolean
         // Check this FIRST because data can contain hyphens, breaking the split('-') logic below
         if (token.includes('-v2.') || token.includes('-v2e.')) {
             // Simple regex check for format
-            return /^fx-(flow|grid|mosaic|rotated|tree|text)-v2e?\.([a-f0-9]+)\.(.+)$/.test(token);
+            return /^fx-(flow|grid|mosaic|rotated|tree|text|lamb)-v2e?\.([a-f0-9]+)\.(.+)$/.test(token);
         }
 
         const parts = token.split('-');
@@ -111,7 +111,7 @@ export function validateToken(token: string, artworkType?: ArtworkType): boolean
 }
 
 export function getTokenArtworkType(token: string): ArtworkType | null {
-    const match = token.match(/^fx-(flow|grid|mosaic|rotated|tree|text)-/);
+    const match = token.match(/^fx-(flow|grid|mosaic|rotated|tree|text|lamb)-/);
     return match ? (match[1] as ArtworkType) : null;
 }
 

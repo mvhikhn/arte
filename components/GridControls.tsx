@@ -9,12 +9,12 @@ import { ChevronDown, ChevronRight, Download, Image as ImageIcon, Shuffle, Play,
 interface GridControlsProps {
   params: GridArtworkParams;
   onParamChange: (param: keyof GridArtworkParams, value: number) => void;
-  onColorChange: (param: keyof GridArtworkParams, value: string) => void;
+  onColorChange?: (param: keyof GridArtworkParams, value: string) => void;
   onExportImage: () => void;
-  onExportGif: (duration: number, fps: number) => void;
-  onExportWallpapers: () => void;
-  onToggleAnimation: () => void;
-  onRandomize: () => void;
+  onExportGif?: (duration: number, fps: number) => void;
+  onExportWallpapers?: () => void;
+  onToggleAnimation?: () => void;
+  onRandomize?: () => void;
   tokenInput?: string;
   onTokenChange?: (value: string) => void;
 }
@@ -70,7 +70,7 @@ export default function GridControls({ params, onParamChange, onColorChange, onE
 
   const handleExportGif = async () => {
     setIsExporting(true);
-    await onExportGif(gifDuration, gifFps);
+    await onExportGif?.(gifDuration, gifFps);
     setIsExporting(false);
   };
 
@@ -86,7 +86,7 @@ export default function GridControls({ params, onParamChange, onColorChange, onE
       {/* Control Buttons */}
       <div className="px-3 py-3 border-b border-zinc-100 flex gap-2">
         <button
-          onClick={onToggleAnimation}
+          onClick={() => onToggleAnimation?.()}
           className="flex-1 px-3 py-1.5 bg-zinc-100 hover:bg-zinc-200 rounded-md flex items-center justify-center gap-1.5 transition-colors font-medium text-xs"
         >
           {params.isAnimating ? (
@@ -102,7 +102,7 @@ export default function GridControls({ params, onParamChange, onColorChange, onE
           )}
         </button>
         <button
-          onClick={onRandomize}
+          onClick={() => onRandomize?.()}
           className="flex-1 px-3 py-1.5 bg-zinc-900 hover:bg-zinc-800 text-white rounded-md flex items-center justify-center gap-1.5 transition-colors font-medium text-xs"
         >
           <Shuffle className="w-3 h-3" />
@@ -238,7 +238,7 @@ export default function GridControls({ params, onParamChange, onColorChange, onE
                     <div className="w-6 h-6 rounded-full overflow-hidden border border-zinc-200 flex-shrink-0">
                       <ColorPicker
                         value={value}
-                        onChange={(v) => onColorChange(key, v)}
+                        onChange={(v) => onColorChange?.(key, v)}
                       />
                     </div>
                     <input
@@ -247,7 +247,7 @@ export default function GridControls({ params, onParamChange, onColorChange, onE
                       onChange={(e) => {
                         const newVal = e.target.value;
                         if (/^#[0-9A-Fa-f]{0,6}$/.test(newVal)) {
-                          onColorChange(key, newVal);
+                          onColorChange?.(key, newVal);
                         }
                       }}
                       className="w-full h-6 bg-transparent font-mono text-[10px] text-zinc-700 focus:outline-none"
@@ -370,7 +370,7 @@ export default function GridControls({ params, onParamChange, onColorChange, onE
             </div>
 
             <button
-              onClick={onExportWallpapers}
+              onClick={() => onExportWallpapers?.()}
               className="w-full px-3 py-2 rounded-md flex items-center justify-center gap-2 transition-colors bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-medium mt-2"
             >
               <Monitor className="w-3.5 h-3.5" />

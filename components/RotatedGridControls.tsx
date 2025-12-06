@@ -9,11 +9,11 @@ import { ChevronDown, ChevronRight, Download, Image as ImageIcon, Shuffle, Monit
 interface RotatedGridControlsProps {
   params: RotatedGridArtworkParams;
   onParamChange: (param: keyof RotatedGridArtworkParams, value: number) => void;
-  onColorChange: (param: keyof RotatedGridArtworkParams, value: string) => void;
+  onColorChange?: (param: keyof RotatedGridArtworkParams, value: string) => void;
   onExportImage: () => void;
-  onExportWallpapers: () => void;
-  onRandomize: () => void;
-  onRegenerate: () => void;
+  onExportWallpapers?: () => void;
+  onRandomize?: () => void;
+  onRegenerate?: () => void;
   tokenInput?: string;
   onTokenChange?: (value: string) => void;
 }
@@ -80,14 +80,14 @@ export default function RotatedGridControls({ params, onParamChange, onColorChan
       {/* Control Buttons */}
       <div className="px-3 py-3 border-b border-zinc-100 flex gap-2">
         <button
-          onClick={onRegenerate}
+          onClick={() => onRegenerate?.()}
           className="flex-1 px-3 py-1.5 bg-zinc-100 hover:bg-zinc-200 rounded-md flex items-center justify-center gap-1.5 transition-colors font-medium text-xs"
         >
           <Shuffle className="w-3 h-3" />
           Regenerate
         </button>
         <button
-          onClick={onRandomize}
+          onClick={() => onRandomize?.()}
           className="flex-1 px-3 py-1.5 bg-zinc-900 hover:bg-zinc-800 text-white rounded-md flex items-center justify-center gap-1.5 transition-colors font-medium text-xs"
         >
           Randomize
@@ -221,7 +221,7 @@ export default function RotatedGridControls({ params, onParamChange, onColorChan
                     <div className="w-6 h-6 rounded-full overflow-hidden border border-zinc-200 flex-shrink-0">
                       <ColorPicker
                         value={value}
-                        onChange={(v) => onColorChange(key, v)}
+                        onChange={(v) => onColorChange?.(key, v)}
                       />
                     </div>
                     <input
@@ -230,7 +230,7 @@ export default function RotatedGridControls({ params, onParamChange, onColorChan
                       onChange={(e) => {
                         const newVal = e.target.value;
                         if (/^#[0-9A-Fa-f]{0,6}$/.test(newVal)) {
-                          onColorChange(key, newVal);
+                          onColorChange?.(key, newVal);
                         }
                       }}
                       className="w-full h-6 bg-transparent font-mono text-[10px] text-zinc-700 focus:outline-none "
@@ -316,7 +316,7 @@ export default function RotatedGridControls({ params, onParamChange, onColorChan
               Export PNG
             </button>
             <button
-              onClick={onExportWallpapers}
+              onClick={() => onExportWallpapers?.()}
               className="w-full px-3 py-2 rounded-md flex items-center justify-center gap-2 transition-colors bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-medium mt-2"
             >
               <Monitor className="w-3.5 h-3.5" />

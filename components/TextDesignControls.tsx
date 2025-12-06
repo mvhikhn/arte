@@ -10,7 +10,7 @@ interface TextDesignControlsProps {
     params: TextDesignArtworkParams;
     onParamChange: (param: keyof TextDesignArtworkParams, value: any) => void;
     onExportImage: () => void;
-    onExportWallpapers: () => void;
+    onExportWallpapers?: () => void;
     onRandomize?: () => void;
     tokenInput?: string;
     onTokenChange?: (value: string) => void;
@@ -379,7 +379,7 @@ export default function TextDesignControls({
                     Export Image
                 </button>
                 <button
-                    onClick={onExportWallpapers}
+                    onClick={() => onExportWallpapers?.()}
                     className="w-full px-3 py-1.5 bg-zinc-100 hover:bg-zinc-200 rounded-md flex items-center justify-center gap-2 transition-colors font-medium text-xs"
                 >
                     <Monitor className="w-3.5 h-3.5" />

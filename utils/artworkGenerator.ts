@@ -4,6 +4,7 @@ import { MosaicArtworkParams } from "@/components/MosaicArtwork";
 import { RotatedGridArtworkParams } from "@/components/RotatedGridArtwork";
 import { TreeArtworkParams } from "@/components/TreeArtwork";
 import { TextDesignArtworkParams } from "@/components/TextDesignArtwork";
+import { LambArtworkParams } from "@/components/LambArtwork";
 import { createSeededRandom } from "@/utils/token";
 import { decodeParamsSync } from "@/utils/serialization";
 
@@ -13,7 +14,7 @@ const randomInRange = (min: number, max: number) => Math.random() * (max - min) 
 // Generate flow params from a token (deterministic)
 export const generateFlowParamsFromToken = (token: string): ArtworkParams => {
     // Check for encoded params (v2 state tokens)
-    if (token.includes("-v2")) {
+    if (token.includes("-v2.") || token.includes("-v2e.")) {
         const result = decodeParamsSync(token);
         if (result) {
             return result.params as ArtworkParams;
@@ -102,7 +103,7 @@ export const generateFlowParamsFromToken = (token: string): ArtworkParams => {
 // Generate grid params from token
 export const generateGridParamsFromToken = (token: string): GridArtworkParams => {
     // Check for encoded params (v2 state tokens)
-    if (token.includes("-v2")) {
+    if (token.includes("-v2.") || token.includes("-v2e.")) {
         const result = decodeParamsSync(token);
         if (result) {
             return result.params as GridArtworkParams;
@@ -147,7 +148,7 @@ export const generateGridParamsFromToken = (token: string): GridArtworkParams =>
 // Generate mosaic params from token
 export const generateMosaicParamsFromToken = (token: string): MosaicArtworkParams => {
     // Check for encoded params (v2 state tokens)
-    if (token.includes("-v2")) {
+    if (token.includes("-v2.") || token.includes("-v2e.")) {
         const result = decodeParamsSync(token);
         if (result) {
             return result.params as MosaicArtworkParams;
@@ -197,7 +198,7 @@ export const generateMosaicParamsFromToken = (token: string): MosaicArtworkParam
 // Generate rotated grid params from token
 export const generateRotatedGridParamsFromToken = (token: string): RotatedGridArtworkParams => {
     // Check for encoded params (v2 state tokens)
-    if (token.includes("-v2")) {
+    if (token.includes("-v2.") || token.includes("-v2e.")) {
         const result = decodeParamsSync(token);
         if (result) {
             return result.params as RotatedGridArtworkParams;
@@ -239,7 +240,7 @@ export const generateRotatedGridParamsFromToken = (token: string): RotatedGridAr
 // Generate tree params from token
 export const generateTreeParamsFromToken = (token: string): TreeArtworkParams => {
     // Check for encoded params (v2 state tokens)
-    if (token.includes("-v2")) {
+    if (token.includes("-v2.") || token.includes("-v2e.")) {
         const result = decodeParamsSync(token);
         if (result) {
             return result.params as TreeArtworkParams;
@@ -313,7 +314,7 @@ export const generateTreeParamsFromToken = (token: string): TreeArtworkParams =>
 // Generate text design params from token
 export const generateTextDesignParamsFromToken = (token: string): TextDesignArtworkParams => {
     // Check for encoded params (v2 state tokens)
-    if (token.includes("-v2")) {
+    if (token.includes("-v2.") || token.includes("-v2e.")) {
         const result = decodeParamsSync(token);
         if (result) {
             return result.params as TextDesignArtworkParams;
@@ -396,5 +397,35 @@ export const generateTextDesignParamsFromToken = (token: string): TextDesignArtw
         colorSeed: token,
         exportWidth: 1600,
         exportHeight: 2000,
+    };
+};
+
+// Generate lamb params from token
+export const generateLambParamsFromToken = (token: string): LambArtworkParams => {
+    // Check for encoded params (v2 state tokens)
+    if (token.includes("-v2.") || token.includes("-v2e.")) {
+        const result = decodeParamsSync(token);
+        if (result) {
+            return result.params as LambArtworkParams;
+        }
+        throw new Error('Invalid state token');
+    }
+
+    const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+    const rand = createSeededRandom(token);
+
+    return {
+        cols: Math.floor(rand() * 10 + 1) * 10,
+        rows: Math.floor(rand() * 10 + 1) * 10,
+        wOff: 200,
+        hOff: 200,
+        noiseScale: rand() * 0.005 + 0.005,
+        lifeStep: 0.005,
+        weiRangeMax: Math.pow(2, Math.floor(rand() * 6) + 3),
+        totalFrame: 1000,
+        canvasWidth: isMobile ? 400 : 1200,
+        canvasHeight: isMobile ? 123 : 370,
+        token: token,
+        isAnimating: true,
     };
 };

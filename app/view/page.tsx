@@ -3,25 +3,13 @@
 import { useState, useEffect, useRef, MouseEvent } from "react";
 import Link from "next/link";
 import { ExternalLink, Download } from "lucide-react";
-import { validateToken, getTokenArtworkType, ArtworkType } from "@/utils/token";
-import Artwork, { ArtworkParams, ArtworkRef } from "@/components/Artwork";
-import GridArtwork, { GridArtworkParams, GridArtworkRef } from "@/components/GridArtwork";
-import MosaicArtwork, { MosaicArtworkParams, MosaicArtworkRef } from "@/components/MosaicArtwork";
-import RotatedGridArtwork, { RotatedGridArtworkParams, RotatedGridArtworkRef } from "@/components/RotatedGridArtwork";
-import TreeArtwork, { TreeArtworkParams, TreeArtworkRef } from "@/components/TreeArtwork";
-import TextDesignArtwork, { TextDesignArtworkParams, TextDesignArtworkRef } from "@/components/TextDesignArtwork";
-import {
-    generateFlowParamsFromToken,
-    generateGridParamsFromToken,
-    generateMosaicParamsFromToken,
-    generateRotatedGridParamsFromToken,
-    generateTreeParamsFromToken,
-    generateTextDesignParamsFromToken
-} from "@/utils/artworkGenerator";
+import { validateToken, getTokenArtworkType } from "@/utils/token";
+import { ARTWORKS } from "@/config/artworks";
 
 export default function ViewPage() {
     const [tokenInput, setTokenInput] = useState("");
-    const [currentArtwork, setCurrentArtwork] = useState<ArtworkType | null>(null);
+    const [currentArtwork, setCurrentArtwork] = useState<string | null>(null);
+    const [params, setParams] = useState<any>(null);
     const [error, setError] = useState<string | null>(null);
     const [isHoveringInput, setIsHoveringInput] = useState(false);
     const [isEncrypted, setIsEncrypted] = useState(false);
@@ -33,21 +21,8 @@ export default function ViewPage() {
     const [holoY, setHoloY] = useState(50);
     const cardRef = useRef<HTMLDivElement>(null);
 
-    // Params state
-    const [flowParams, setFlowParams] = useState<ArtworkParams | null>(null);
-    const [gridParams, setGridParams] = useState<GridArtworkParams | null>(null);
-    const [mosaicParams, setMosaicParams] = useState<MosaicArtworkParams | null>(null);
-    const [rotatedGridParams, setRotatedGridParams] = useState<RotatedGridArtworkParams | null>(null);
-    const [treeParams, setTreeParams] = useState<TreeArtworkParams | null>(null);
-    const [textDesignParams, setTextDesignParams] = useState<TextDesignArtworkParams | null>(null);
-
-    // Refs
-    const flowRef = useRef<ArtworkRef>(null);
-    const gridRef = useRef<GridArtworkRef>(null);
-    const mosaicRef = useRef<MosaicArtworkRef>(null);
-    const rotatedRef = useRef<RotatedGridArtworkRef>(null);
-    const treeRef = useRef<TreeArtworkRef>(null);
-    const textRef = useRef<TextDesignArtworkRef>(null);
+    // Generic ref
+    const artworkRef = useRef<any>(null);
 
     const handleTokenChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
@@ -61,21 +36,26 @@ export default function ViewPage() {
 
         if (!trimmedToken) {
             setCurrentArtwork(null);
+            setParams(null);
             return;
         }
 
         const type = getTokenArtworkType(trimmedToken);
 
-        if (!type) {
+        if (!type || !ARTWORKS[type]) {
             if (trimmedToken.startsWith("fx-")) {
-                setError("Invalid key format");
+                setError("Invalid key format or unknown artwork type");
             }
             setCurrentArtwork(null);
+            setParams(null);
             return;
         }
 
-        if (validateToken(trimmedToken, type)) {
-            setCurrentArtwork(type);
+        // We cast type to string to index ARTWORKS, though getTokenArtworkType returns known types
+        const artworkType = type as string;
+
+        if (validateToken(trimmedToken, artworkType)) {
+            setCurrentArtwork(artworkType);
             setError(null);
             setIsEncrypted(trimmedToken.includes('-v2e.'));
 
@@ -89,29 +69,17 @@ export default function ViewPage() {
                     // But for v2e, we must use decodeParams
                     if (trimmedToken.includes("-v2e.")) {
                         const result = await decodeParams(trimmedToken);
-                        switch (type) {
-                            case 'flow': setFlowParams(result.params); break;
-                            case 'grid': setGridParams(result.params); break;
-                            case 'mosaic': setMosaicParams(result.params); break;
-                            case 'rotated': setRotatedGridParams(result.params); break;
-                            case 'tree': setTreeParams(result.params); break;
-                            case 'text': setTextDesignParams(result.params); break;
-                        }
+                        setParams(result.params);
                     } else {
-                        // Use sync generators for v2 local / v1 legacy
-                        switch (type) {
-                            case 'flow': setFlowParams(generateFlowParamsFromToken(trimmedToken)); break;
-                            case 'grid': setGridParams(generateGridParamsFromToken(trimmedToken)); break;
-                            case 'mosaic': setMosaicParams(generateMosaicParamsFromToken(trimmedToken)); break;
-                            case 'rotated': setRotatedGridParams(generateRotatedGridParamsFromToken(trimmedToken)); break;
-                            case 'tree': setTreeParams(generateTreeParamsFromToken(trimmedToken)); break;
-                            case 'text': setTextDesignParams(generateTextDesignParamsFromToken(trimmedToken)); break;
-                        }
+                        // Use generator from registry
+                        const generator = ARTWORKS[artworkType].generator;
+                        setParams(generator(trimmedToken));
                     }
                 } catch (error: any) {
                     console.error("Decoding error:", error);
                     setError(`Error: ${error.message || "Invalid key or decryption failed"}`);
                     setCurrentArtwork(null);
+                    setParams(null);
                 }
             };
 
@@ -119,32 +87,25 @@ export default function ViewPage() {
         } else {
             setError("Invalid key");
             setCurrentArtwork(null);
+            setParams(null);
         }
     }, [tokenInput]);
 
-    const handleCardMouseMove = (e: MouseEvent<HTMLDivElement>) => {
+    const handleTilt = (clientX: number, clientY: number) => {
         if (!cardRef.current) return;
-
-        // Disable tilt on touch devices or screens that don't support hover
-        if (typeof window !== 'undefined' && window.matchMedia('(hover: none)').matches) {
-            return;
-        }
 
         const rect = cardRef.current.getBoundingClientRect();
         const centerX = rect.left + rect.width / 2;
         const centerY = rect.top + rect.height / 2;
 
-        const mouseX = e.clientX;
-        const mouseY = e.clientY;
-
         // Calculate rotation based on distance from center
         // Reduced to 8 degrees max for heavier, more premium feel
-        const rotateY = ((mouseX - centerX) / (rect.width / 2)) * 8;
-        const rotateX = -((mouseY - centerY) / (rect.height / 2)) * 8;
+        const rotateY = ((clientX - centerX) / (rect.width / 2)) * 8;
+        const rotateX = -((clientY - centerY) / (rect.height / 2)) * 8;
 
         // Calculate hologram gradient position (0-100 for percentage)
-        const holoXPos = ((mouseX - rect.left) / rect.width) * 100;
-        const holoYPos = ((mouseY - rect.top) / rect.height) * 100;
+        const holoXPos = ((clientX - rect.left) / rect.width) * 100;
+        const holoYPos = ((clientY - rect.top) / rect.height) * 100;
 
         setTiltX(rotateX);
         setTiltY(rotateY);
@@ -152,7 +113,25 @@ export default function ViewPage() {
         setHoloY(holoYPos);
     };
 
-    const handleCardMouseLeave = () => {
+    const handleCardMouseMove = (e: MouseEvent<HTMLDivElement>) => {
+        // Disable mouse tilt on touch devices to prevent conflict, 
+        // but we'll handle touch separately
+        if (typeof window !== 'undefined' && window.matchMedia('(hover: none)').matches) {
+            return;
+        }
+        handleTilt(e.clientX, e.clientY);
+    };
+
+    const handleCardTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
+        // Prevent scrolling while interacting with the card
+        // e.preventDefault(); // Optional: might block page scroll, use with caution
+        if (e.touches.length > 0) {
+            const touch = e.touches[0];
+            handleTilt(touch.clientX, touch.clientY);
+        }
+    };
+
+    const handleResetTilt = () => {
         setTiltX(0);
         setTiltY(0);
         setHoloX(50);
@@ -160,44 +139,26 @@ export default function ViewPage() {
     };
 
     const handleDownload = () => {
-        switch (currentArtwork) {
-            case 'flow':
-                flowRef.current?.exportHighRes?.(4);
-                break;
-            case 'grid':
-                gridRef.current?.exportHighRes?.(4);
-                break;
-            case 'mosaic':
-                mosaicRef.current?.exportHighRes?.(4);
-                break;
-            case 'rotated':
-                rotatedRef.current?.exportHighRes?.(4);
-                break;
-            case 'tree':
-                treeRef.current?.exportHighRes?.(4);
-                break;
-            case 'text':
-                textRef.current?.exportHighRes?.(4);
-                break;
-        }
+        artworkRef.current?.exportHighRes?.(4);
     };
 
     // Get current canvas dimensions for responsive card sizing
     const getCurrentDimensions = () => {
-        if (currentArtwork === 'flow' && flowParams) return { width: flowParams.canvasWidth, height: flowParams.canvasHeight };
-        if (currentArtwork === 'grid' && gridParams) return { width: gridParams.canvasWidth, height: gridParams.canvasHeight };
-        if (currentArtwork === 'mosaic' && mosaicParams) return { width: mosaicParams.canvasWidth, height: mosaicParams.canvasHeight };
-        if (currentArtwork === 'rotated' && rotatedGridParams) return { width: rotatedGridParams.canvasWidth, height: rotatedGridParams.canvasHeight };
-        if (currentArtwork === 'tree' && treeParams) return { width: treeParams.canvasWidth, height: treeParams.canvasHeight };
-        if (currentArtwork === 'text' && textDesignParams) return { width: textDesignParams.canvasWidth, height: textDesignParams.canvasHeight };
+        if (currentArtwork && params) {
+            return {
+                width: params.canvasWidth || 630,
+                height: params.canvasHeight || 790
+            };
+        }
         return { width: 630, height: 790 };
     };
 
     const dimensions = getCurrentDimensions();
     const aspectRatio = dimensions.width / dimensions.height;
+    const ArtworkComponent = currentArtwork ? ARTWORKS[currentArtwork].component : null;
 
     return (
-        <div className="min-h-screen bg-[#fafafa] flex flex-col items-center justify-center p-4 relative">
+        <div className="min-h-screen bg-[#fafafa] flex flex-col items-center justify-center p-4 relative overflow-hidden">
             {/* Home Button - Top Left */}
             <Link
                 href="/"
@@ -260,14 +221,16 @@ export default function ViewPage() {
 
             {/* Artwork Display */}
             <div className="flex-1 w-full flex items-center justify-center" style={{ perspective: '1500px' }}>
-                {currentArtwork && !error ? (
-                    <div className="relative">
+                {currentArtwork && !error && ArtworkComponent && params ? (
+                    <div className="relative flex items-center justify-center">
                         {/* 3D Card with Premium Physics, Tight Frame, and Holographic Effect */}
                         <div
                             ref={cardRef}
                             onMouseMove={handleCardMouseMove}
-                            onMouseLeave={handleCardMouseLeave}
-                            className="relative rounded-lg overflow-hidden transition-all duration-300 ease-out"
+                            onMouseLeave={handleResetTilt}
+                            onTouchMove={handleCardTouchMove}
+                            onTouchEnd={handleResetTilt}
+                            className="relative rounded-lg overflow-hidden transition-transform duration-100 ease-out"
                             style={{
                                 transform: `rotateX(${tiltX}deg) rotateY(${tiltY}deg) translateZ(30px)`,
                                 boxShadow: `
@@ -279,37 +242,24 @@ export default function ViewPage() {
                                     ${-tiltY * 2}px ${tiltX * 2}px 40px rgba(0, 0, 0, 0.15),
                                     inset 0 0 0 1px rgba(255, 255, 255, 0.1)
                                 `,
-                                maxWidth: '85vw',
-                                maxHeight: '70vh',
+                                // Dynamic sizing logic
+                                width: `min(85vw, 70vh * ${aspectRatio})`,
+                                height: `min(70vh, 85vw / ${aspectRatio})`,
                                 padding: '4px',
                                 background: 'linear-gradient(145deg, #ffffff 0%, #f8f8f8 100%)',
                             }}
                         >
                             {/* Inner card with tight border */}
                             <div
-                                className="relative overflow-hidden rounded-md"
+                                className="relative overflow-hidden rounded-md w-full h-full"
                                 style={{
                                     boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.06), 0 0 0 1px rgba(0,0,0,0.04)',
                                 }}
                             >
-                                {currentArtwork === 'flow' && flowParams && (
-                                    <Artwork ref={flowRef} params={flowParams} />
-                                )}
-                                {currentArtwork === 'grid' && gridParams && (
-                                    <GridArtwork ref={gridRef} params={gridParams} />
-                                )}
-                                {currentArtwork === 'mosaic' && mosaicParams && (
-                                    <MosaicArtwork ref={mosaicRef} params={mosaicParams} />
-                                )}
-                                {currentArtwork === 'rotated' && rotatedGridParams && (
-                                    <RotatedGridArtwork ref={rotatedRef} params={rotatedGridParams} />
-                                )}
-                                {currentArtwork === 'tree' && treeParams && (
-                                    <TreeArtwork ref={treeRef} params={treeParams} />
-                                )}
-                                {currentArtwork === 'text' && textDesignParams && (
-                                    <TextDesignArtwork ref={textRef} params={textDesignParams} />
-                                )}
+                                {/* Force canvas to scale to container */}
+                                <div className="w-full h-full [&>canvas]:!w-full [&>canvas]:!h-full [&>canvas]:!object-contain">
+                                    <ArtworkComponent ref={artworkRef} params={params} />
+                                </div>
 
                                 {/* Holographic Light Reflection Overlay */}
                                 <div

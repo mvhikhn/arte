@@ -9,13 +9,13 @@ import { ChevronDown, ChevronRight, Pause, Play, RefreshCw, Shuffle, Download, I
 interface TreeControlsProps {
   params: TreeArtworkParams;
   onParamChange: (param: keyof TreeArtworkParams, value: number) => void;
-  onColorChange: (param: keyof TreeArtworkParams, value: string) => void;
+  onColorChange?: (param: keyof TreeArtworkParams, value: string) => void;
   onExportImage: () => void;
-  onExportGif: (duration: number, fps: number) => void;
-  onExportWallpapers: () => void;
-  onToggleAnimation: () => void;
-  onRandomize: () => void;
-  onRegenerate: () => void;
+  onExportGif?: (duration: number, fps: number) => void;
+  onExportWallpapers?: () => void;
+  onToggleAnimation?: () => void;
+  onRandomize?: () => void;
+  onRegenerate?: () => void;
   tokenInput?: string;
   onTokenChange?: (value: string) => void;
 }
@@ -51,7 +51,7 @@ export default function TreeControls({
   const handleExportGif = async () => {
     setIsExporting(true);
     try {
-      await onExportGif(gifDuration, gifFps);
+      await onExportGif?.(gifDuration, gifFps);
       setTimeout(() => setIsExporting(false), (gifDuration + 1) * 1000);
     } catch (error) {
       console.error("GIF export failed:", error);
@@ -71,7 +71,7 @@ export default function TreeControls({
       {/* Control Buttons */}
       <div className="px-3 py-3 border-b border-zinc-100 flex gap-2">
         <button
-          onClick={onToggleAnimation}
+          onClick={() => onToggleAnimation?.()}
           className="flex-1 px-3 py-1.5 bg-zinc-100 hover:bg-zinc-200 rounded-md flex items-center justify-center gap-1.5 transition-colors font-medium text-xs"
         >
           {params.isAnimating ? (
@@ -87,14 +87,14 @@ export default function TreeControls({
           )}
         </button>
         <button
-          onClick={onRegenerate}
+          onClick={() => onRegenerate?.()}
           className="flex-1 px-3 py-1.5 bg-zinc-100 hover:bg-zinc-200 rounded-md flex items-center justify-center gap-1.5 transition-colors font-medium text-xs"
         >
           <RefreshCw className="w-3 h-3" />
           Regenerate
         </button>
         <button
-          onClick={onRandomize}
+          onClick={() => onRandomize?.()}
           className="flex-1 px-3 py-1.5 bg-zinc-900 hover:bg-zinc-800 text-white rounded-md flex items-center justify-center gap-1.5 transition-colors font-medium text-xs"
         >
           Randomize
@@ -339,7 +339,7 @@ export default function TreeControls({
                   <input
                     type="color"
                     value={params.backgroundColor}
-                    onChange={(e) => onColorChange("backgroundColor", e.target.value)}
+                    onChange={(e) => onColorChange?.("backgroundColor", e.target.value)}
                     className="w-full h-full opacity-0 cursor-pointer"
                     style={{ backgroundColor: params.backgroundColor }}
                   />
@@ -358,7 +358,7 @@ export default function TreeControls({
                       <input
                         type="color"
                         value={params[paramKey] as string}
-                        onChange={(e) => onColorChange(paramKey, e.target.value)}
+                        onChange={(e) => onColorChange?.(paramKey, e.target.value)}
                         className="w-full h-full opacity-0 cursor-pointer relative z-10"
                       />
                     </div>
@@ -378,7 +378,7 @@ export default function TreeControls({
                       <input
                         type="color"
                         value={params[paramKey] as string}
-                        onChange={(e) => onColorChange(paramKey, e.target.value)}
+                        onChange={(e) => onColorChange?.(paramKey, e.target.value)}
                         className="w-full h-full opacity-0 cursor-pointer relative z-10"
                       />
                     </div>
@@ -414,14 +414,14 @@ export default function TreeControls({
                   <input
                     type="color"
                     value={params.backgroundColor}
-                    onChange={(e) => onColorChange('backgroundColor', e.target.value)}
+                    onChange={(e) => onColorChange?.('backgroundColor', e.target.value)}
                     className="w-full h-full cursor-pointer opacity-0 relative z-10"
                   />
                 </div>
                 <input
                   type="text"
                   value={params.backgroundColor}
-                  onChange={(e) => onColorChange('backgroundColor', e.target.value)}
+                  onChange={(e) => onColorChange?.('backgroundColor', e.target.value)}
                   className="w-20 px-2 py-1 bg-zinc-50 border border-zinc-200 rounded text-[10px] font-mono focus:outline-none focus:border-zinc-400"
                 />
               </div>
@@ -439,7 +439,7 @@ export default function TreeControls({
                     const reader = new FileReader();
                     reader.onload = (event) => {
                       if (event.target?.result) {
-                        onColorChange('backgroundImage', event.target.result as string);
+                        onColorChange?.('backgroundImage', event.target.result as string);
                       }
                     };
                     reader.readAsDataURL(file);
@@ -449,7 +449,7 @@ export default function TreeControls({
               />
               {params.backgroundImage && (
                 <button
-                  onClick={() => onColorChange('backgroundImage', '')}
+                  onClick={() => onColorChange?.('backgroundImage', '')}
                   className="text-[10px] text-red-500 hover:text-red-600 underline"
                 >
                   Remove Image
@@ -465,7 +465,7 @@ export default function TreeControls({
                   {['cover', 'contain'].map((mode) => (
                     <button
                       key={mode}
-                      onClick={() => onColorChange('backgroundScale', mode)}
+                      onClick={() => onColorChange?.('backgroundScale', mode)}
                       className={`flex-1 py-1 text-[10px] rounded border ${params.backgroundScale === mode
                         ? 'bg-zinc-900 text-white border-zinc-900'
                         : 'bg-white text-zinc-600 border-zinc-200 hover:border-zinc-300'
@@ -513,7 +513,7 @@ export default function TreeControls({
               <>
                 <textarea
                   value={params.textContent}
-                  onChange={(e) => onColorChange('textContent', e.target.value)}
+                  onChange={(e) => onColorChange?.('textContent', e.target.value)}
                   placeholder="Enter text..."
                   className="w-full h-24 px-3 py-2 bg-zinc-50 border border-zinc-200 rounded-md resize-none text-xs focus:outline-none focus:border-zinc-400 font-sans"
                 />
@@ -525,11 +525,11 @@ export default function TreeControls({
                     value={params.fontUrl || ''}
                     onChange={(e) => {
                       const url = e.target.value;
-                      onColorChange('fontUrl', url);
+                      onColorChange?.('fontUrl', url);
                       // Extract font family name from URL if possible
                       const match = url.match(/family=([^&]*)/);
                       const family = match ? decodeURIComponent(match[1].replace(/\+/g, ' ')) : '';
-                      onColorChange('customFontFamily', family);
+                      onColorChange?.('customFontFamily', family);
                     }}
                     placeholder="https://fonts.googleapis.com/css2?family=..."
                     className="w-full px-2 py-1 bg-zinc-50 border border-zinc-200 rounded text-xs focus:outline-none focus:border-zinc-400"
@@ -541,7 +541,7 @@ export default function TreeControls({
                     <span className="text-[10px] text-zinc-500 tracking-wide">Font Family</span>
                     <select
                       value={params.fontFamily}
-                      onChange={(e) => onColorChange("fontFamily" as any, e.target.value)}
+                      onChange={(e) => onColorChange?.("fontFamily" as any, e.target.value)}
                       className="w-full px-2 py-1 bg-zinc-50 border border-zinc-200 rounded text-xs"
                     >
                       <option value="Georgia, serif">Georgia</option>
@@ -560,14 +560,14 @@ export default function TreeControls({
                         <input
                           type="color"
                           value={params.textColor}
-                          onChange={(e) => onColorChange("textColor" as any, e.target.value)}
+                          onChange={(e) => onColorChange?.("textColor" as any, e.target.value)}
                           className="w-full h-full opacity-0 cursor-pointer relative z-10"
                         />
                       </div>
                       <input
                         type="text"
                         value={params.textColor}
-                        onChange={(e) => onColorChange("textColor" as any, e.target.value)}
+                        onChange={(e) => onColorChange?.("textColor" as any, e.target.value)}
                         className="w-full h-full px-2 bg-zinc-50 border border-zinc-200 rounded text-xs font-mono"
                       />
                     </div>
@@ -602,7 +602,7 @@ export default function TreeControls({
                     {['left', 'center', 'right'].map((align) => (
                       <button
                         key={align}
-                        onClick={() => onColorChange("textAlign" as any, align)}
+                        onClick={() => onColorChange?.("textAlign" as any, align)}
                         className={`flex-1 py-1 text-[10px] font-medium rounded-sm transition-colors ${params.textAlign === align
                           ? 'bg-white shadow-sm text-zinc-900'
                           : 'text-zinc-500 hover:text-zinc-700'
@@ -760,7 +760,7 @@ export default function TreeControls({
             </div>
 
             <button
-              onClick={onExportWallpapers}
+              onClick={() => onExportWallpapers?.()}
               className="w-full px-3 py-2 rounded-md flex items-center justify-center gap-2 transition-colors bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-medium mt-2"
             >
               <Monitor className="w-3.5 h-3.5" />

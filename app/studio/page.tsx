@@ -1,155 +1,36 @@
 "use client";
 
-import { useState, useRef, useEffect, useTransition, Suspense } from "react";
+import { useState, useRef, useEffect, useTransition, Suspense, MouseEvent } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import Artwork, { ArtworkParams, ArtworkRef } from "@/components/Artwork";
-import GridArtwork, { GridArtworkParams, GridArtworkRef } from "@/components/GridArtwork";
-import MosaicArtwork, { MosaicArtworkParams, MosaicArtworkRef } from "@/components/MosaicArtwork";
-import RotatedGridArtwork, { RotatedGridArtworkParams, RotatedGridArtworkRef } from "@/components/RotatedGridArtwork";
-import TreeArtwork, { TreeArtworkParams, TreeArtworkRef } from "@/components/TreeArtwork";
-import TextDesignArtwork, { TextDesignArtworkParams, TextDesignArtworkRef } from "@/components/TextDesignArtwork";
-import Controls from "@/components/Controls";
-import GridControls from "@/components/GridControls";
-import MosaicControls from "@/components/MosaicControls";
-import RotatedGridControls from "@/components/RotatedGridControls";
-import TreeControls from "@/components/TreeControls";
-import TextDesignControls from "@/components/TextDesignControls";
+import { ARTWORKS } from "@/config/artworks";
 import { ExportPopup } from "@/components/ExportPopup";
 import { PaymentModal } from "@/components/PaymentModal";
 import { EmailVerificationModal } from "@/components/EmailVerificationModal";
-import { ArrowRight, ArrowLeft, SlidersHorizontal, RefreshCw, Shuffle, Download, Link2, Check } from "lucide-react";
-import { getRandomColors } from "@/lib/colorPalettes";
+import { ArrowLeft, SlidersHorizontal, RefreshCw, Shuffle, Download, Link2, Check } from "lucide-react";
 import { hasGifAccess, grantGifAccess } from "@/lib/paymentUtils";
-import { generateToken, validateToken } from "@/utils/token";
+import { validateToken } from "@/utils/token";
 import { encodeParams, encodeParamsSecure } from "@/utils/serialization";
 
-type ArtworkType = "flow" | "grid" | "mosaic" | "rotated" | "tree" | "textdesign";
-
-// Helper to generate random value within range
-const randomInRange = (min: number, max: number) => Math.random() * (max - min) + min;
-
-// Fixed default params for SSR/hydration consistency
-const getDefaultTreeParams = (): TreeArtworkParams => ({
-  initialPaths: 2,
-  initialVelocity: 10,
-  branchProbability: 0.2,
-  diameterShrink: 0.65,
-  minDiameter: 0.3,
-  bumpMultiplier: 0.2,
-  velocityRetention: 0.77,
-  speedMin: 5,
-  speedMax: 10,
-  finishedCircleSize: 12,
-  strokeWeightMultiplier: 1.1,
-  stemColor1: "#3d2817",
-  stemColor2: "#4a3319",
-  stemColor3: "#5c3d1f",
-  tipColor1: "#e8c4a0",
-  tipColor2: "#f0d4b8",
-  tipColor3: "#d9b89a",
-  backgroundColor: "#fafafa",
-  textContent: "",
-  textEnabled: false,
-  fontSize: 24,
-  textColor: "#333333",
-  textAlign: 'center' as 'left' | 'center' | 'right',
-  textX: 400,
-  textY: 50,
-  lineHeight: 1.5,
-  fontFamily: 'Georgia, serif',
-  fontUrl: '',
-  customFontFamily: '',
-  grainAmount: 0,
-  canvasWidth: 400,
-  canvasHeight: 400,
-
-  token: "fx-default-tree-token",
-  exportWidth: 1600,
-  exportHeight: 2000,
-  isAnimating: true,
-});
-
-import {
-  generateFlowParamsFromToken,
-  generateGridParamsFromToken,
-  generateMosaicParamsFromToken,
-  generateRotatedGridParamsFromToken,
-  generateTreeParamsFromToken,
-  generateTextDesignParamsFromToken
-} from "@/utils/artworkGenerator";
-
-// Generate random initial flow params (creates new token)
-const generateRandomFlowParams = (): ArtworkParams => {
-  const newToken = generateToken('flow');
-  return generateFlowParamsFromToken(newToken);
-};
-
-// Generate random initial grid params
-
-
-// Generate random initial grid params
-const generateRandomGridParams = (): GridArtworkParams => {
-  const newToken = generateToken('grid');
-  return generateGridParamsFromToken(newToken);
-};
-
-// Generate random initial mosaic params
-
-
-// Generate random initial mosaic params
-const generateRandomMosaicParams = (): MosaicArtworkParams => {
-  const newToken = generateToken('mosaic');
-  return generateMosaicParamsFromToken(newToken);
-};
-
-// Generate random initial rotated grid params
-
-
-// Generate random initial rotated grid params
-const generateRandomRotatedGridParams = (): RotatedGridArtworkParams => {
-  const newToken = generateToken('rotated');
-  return generateRotatedGridParamsFromToken(newToken);
-};
-
-// Generate random tree params with darker stems and lighter tips
-
-
-// Generate random tree params
-const generateRandomTreeParams = (): TreeArtworkParams => {
-  const newToken = generateToken('tree');
-  return generateTreeParamsFromToken(newToken);
-};
-
-// Generate random text design params
-
-
-// Generate random text design params
-const generateRandomTextDesignParams = (): TextDesignArtworkParams => {
-  const newToken = generateToken('text');
-  return generateTextDesignParamsFromToken(newToken);
-};
-
-
-// Force dynamic rendering and prevent static generation
+// Force dynamic rendering
 export const dynamic = 'force-dynamic';
 
 function StudioContent() {
   const searchParams = useSearchParams();
   const artworkParam = searchParams.get('artwork');
-  const validArtworks: ArtworkType[] = ["flow", "grid", "mosaic", "rotated", "tree", "textdesign"];
-  const initialArtwork = validArtworks.includes(artworkParam as ArtworkType)
-    ? (artworkParam as ArtworkType)
+  const validArtworks = Object.keys(ARTWORKS);
+
+  // Robust initialization
+  const initialArtwork = (artworkParam && validArtworks.includes(artworkParam))
+    ? artworkParam
     : "flow";
 
-  const [currentArtwork, setCurrentArtwork] = useState<ArtworkType>(initialArtwork);
+  const [currentArtwork, setCurrentArtwork] = useState<string>(initialArtwork);
   const [controlsVisible, setControlsVisible] = useState(false);
-  const flowArtworkRef = useRef<ArtworkRef>(null);
-  const gridArtworkRef = useRef<GridArtworkRef>(null);
-  const mosaicArtworkRef = useRef<MosaicArtworkRef>(null);
-  const rotatedGridArtworkRef = useRef<RotatedGridArtworkRef>(null);
-  const treeArtworkRef = useRef<TreeArtworkRef>(null);
-  const textDesignArtworkRef = useRef<TextDesignArtworkRef>(null);
+
+  // Generic ref for the current artwork component
+  const artworkRef = useRef<any>(null);
+
   const [exportStatus, setExportStatus] = useState({ isExporting: false, message: "" });
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [showEmailVerification, setShowEmailVerification] = useState(false);
@@ -157,41 +38,34 @@ function StudioContent() {
   const [isPending, startTransition] = useTransition();
   const isPreview = searchParams.get('preview') === 'true';
 
-  const [flowParams, setFlowParams] = useState<ArtworkParams>(() => generateRandomFlowParams());
+  // 3D card tilt state (restored from ee64344)
+  const [tiltX, setTiltX] = useState(0);
+  const [tiltY, setTiltY] = useState(0);
+  const [holoX, setHoloX] = useState(50);
+  const [holoY, setHoloY] = useState(50);
+  const cardRef = useRef<HTMLDivElement>(null);
 
-  const [gridParams, setGridParams] = useState<GridArtworkParams>(() => generateRandomGridParams());
+  // Store params for all artworks to preserve state when switching
+  const [artworkStates, setArtworkStates] = useState<Record<string, any>>(() => {
+    const initialStates: Record<string, any> = {};
+    validArtworks.forEach(key => {
+      initialStates[key] = ARTWORKS[key].defaultParams;
+    });
+    return initialStates;
+  });
 
-  const [mosaicParams, setMosaicParams] = useState<MosaicArtworkParams>(() => generateRandomMosaicParams());
+  const currentParams = artworkStates[currentArtwork];
+  const currentDef = ARTWORKS[currentArtwork];
 
-  const [rotatedGridParams, setRotatedGridParams] = useState<RotatedGridArtworkParams>(() => generateRandomRotatedGridParams());
-
-  const [treeParams, setTreeParams] = useState<TreeArtworkParams>(() => generateRandomTreeParams());
-
-  const [textDesignParams, setTextDesignParams] = useState<TextDesignArtworkParams>(() => generateRandomTextDesignParams());
-
-  // Separate state for token input to allow free editing
   const [tokenInput, setTokenInput] = useState<string>("");
-
   const [secureLinkStatus, setSecureLinkStatus] = useState({ loading: false, copied: false });
 
   const handleGetSecureLink = async () => {
     setSecureLinkStatus({ loading: true, copied: false });
     try {
-      let token = "";
-      switch (currentArtwork) {
-        case 'flow': token = await encodeParamsSecure('flow', flowParams); break;
-        case 'grid': token = await encodeParamsSecure('grid', gridParams); break;
-        case 'mosaic': token = await encodeParamsSecure('mosaic', mosaicParams); break;
-        case 'rotated': token = await encodeParamsSecure('rotated', rotatedGridParams); break;
-        case 'tree': token = await encodeParamsSecure('tree', treeParams); break;
-        case 'textdesign': token = await encodeParamsSecure('text', textDesignParams); break;
-      }
-
-      // Copy to clipboard
+      const token = await encodeParamsSecure(currentArtwork, currentParams);
       await navigator.clipboard.writeText(token);
       setSecureLinkStatus({ loading: false, copied: true });
-
-      // Reset copied state after 2 seconds
       setTimeout(() => {
         setSecureLinkStatus(prev => ({ ...prev, copied: false }));
       }, 2000);
@@ -206,77 +80,42 @@ function StudioContent() {
   useEffect(() => {
     const urlToken = searchParams.get('token');
     if (urlToken && validateToken(urlToken)) {
-      // Token is in URL, use it to initialize the artwork
-      const type = currentArtwork === 'textdesign' ? 'text' : currentArtwork;
-
       try {
-        switch (type) {
-          case 'flow':
-            setFlowParams(generateFlowParamsFromToken(urlToken));
-            break;
-          case 'grid':
-            setGridParams(generateGridParamsFromToken(urlToken));
-            break;
-          case 'mosaic':
-            setMosaicParams(generateMosaicParamsFromToken(urlToken));
-            break;
-          case 'rotated':
-            setRotatedGridParams(generateRotatedGridParamsFromToken(urlToken));
-            break;
-          case 'tree':
-            setTreeParams(generateTreeParamsFromToken(urlToken));
-            break;
-          case 'text':
-            setTextDesignParams(generateTextDesignParamsFromToken(urlToken));
-            break;
-        }
+        const newParams = currentDef.generator(urlToken);
+        setArtworkStates(prev => ({
+          ...prev,
+          [currentArtwork]: newParams
+        }));
         setTokenInput(urlToken);
       } catch (error) {
         console.error('Failed to initialize from URL token:', error);
       }
     }
-    // Only run on mount or when URL changes
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // REMOVED: useEffect that syncs params to tokenInput
-  // This caused race conditions where random tokens from regeneration overwrote encoded v1 tokens.
-  // Now we explicitly update tokenInput in every handler (Regenerate, Randomize, Edit).
-
-  // Save current artwork state to localStorage
+  // Save/Restore state logic (generic)
   const saveArtworkState = () => {
     const state = {
       currentArtwork,
-      flowParams,
-      gridParams,
-      mosaicParams,
-      rotatedGridParams,
-      treeParams,
-      textDesignParams,
+      artworkStates,
       timestamp: Date.now(),
     };
     localStorage.setItem('artworkState', JSON.stringify(state));
   };
 
-  // Restore artwork state from localStorage
   const restoreArtworkState = () => {
     try {
       const saved = localStorage.getItem('artworkState');
       if (saved) {
         const state = JSON.parse(saved);
-        // Only restore if saved within last 30 minutes
         if (Date.now() - state.timestamp < 30 * 60 * 1000) {
           setCurrentArtwork(state.currentArtwork);
-          setFlowParams(state.flowParams);
-          setGridParams(state.gridParams);
-          setMosaicParams(state.mosaicParams);
-          setRotatedGridParams(state.rotatedGridParams);
-          setTreeParams(state.treeParams);
-          setTextDesignParams(state.textDesignParams);
-          localStorage.removeItem('artworkState'); // Clear after restore
+          setArtworkStates(state.artworkStates);
+          localStorage.removeItem('artworkState');
           return true;
         }
-        localStorage.removeItem('artworkState'); // Clear old state
+        localStorage.removeItem('artworkState');
       }
     } catch (error) {
       console.error('Failed to restore artwork state:', error);
@@ -286,491 +125,171 @@ function StudioContent() {
   };
 
   const [isMounted, setIsMounted] = useState(false);
+  useEffect(() => setIsMounted(true), []);
 
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
-
-  // Check if returning from successful payment or email verification
+  // Payment/Verification return logic
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const isReturningFromPayment = urlParams.get('payment') === 'success';
     const isReturningFromVerification = urlParams.get('verified') === 'true';
 
-    // Restore artwork state if returning from payment or verification
     if (isReturningFromPayment || isReturningFromVerification) {
       const restored = restoreArtworkState();
-
       if (isReturningFromPayment) {
-        // Grant local access (for immediate use on this device)
         grantGifAccess();
-
-        // Show success message
         setExportStatus({ isExporting: false, message: "Payment successful! GIF exports unlocked!" });
-        setTimeout(() => {
-          setExportStatus({ isExporting: false, message: "" });
-        }, 3000);
+        setTimeout(() => setExportStatus({ isExporting: false, message: "" }), 3000);
       }
-
       if (isReturningFromVerification) {
         setExportStatus({ isExporting: false, message: restored ? "Welcome back! Your artwork has been restored." : "Email verified!" });
-        setTimeout(() => {
-          setExportStatus({ isExporting: false, message: "" });
-        }, 3000);
+        setTimeout(() => setExportStatus({ isExporting: false, message: "" }), 3000);
       }
-
-      // Clean URL
       window.history.replaceState({}, '', window.location.pathname);
     }
 
-    // Listen for email verification modal trigger
     const handleShowEmailVerification = () => {
-      saveArtworkState(); // Save state before showing verification modal
+      saveArtworkState();
       setShowEmailVerification(true);
     };
-
     window.addEventListener('showEmailVerification', handleShowEmailVerification);
-
-    return () => {
-      window.removeEventListener('showEmailVerification', handleShowEmailVerification);
-    };
+    return () => window.removeEventListener('showEmailVerification', handleShowEmailVerification);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-
-
-  const handleFlowParamChange = (param: keyof ArtworkParams, value: number) => {
-    setFlowParams((prev) => {
-      // Create new params with the changed value
-      const newParams = {
-        ...prev,
-        [param]: value,
-      };
-
-      // Generate a new token to represent this state
-      const newToken = encodeParams('flow', newParams);
-      setTokenInput(newToken); // Update URL with v1 token
-
-      return {
-        ...newParams,
-        token: prev.token, // Keep original seed for stable layout
-      };
+  // Generic Handlers
+  const handleParamChange = (key: string | number | symbol, value: any) => {
+    const paramKey = key as string;
+    setArtworkStates(prev => {
+      const newParams = { ...prev[currentArtwork], [paramKey]: value };
+      const newToken = encodeParams(currentArtwork, newParams);
+      setTokenInput(newToken);
+      return { ...prev, [currentArtwork]: { ...newParams, token: prev[currentArtwork].token } };
     });
   };
 
-  const handleFlowColorChange = (param: keyof ArtworkParams, value: string) => {
-    setFlowParams((prev) => {
-      // Create new params with the changed color
-      const newParams = {
-        ...prev,
-        [param]: value,
-      };
-
-      // Generate a new token to represent this state
-      const newToken = encodeParams('flow', newParams);
-      setTokenInput(newToken); // Update URL with v1 token
-
-      return {
-        ...newParams,
-        token: prev.token, // Keep original seed
-      };
-    });
+  const handleColorChange = (key: string | number | symbol, value: string) => {
+    handleParamChange(key, value);
   };
 
-  const handleFlowTokenChange = (value: string) => {
-    // Trim whitespace
+  const handleTokenChange = (value: string) => {
     const trimmedValue = value.trim();
-
-    // Always update the input field (with untrimmed value for UX)
     setTokenInput(value);
-
-    // Only update if the token is valid - regenerate ALL params from the token
-    if (validateToken(trimmedValue, 'flow')) {
-      const newParams = generateFlowParamsFromToken(trimmedValue);
-      setFlowParams(newParams);
+    if (validateToken(trimmedValue, currentArtwork)) {
+      const newParams = currentDef.generator(trimmedValue);
+      setArtworkStates(prev => ({ ...prev, [currentArtwork]: newParams }));
     }
   };
 
-  const handleGridParamChange = (param: keyof GridArtworkParams, value: number) => {
-    setGridParams((prev) => {
-      const newParams = { ...prev, [param]: value };
-      const newToken = encodeParams('grid', newParams);
-      setTokenInput(newToken); // Update URL with v1 token
-      return { ...newParams, token: prev.token }; // Keep original seed for stable layout
-    });
-  };
-
-  const handleGridColorChange = (param: keyof GridArtworkParams, value: string) => {
-    setGridParams((prev) => {
-      const newParams = { ...prev, [param]: value };
-      const newToken = encodeParams('grid', newParams);
-      setTokenInput(newToken); // Update URL with v1 token
-      return { ...newParams, token: prev.token }; // Keep original seed
-    });
-  };
-
-  const handleGridTokenChange = (value: string) => {
-    const trimmedValue = value.trim();
-    setTokenInput(value);
-    if (validateToken(trimmedValue, 'grid')) {
-      const newParams = generateGridParamsFromToken(trimmedValue);
-      setGridParams(newParams);
+  const handleRandomize = () => {
+    if (currentDef.randomGenerator) {
+      const newParams = currentDef.randomGenerator();
+      setArtworkStates(prev => ({ ...prev, [currentArtwork]: newParams }));
+      setTokenInput(encodeParams(currentArtwork, newParams));
     }
   };
 
-  const handleMosaicParamChange = (param: keyof MosaicArtworkParams, value: number) => {
-    setMosaicParams((prev) => {
-      const newParams = { ...prev, [param]: value };
-      const newToken = encodeParams('mosaic', newParams);
-      setTokenInput(newToken);
-      return { ...newParams, token: prev.token };
-    });
-  };
-
-  const handleMosaicColorChange = (param: keyof MosaicArtworkParams, value: string) => {
-    setMosaicParams((prev) => {
-      const newParams = { ...prev, [param]: value };
-      const newToken = encodeParams('mosaic', newParams);
-      setTokenInput(newToken);
-      return { ...newParams, token: prev.token };
-    });
-  };
-
-  const handleMosaicTokenChange = (value: string) => {
-    const trimmedValue = value.trim();
-    setTokenInput(value);
-    if (validateToken(trimmedValue, 'mosaic')) {
-      const newParams = generateMosaicParamsFromToken(trimmedValue);
-      setMosaicParams(newParams);
+  const handleRegenerate = () => {
+    if (currentDef.regenerator) {
+      const newParams = currentDef.regenerator(currentParams);
+      setArtworkStates(prev => ({ ...prev, [currentArtwork]: newParams }));
+      setTokenInput(encodeParams(currentArtwork, newParams));
+    } else {
+      handleRandomize();
     }
   };
 
-  const handleRotatedGridParamChange = (param: keyof RotatedGridArtworkParams, value: number) => {
-    setRotatedGridParams((prev) => {
-      const newParams = { ...prev, [param]: value };
-      const newToken = encodeParams('rotated', newParams);
-      setTokenInput(newToken);
-      return { ...newParams, token: prev.token };
-    });
-  };
-
-  const handleRotatedGridColorChange = (param: keyof RotatedGridArtworkParams, value: string) => {
-    setRotatedGridParams((prev) => {
-      const newParams = { ...prev, [param]: value };
-      const newToken = encodeParams('rotated', newParams);
-      setTokenInput(newToken);
-      return { ...newParams, token: prev.token };
-    });
-  };
-
-  const handleRotatedGridTokenChange = (value: string) => {
-    const trimmedValue = value.trim();
-    setTokenInput(value);
-    if (validateToken(trimmedValue, 'rotated')) {
-      const newParams = generateRotatedGridParamsFromToken(trimmedValue);
-      setRotatedGridParams(newParams);
-    }
-  };
-
-  const handleTreeParamChange = (param: keyof TreeArtworkParams, value: number) => {
-    setTreeParams((prev) => {
-      const newParams = { ...prev, [param]: param === 'textEnabled' ? Boolean(value) : value };
-      const newToken = encodeParams('tree', newParams);
-      setTokenInput(newToken);
-      return { ...newParams, token: prev.token };
-    });
-  };
-
-  const handleTreeColorChange = (param: keyof TreeArtworkParams, value: string) => {
-    setTreeParams((prev) => {
-      const newParams = { ...prev, [param]: value };
-      const newToken = encodeParams('tree', newParams);
-      setTokenInput(newToken);
-      return { ...newParams, token: prev.token };
-    });
-  };
-
-  const handleTreeTokenChange = (value: string) => {
-    const trimmedValue = value.trim();
-    setTokenInput(value);
-    if (validateToken(trimmedValue, 'tree')) {
-      const newParams = generateTreeParamsFromToken(trimmedValue);
-      setTreeParams(newParams);
-    }
-  };
-
-  const handleTextDesignParamChange = (param: keyof TextDesignArtworkParams, value: any) => {
-    setTextDesignParams((prev) => {
-      const newParams = { ...prev, [param]: value };
-      const newToken = encodeParams('text', newParams);
-      setTokenInput(newToken);
-      return { ...newParams, token: prev.token };
-    });
-  };
-
-  const handleTextDesignTokenChange = (value: string) => {
-    const trimmedValue = value.trim();
-    setTokenInput(value);
-    if (validateToken(trimmedValue, 'text')) {
-      const newParams = generateTextDesignParamsFromToken(trimmedValue);
-      setTextDesignParams(newParams);
+  const handleToggleAnimation = () => {
+    if (currentParams.hasOwnProperty('isAnimating')) {
+      handleParamChange('isAnimating', !currentParams.isAnimating);
     }
   };
 
   const handleExportImage = () => {
     setExportStatus({ isExporting: true, message: "Exporting image..." });
-    if (currentArtwork === "flow") {
-      flowArtworkRef.current?.exportImage();
-    } else if (currentArtwork === "grid") {
-      gridArtworkRef.current?.exportImage();
-    } else if (currentArtwork === "mosaic") {
-      mosaicArtworkRef.current?.exportImage();
-    } else if (currentArtwork === "rotated") {
-      rotatedGridArtworkRef.current?.exportImage();
-    } else if (currentArtwork === "tree") {
-      treeArtworkRef.current?.exportImage();
-    } else if (currentArtwork === "textdesign") {
-      // Check paywall for textdesign
-      if (!hasGifAccess()) {
-        saveArtworkState();
-        setShowPaymentModal(true);
-        return;
-      }
-      textDesignArtworkRef.current?.exportImage();
+    if (currentArtwork === "textdesign" && !hasGifAccess()) {
+      saveArtworkState();
+      setShowPaymentModal(true);
+      return;
     }
-    setTimeout(() => {
-      setExportStatus({ isExporting: false, message: "Image exported!" });
-    }, 500);
+    artworkRef.current?.exportImage();
+    setTimeout(() => setExportStatus({ isExporting: false, message: "Image exported!" }), 500);
   };
 
   const handleExportGif = async (duration: number, fps: number) => {
-    // Check if user has paid for GIF export
     if (!hasGifAccess()) {
-      // Save current artwork state before payment
       saveArtworkState();
-      // Store the pending export and show payment modal
       setPendingGifExport({ duration, fps });
       setShowPaymentModal(true);
       return;
     }
-
-    // User has access, proceed with export
     executeGifExport(duration, fps);
   };
 
   const executeGifExport = async (duration: number, fps: number) => {
     setExportStatus({ isExporting: true, message: `Recording ${duration}s GIF...` });
-    if (currentArtwork === "flow") {
-      flowArtworkRef.current?.exportGif(duration, fps);
-    } else if (currentArtwork === "grid") {
-      gridArtworkRef.current?.exportGif(duration, fps);
-    } else if (currentArtwork === "tree") {
-      treeArtworkRef.current?.exportGif(duration, fps);
-    }
-    setTimeout(() => {
-      setExportStatus({ isExporting: false, message: "GIF exported!" });
-    }, (duration + 1) * 1000);
+    artworkRef.current?.exportGif?.(duration, fps);
+    setTimeout(() => setExportStatus({ isExporting: false, message: "GIF exported!" }), (duration + 1) * 1000);
   };
 
   const handleExportWallpapers = () => {
-    // Check if user has paid for wallpaper export (same access as GIF)
     if (!hasGifAccess()) {
-      // Save current artwork state before payment
       saveArtworkState();
-      // Show payment modal
       setShowPaymentModal(true);
       return;
     }
-
-    // User has access, proceed with export
     setExportStatus({ isExporting: true, message: "Exporting wallpapers..." });
-    if (currentArtwork === "flow") {
-      flowArtworkRef.current?.exportWallpapers();
-    } else if (currentArtwork === "grid") {
-      gridArtworkRef.current?.exportWallpapers();
-    } else if (currentArtwork === "mosaic") {
-      mosaicArtworkRef.current?.exportWallpapers();
-    } else if (currentArtwork === "rotated") {
-      rotatedGridArtworkRef.current?.exportWallpapers();
-    } else if (currentArtwork === "tree") {
-      treeArtworkRef.current?.exportWallpapers();
-    } else if (currentArtwork === "textdesign") {
-      textDesignArtworkRef.current?.exportWallpapers();
-    }
-    setTimeout(() => {
-      setExportStatus({ isExporting: false, message: "Wallpapers exported!" });
-    }, 1000);
+    artworkRef.current?.exportWallpapers?.();
+    setTimeout(() => setExportStatus({ isExporting: false, message: "Wallpapers exported!" }), 1000);
   };
 
-  const handlePaymentSuccess = () => {
-    // Grant access
-    grantGifAccess();
+  // 3D Tilt Logic
+  const handleTilt = (clientX: number, clientY: number) => {
+    if (!cardRef.current) return;
 
-    // Execute the pending export if exists
-    if (pendingGifExport) {
-      executeGifExport(pendingGifExport.duration, pendingGifExport.fps);
-      setPendingGifExport(null);
-    }
+    const rect = cardRef.current.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+
+    const rotateY = ((clientX - centerX) / (rect.width / 2)) * 8;
+    const rotateX = -((clientY - centerY) / (rect.height / 2)) * 8;
+    const holoXPos = ((clientX - rect.left) / rect.width) * 100;
+    const holoYPos = ((clientY - rect.top) / rect.height) * 100;
+
+    setTiltX(rotateX);
+    setTiltY(rotateY);
+    setHoloX(holoXPos);
+    setHoloY(holoYPos);
   };
 
-  const handleToggleAnimation = () => {
-    if (currentArtwork === "flow") {
-      setFlowParams((prev) => ({
-        ...prev,
-        isAnimating: !prev.isAnimating,
-      }));
-    } else if (currentArtwork === "grid") {
-      setGridParams((prev) => ({
-        ...prev,
-        isAnimating: !prev.isAnimating,
-      }));
-    } else if (currentArtwork === "tree") {
-      setTreeParams((prev) => ({
-        ...prev,
-        isAnimating: !prev.isAnimating,
-      }));
+  const handleCardMouseMove = (e: MouseEvent<HTMLDivElement>) => {
+    if (typeof window !== 'undefined' && window.matchMedia('(hover: none)').matches) return;
+    handleTilt(e.clientX, e.clientY);
+  };
+
+  const handleCardTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
+    if (e.touches.length > 0) {
+      const touch = e.touches[0];
+      handleTilt(touch.clientX, touch.clientY);
     }
   };
 
-  const handleFlowRandomize = () => {
-    // Generate new params with new token
-    const newParams = generateRandomFlowParams();
-    setFlowParams(newParams);
-    // Explicitly encode and update URL to v1 token
-    setTokenInput(encodeParams('flow', newParams));
+  const handleResetTilt = () => {
+    setTiltX(0);
+    setTiltY(0);
+    setHoloX(50);
+    setHoloY(50);
   };
 
-  const handleGridRandomize = () => {
-    const newParams = generateRandomGridParams();
-    setGridParams(newParams);
-    // Explicitly encode and update URL to v1 token
-    setTokenInput(encodeParams('grid', newParams));
-  };
+  if (!isMounted) return null;
 
-  const handleMosaicRandomize = () => {
-    const newParams = generateRandomMosaicParams();
-    setMosaicParams(newParams);
-    // Explicitly encode and update URL to v1 token
-    setTokenInput(encodeParams('mosaic', newParams));
-  };
+  const ArtworkComponent = currentDef.component;
+  const ControlsComponent = currentDef.controls;
 
-  const handleMosaicRegenerate = () => {
-    const newToken = generateToken('mosaic');
-    const newParams = generateMosaicParamsFromToken(newToken);
-    // Preserve colorSeed AND actual color values (layout changes, colors stay same)
-    setMosaicParams(prev => {
-      const preservedColorSeed = prev.colorSeed || prev.token;
-      console.log('🔄 Mosaic Regenerate:', {
-        oldToken: prev.token,
-        oldColorSeed: prev.colorSeed,
-        newToken: newToken,
-        preservingColors: [prev.color1, prev.color2, prev.color3, prev.color4]
-      });
-      const finalParams = {
-        ...newParams,
-        colorSeed: preservedColorSeed,
-        // Preserve actual color values
-        color1: prev.color1,
-        color2: prev.color2,
-        color3: prev.color3,
-        color4: prev.color4,
-      };
-      // Explicitly encode and update URL to v1 token
-      setTokenInput(encodeParams('mosaic', finalParams));
-      return finalParams;
-    });
-  };
-
-  const handleRotatedGridRandomize = () => {
-    const newParams = generateRandomRotatedGridParams();
-    setRotatedGridParams(newParams);
-    // Explicitly encode and update URL to v1 token
-    setTokenInput(encodeParams('rotated', newParams));
-  };
-
-  const handleRotatedGridRegenerate = () => {
-    const newToken = generateToken('rotated');
-    const newParams = generateRotatedGridParamsFromToken(newToken);
-    // Preserve colorSeed AND actual color values (layout changes, colors stay same)
-    setRotatedGridParams(prev => {
-      const finalParams = {
-        ...newParams,
-        colorSeed: prev.colorSeed || prev.token,
-        // Preserve actual color values
-        color1: prev.color1,
-        color2: prev.color2,
-        color3: prev.color3,
-        color4: prev.color4,
-        backgroundColor: prev.backgroundColor,
-      };
-      // Explicitly encode and update URL to v1 token
-      setTokenInput(encodeParams('rotated', finalParams));
-      return finalParams;
-    });
-  };
-
-  const handleTreeRandomize = () => {
-    const newParams = {
-      ...generateRandomTreeParams(),
-      canvasWidth: treeParams.canvasWidth,
-      canvasHeight: treeParams.canvasHeight
-    };
-    setTreeParams(newParams);
-    // Explicitly encode and update URL to v1 token
-    setTokenInput(encodeParams('tree', newParams));
-  };
-
-  const handleTreeRegenerate = () => {
-    const newToken = generateToken('tree');
-    const newParams = generateTreeParamsFromToken(newToken);
-    // Preserve colorSeed, canvas dimensions, AND actual color values
-    setTreeParams(prev => {
-      const finalParams = {
-        ...newParams,
-        canvasWidth: prev.canvasWidth,
-        canvasHeight: prev.canvasHeight,
-        colorSeed: prev.colorSeed || prev.token,
-        // Preserve actual color values
-        stemColor1: prev.stemColor1,
-        stemColor2: prev.stemColor2,
-        stemColor3: prev.stemColor3,
-        tipColor1: prev.tipColor1,
-        tipColor2: prev.tipColor2,
-        tipColor3: prev.tipColor3,
-        backgroundColor: prev.backgroundColor,
-      };
-      // Explicitly encode and update URL to v1 token
-      setTokenInput(encodeParams('tree', finalParams));
-      return finalParams;
-    });
-  };
-
-  const handleTextDesignRandomize = () => {
-    const newToken = generateToken('text');
-    const newParams = generateTextDesignParamsFromToken(newToken);
-    setTextDesignParams(newParams);
-    setTokenInput(newToken);
-  };
-
-  const handleNextArtwork = () => {
-    startTransition(() => {
-      setCurrentArtwork((prev) => {
-        if (prev === "flow") return "grid";
-        if (prev === "grid") return "mosaic";
-        if (prev === "mosaic") return "rotated";
-        if (prev === "rotated") return "tree";
-        if (prev === "tree") return "textdesign";
-        return "flow";
-      });
-    });
-  };
-
-  if (!isMounted) {
-    return null;
-  }
+  // Calculate aspect ratio
+  const aspectRatio = (currentParams.canvasWidth || 630) / (currentParams.canvasHeight || 790);
 
   return (
-    <div className="relative w-full h-full">
+    <div className="min-h-screen bg-[#fafafa] flex flex-col items-center justify-center p-4 relative overflow-hidden">
       <ExportPopup
         isExporting={exportStatus.isExporting}
         message={exportStatus.message}
@@ -779,79 +298,36 @@ function StudioContent() {
       <PaymentModal
         isOpen={showPaymentModal}
         onClose={() => setShowPaymentModal(false)}
-        onSuccess={() => {
-          // Payment successful, refresh to update status
-          window.location.reload();
-        }}
+        onSuccess={() => window.location.reload()}
       />
       <EmailVerificationModal
         isOpen={showEmailVerification}
         onClose={() => setShowEmailVerification(false)}
-        onSuccess={() => {
-          // Access has been granted, refresh the page or update state
-          window.location.reload();
-        }}
+        onSuccess={() => window.location.reload()}
       />
-      <main className="h-screen w-screen overflow-hidden bg-white">
-        {/* Artwork Section - Full Screen */}
-        <div className="h-full w-full flex items-center justify-center md:w-1/2 md:h-full md:items-center md:justify-center relative bg-white">
-          {/* Artwork wrapper - fills container */}
-          <div className="w-full h-full flex items-center justify-center relative">
-            {currentArtwork === "flow" ? (
-              <Artwork ref={flowArtworkRef} params={flowParams} />
-            ) : currentArtwork === "grid" ? (
-              <GridArtwork ref={gridArtworkRef} params={gridParams} />
-            ) : currentArtwork === "mosaic" ? (
-              <MosaicArtwork ref={mosaicArtworkRef} params={mosaicParams} />
-            ) : currentArtwork === "rotated" ? (
-              <RotatedGridArtwork ref={rotatedGridArtworkRef} params={rotatedGridParams} />
-            ) : currentArtwork === "tree" ? (
-              <TreeArtwork ref={treeArtworkRef} params={treeParams} />
-            ) : (
-              <TextDesignArtwork ref={textDesignArtworkRef} params={textDesignParams} />
-            )}
-          </div>
-        </div>
-      </main>
 
-      {/* Only show controls/buttons when NOT in preview mode */}
-      {!isPreview && (
+      {/* Preview Mode - Only show artwork */}
+      {isPreview ? (
+        <div className="w-full h-full flex items-center justify-center">
+          <ArtworkComponent ref={artworkRef} params={currentParams} />
+        </div>
+      ) : (
         <>
           {/* Home Button - Top Left */}
-          {/* Home Button - Minimal */}
           <Link
             href="/"
-            className="group fixed top-6 left-6 flex items-center gap-2 text-zinc-400 hover:text-zinc-900 transition-colors z-50"
-            aria-label="Return to home"
+            className="absolute top-6 left-6 group p-2 rounded-full text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 transition-colors z-30"
+            title="Return Home"
           >
-            <div className="p-2 rounded-full group-hover:bg-zinc-100 transition-colors">
-              <ArrowLeft className="w-4 h-4" />
-            </div>
-            <span className="text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity -ml-2 group-hover:ml-0">Home</span>
+            <ArrowLeft className="w-5 h-5" />
           </Link>
 
-          {/* Next Artwork Button - Minimal */}
-          <button
-            onClick={handleNextArtwork}
-            className="group fixed bottom-6 right-6 flex items-center gap-2 text-zinc-400 hover:text-zinc-900 transition-colors z-50"
-            aria-label="Next artwork"
-          >
-            <span className="text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity -mr-2 group-hover:mr-0">Next</span>
-            <div className="p-2 rounded-full group-hover:bg-zinc-100 transition-colors">
-              <ArrowRight className="w-4 h-4" />
-            </div>
-          </button>
-
-          {/* Action Icons - Regenerate, Randomize, Export */}
-          <div className="fixed top-6 right-32 flex items-center gap-2 z-50">
-            {/* Regenerate Button - only for artworks that have regenerate */}
-            {(currentArtwork === "mosaic" || currentArtwork === "rotated" || currentArtwork === "tree") && (
+          {/* Buttons - Top Right of Page (outside canvas) */}
+          <div className="absolute top-6 right-16 flex gap-2 z-30 mr-12">
+            {/* Regenerate Button */}
+            {currentDef.regenerator && (
               <button
-                onClick={() => {
-                  if (currentArtwork === "mosaic") handleMosaicRegenerate();
-                  if (currentArtwork === "rotated") handleRotatedGridRegenerate();
-                  if (currentArtwork === "tree") handleTreeRegenerate();
-                }}
+                onClick={handleRegenerate}
                 className="group p-2 rounded-full text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 transition-colors"
                 aria-label="Regenerate"
               >
@@ -861,14 +337,7 @@ function StudioContent() {
 
             {/* Randomize Button */}
             <button
-              onClick={() => {
-                if (currentArtwork === "flow") handleFlowRandomize();
-                if (currentArtwork === "grid") handleGridRandomize();
-                if (currentArtwork === "mosaic") handleMosaicRandomize();
-                if (currentArtwork === "rotated") handleRotatedGridRandomize();
-                if (currentArtwork === "tree") handleTreeRandomize();
-                if (currentArtwork === "textdesign") handleTextDesignRandomize();
-              }}
+              onClick={handleRandomize}
               className="group p-2 rounded-full text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 transition-colors"
               aria-label="Randomize"
             >
@@ -923,95 +392,133 @@ function StudioContent() {
               className="fixed top-16 right-6 w-[300px] max-h-[calc(100vh-8rem)] overflow-y-auto bg-white/90 backdrop-blur-md border border-zinc-200 shadow-2xl rounded-2xl z-40 no-scrollbar"
             >
               <div className="overflow-y-auto no-scrollbar" style={{ maxHeight: 'calc(100vh - 73px)' }}>
-                {currentArtwork === "flow" && (
-                  <Controls
-                    params={flowParams}
-                    tokenInput={tokenInput}
-                    onParamChange={handleFlowParamChange}
-                    onColorChange={handleFlowColorChange}
-                    onTokenChange={handleFlowTokenChange}
-                    onExportImage={handleExportImage}
-                    onExportGif={handleExportGif}
-                    onExportWallpapers={handleExportWallpapers}
-                    onToggleAnimation={handleToggleAnimation}
-                    onRandomize={handleFlowRandomize}
-                  />
-                )}
-                {currentArtwork === "grid" && (
-                  <GridControls
-                    params={gridParams}
-                    onParamChange={handleGridParamChange}
-                    onColorChange={handleGridColorChange}
-                    onExportImage={handleExportImage}
-                    onExportGif={handleExportGif}
-                    onExportWallpapers={handleExportWallpapers}
-                    onToggleAnimation={handleToggleAnimation}
-                    tokenInput={tokenInput}
-                    onTokenChange={handleGridTokenChange}
-                    onRandomize={handleGridRandomize}
-                  />
-                )}
-                {currentArtwork === "mosaic" && (
-                  <MosaicControls
-                    params={mosaicParams}
-                    onParamChange={handleMosaicParamChange}
-                    onColorChange={handleMosaicColorChange}
-                    tokenInput={tokenInput}
-                    onTokenChange={handleMosaicTokenChange}
-                    onExportImage={handleExportImage}
-                    onExportWallpapers={handleExportWallpapers}
-                    onRandomize={handleMosaicRandomize}
-                    onRegenerate={handleMosaicRegenerate}
-                  />
-                )}
-                {currentArtwork === "rotated" && (
-                  <RotatedGridControls
-                    params={rotatedGridParams}
-                    onParamChange={handleRotatedGridParamChange}
-                    onColorChange={handleRotatedGridColorChange}
-                    tokenInput={tokenInput}
-                    onTokenChange={handleRotatedGridTokenChange}
-                    onExportImage={handleExportImage}
-                    onExportWallpapers={handleExportWallpapers}
-                    onRandomize={handleRotatedGridRandomize}
-                    onRegenerate={handleRotatedGridRegenerate}
-                  />
-                )}
-                {currentArtwork === "tree" && (
-                  <TreeControls
-                    params={treeParams}
-                    onParamChange={handleTreeParamChange}
-                    onColorChange={handleTreeColorChange}
-                    tokenInput={tokenInput}
-                    onTokenChange={handleTreeTokenChange}
-                    onExportImage={handleExportImage}
-                    onExportGif={handleExportGif}
-                    onExportWallpapers={handleExportWallpapers}
-                    onToggleAnimation={handleToggleAnimation}
-                    onRandomize={handleTreeRandomize}
-                    onRegenerate={handleTreeRegenerate}
-                  />
-                )}
-                {currentArtwork === "textdesign" && (
-                  <TextDesignControls
-                    params={textDesignParams}
-                    onParamChange={handleTextDesignParamChange}
-                    tokenInput={tokenInput}
-                    onTokenChange={handleTextDesignTokenChange}
-                    onExportImage={handleExportImage}
-                    onExportWallpapers={handleExportWallpapers}
-                    onRandomize={handleTextDesignRandomize}
-                  />
-                )}
+                <ControlsComponent
+                  params={currentParams}
+                  onParamChange={handleParamChange}
+                  onColorChange={handleColorChange}
+                  onExportImage={handleExportImage}
+                  onExportGif={handleExportGif}
+                  onExportWallpapers={handleExportWallpapers}
+                  onToggleAnimation={handleToggleAnimation}
+                  onRandomize={handleRandomize}
+                  onRegenerate={currentDef.regenerator ? handleRegenerate : undefined}
+                  tokenInput={tokenInput}
+                  onTokenChange={handleTokenChange}
+                />
               </div>
             </div>
           )}
-          {/* End of preview mode conditional */}
+
+          {/* Artwork Display */}
+          <div className="flex-1 w-full flex items-center justify-center" style={{ perspective: '1500px' }}>
+            <div className="relative flex items-center justify-center">
+              {/* 3D Card with Premium Physics, Tight Frame, and Holographic Effect */}
+              <div
+                ref={cardRef}
+                onMouseMove={handleCardMouseMove}
+                onMouseLeave={handleResetTilt}
+                onTouchMove={handleCardTouchMove}
+                onTouchEnd={handleResetTilt}
+                className="relative rounded-lg overflow-hidden transition-transform duration-100 ease-out"
+                style={{
+                  transform: `rotateX(${tiltX}deg) rotateY(${tiltY}deg) translateZ(30px)`,
+                  boxShadow: `
+                                    0 2px 4px rgba(0, 0, 0, 0.08),
+                                    0 4px 8px rgba(0, 0, 0, 0.08),
+                                    0 8px 16px rgba(0, 0, 0, 0.08),
+                                    0 16px 32px rgba(0, 0, 0, 0.1),
+                                    0 32px 64px rgba(0, 0, 0, 0.12),
+                                    ${-tiltY * 2}px ${tiltX * 2}px 40px rgba(0, 0, 0, 0.15),
+                                    inset 0 0 0 1px rgba(255, 255, 255, 0.1)
+                                `,
+                  // Dynamic sizing logic
+                  width: `min(85vw, 70vh * ${aspectRatio})`,
+                  height: `min(70vh, 85vw / ${aspectRatio})`,
+                  padding: '4px',
+                  background: 'linear-gradient(145deg, #ffffff 0%, #f8f8f8 100%)',
+                }}
+              >
+                {/* Inner card with tight border */}
+                <div
+                  className="relative overflow-hidden rounded-md w-full h-full"
+                  style={{
+                    boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.06), 0 0 0 1px rgba(0,0,0,0.04)',
+                  }}
+                >
+                  {/* Force canvas to scale to container */}
+                  <div className="w-full h-full [&>canvas]:!w-full [&>canvas]:!h-full [&>canvas]:!object-contain">
+                    <ArtworkComponent ref={artworkRef} params={currentParams} />
+                  </div>
+
+                  {/* Holographic Light Reflection Overlay */}
+                  <div
+                    className="absolute inset-0 pointer-events-none transition-opacity duration-300"
+                    style={{
+                      background: `
+                                            radial-gradient(
+                                                ellipse 80% 50% at ${holoX}% ${holoY}%,
+                                                rgba(255, 0, 128, 0.15) 0%,
+                                                rgba(255, 128, 0, 0.12) 15%,
+                                                rgba(255, 255, 0, 0.1) 30%,
+                                                rgba(0, 255, 128, 0.08) 45%,
+                                                rgba(0, 128, 255, 0.1) 60%,
+                                                rgba(128, 0, 255, 0.12) 75%,
+                                                rgba(255, 0, 128, 0.08) 90%,
+                                                transparent 100%
+                                            )
+                                        `,
+                      mixBlendMode: 'overlay',
+                      opacity: Math.abs(tiltX) + Math.abs(tiltY) > 1 ? 1 : 0.3,
+                    }}
+                  />
+
+                  {/* Shimmer/Glare Effect */}
+                  <div
+                    className="absolute inset-0 pointer-events-none transition-all duration-200"
+                    style={{
+                      background: `
+                                            linear-gradient(
+                                                ${135 + (holoX - 50) * 0.5}deg,
+                                                transparent 0%,
+                                                transparent ${40 + (holoY - 50) * 0.3}%,
+                                                rgba(255, 255, 255, 0.4) ${50 + (holoY - 50) * 0.3}%,
+                                                transparent ${60 + (holoY - 50) * 0.3}%,
+                                                transparent 100%
+                                            )
+                                        `,
+                      opacity: Math.abs(tiltX) + Math.abs(tiltY) > 2 ? 0.6 : 0.2,
+                    }}
+                  />
+
+                  {/* Iridescent Edge Highlight */}
+                  <div
+                    className="absolute inset-0 pointer-events-none"
+                    style={{
+                      background: `
+                                            conic-gradient(
+                                                from ${(holoX + holoY) * 1.8}deg at ${holoX}% ${holoY}%,
+                                                rgba(255, 0, 100, 0.05),
+                                                rgba(255, 200, 0, 0.05),
+                                                rgba(0, 255, 150, 0.05),
+                                                rgba(0, 150, 255, 0.05),
+                                                rgba(200, 0, 255, 0.05),
+                                                rgba(255, 0, 100, 0.05)
+                                            )
+                                        `,
+                      mixBlendMode: 'color-dodge',
+                      opacity: Math.abs(tiltX) + Math.abs(tiltY) > 1 ? 0.8 : 0.3,
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
         </>
       )}
     </div>
   );
 }
+
 
 export default function StudioPage() {
   return (

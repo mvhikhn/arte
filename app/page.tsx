@@ -1,130 +1,72 @@
 "use client";
 
+import { useState, useRef, useEffect } from "react";
+import { ARTWORKS } from "@/config/artworks";
+import ArtworkCard from "@/components/ArtworkCard";
+import Footer from "@/components/Footer";
 import CleanLink from "@/components/CleanLink";
 import { ChevronDown, ChevronUp } from "lucide-react";
-import { useState, useEffect, useRef } from "react";
-import Footer from "@/components/Footer";
-import ArtworkCard from "@/components/ArtworkCard";
-import gsap from "gsap";
 
 export default function Home() {
-    const artworks = [
-        { id: "flow", title: "Flow Field", description: "Generative flow particles" },
-        { id: "grid", title: "Grid System", description: "Structured chaos" },
-        { id: "mosaic", title: "Mosaic", description: "Tiled patterns" },
-        { id: "rotated", title: "Rotated Grid", description: "Angular compositions" },
-        { id: "tree", title: "Recursive Tree", description: "Organic growth algorithms" },
-        { id: "textdesign", title: "Text Design", description: "Typography experiments" },
+    const [leftPanelWidth, setLeftPanelWidth] = useState(40);
+    const [isDragging, setIsDragging] = useState(false);
+    const [isGalleryOpen, setIsGalleryOpen] = useState(false);
+    const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+    const nameRef = useRef<HTMLHeadingElement>(null);
+
+    // Get artworks from registry
+    const artworks = Object.values(ARTWORKS);
+
+    // Specific colors for artworks (matching original design)
+    const artworkColors = [
+        '#f5f5f5', // Flow
+        '#f0f7ff', // Grid
+        '#fff0f5', // Mosaic
+        '#f0fff4', // Rotated
+        '#fff8f0', // Tree
+        '#f8f0ff', // Text
+        '#f0f8ff', // Lamb (added)
     ];
 
-    // Generate random pastel colors for each artwork
-    const [artworkColors, setArtworkColors] = useState<string[]>([]);
-    const [isGalleryOpen, setIsGalleryOpen] = useState(false);
-
-    // Ref for name text scramble
-    const nameRef = useRef<HTMLHeadingElement | null>(null);
-
-    useEffect(() => {
-        const pastelColors = artworks.map(() => {
-            const hue = Math.floor(Math.random() * 360);
-            const saturation = Math.floor(Math.random() * 30) + 60; // 60-90%
-            const lightness = Math.floor(Math.random() * 15) + 85; // 85-100%
-            return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
-        });
-        setArtworkColors(pastelColors);
-    }, []);
-
-    // GSAP text scramble effect for name only
-    useEffect(() => {
-        if (!nameRef.current) return;
-
-        const scrambleText = (element: HTMLElement) => {
-            const originalText = element.textContent || "";
-            const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
-
-            let iteration = 0;
-            const interval = setInterval(() => {
-                element.textContent = originalText
-                    .split("")
-                    .map((char, index) => {
-                        if (char === " ") return char;
-                        if (index < iteration) return originalText[index];
-                        return chars[Math.floor(Math.random() * chars.length)];
-                    })
-                    .join("");
-
-                if (iteration >= originalText.length) {
-                    clearInterval(interval);
-                    element.textContent = originalText;
-                }
-                iteration += 1 / 3;
-            }, 30);
-        };
-
-        scrambleText(nameRef.current);
-    }, []);
-
-    // Resizable partition state
-    const [leftPanelWidth, setLeftPanelWidth] = useState(50);
-    const [isDragging, setIsDragging] = useState(false);
-    const containerRef = useRef<HTMLDivElement>(null);
-    const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-
-    // Load saved width on mount
-    useEffect(() => {
-        const savedWidth = localStorage.getItem('arte_divider_width');
-        if (savedWidth) {
-            setLeftPanelWidth(parseFloat(savedWidth));
-        }
-    }, []);
-
-    // Handle resizing
     useEffect(() => {
         const handleMouseMove = (e: MouseEvent) => {
+            setMousePosition({ x: e.clientX, y: e.clientY });
+
             if (isDragging) {
-                setMousePosition({ x: e.clientX, y: e.clientY });
-            }
-
-            if (!isDragging || !containerRef.current) return;
-
-            const containerRect = containerRef.current.getBoundingClientRect();
-            const newWidth = ((e.clientX - containerRect.left) / containerRect.width) * 100;
-
-            // Limit width between 20% and 80%
-            if (newWidth >= 20 && newWidth <= 80) {
-                setLeftPanelWidth(newWidth);
+                const newWidth = (e.clientX / window.innerWidth) * 100;
+                if (newWidth > 20 && newWidth < 80) {
+                    setLeftPanelWidth(newWidth);
+                }
             }
         };
 
         const handleMouseUp = () => {
-            if (isDragging) {
-                setIsDragging(false);
-                document.body.style.cursor = 'default';
-                document.body.classList.remove('cursor-none-override');
-                // Save width to localStorage
-                localStorage.setItem('arte_divider_width', leftPanelWidth.toString());
-            }
+            setIsDragging(false);
         };
 
         if (isDragging) {
             window.addEventListener('mousemove', handleMouseMove);
             window.addEventListener('mouseup', handleMouseUp);
-            document.body.style.cursor = 'none'; // Hide default cursor during drag
-            document.body.classList.add('cursor-none-override');
+            document.body.style.cursor = 'col-resize';
+            document.body.style.userSelect = 'none';
+        } else {
+            window.removeEventListener('mousemove', handleMouseMove);
+            window.removeEventListener('mouseup', handleMouseUp);
+            document.body.style.cursor = '';
+            document.body.style.userSelect = '';
         }
 
         return () => {
             window.removeEventListener('mousemove', handleMouseMove);
             window.removeEventListener('mouseup', handleMouseUp);
-            document.body.style.cursor = 'default';
-            document.body.classList.remove('cursor-none-override');
+            document.body.style.cursor = '';
+            document.body.style.userSelect = '';
         };
-    }, [isDragging, leftPanelWidth]);
+    }, [isDragging]);
 
     return (
         <main
-            ref={containerRef}
-            className="h-dvh w-full flex flex-col md:flex-row bg-white text-zinc-900 font-sans selection:bg-zinc-100 overflow-hidden select-none"
+            className="flex flex-col md:flex-row h-screen w-full bg-white overflow-hidden"
             style={{
                 '--left-panel-width': `${leftPanelWidth}%`
             } as React.CSSProperties}
@@ -257,4 +199,3 @@ export default function Home() {
         </main>
     );
 }
-
