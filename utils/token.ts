@@ -31,7 +31,7 @@ export function generateToken(artworkType?: ArtworkType): string {
 
 export function validateToken(token: string, artworkType?: string): boolean {
     // Check if token has artwork type prefix
-    const hasArtworkType = token.match(/^fx-(flow|grid|mosaic|rotated|tree|text|lamb)-/);
+    const hasArtworkType = token.match(/^fx-(flow|grid|mosaic|rotated|tree|text|textdesign|lamb)-/);
 
     if (hasArtworkType) {
         // Token format: fx-[type]-[44 random chars][2 checksum]
@@ -43,7 +43,7 @@ export function validateToken(token: string, artworkType?: string): boolean {
         if (token.includes('-v2.') || token.includes('-v2e.') || token.includes('-v4.')) {
             // Simple regex check for format - v4 uses 8-char hash, v2/v2e uses 16-char hash
             // For v4, the data part can contain special Base91 characters
-            return /^fx-(flow|grid|mosaic|rotated|tree|text|lamb)-v(2e?|4)\.([a-f0-9]+)\.(.+)$/.test(token);
+            return /^fx-(flow|grid|mosaic|rotated|tree|text|textdesign|lamb)-v(2e?|4)\.([a-f0-9]+)\.(.+)$/.test(token);
         }
 
         const parts = token.split('-');
@@ -114,12 +114,12 @@ export function validateToken(token: string, artworkType?: string): boolean {
 
 export function getTokenArtworkType(token: string): ArtworkType | null {
     // Check for v2/v2e/v4 format first
-    const vMatch = token.match(/^fx-(flow|grid|mosaic|rotated|tree|text|lamb)-v(2e?|4)\./);
+    const vMatch = token.match(/^fx-(flow|grid|mosaic|rotated|tree|text|textdesign|lamb)-v(2e?|4)\./);
     if (vMatch) {
         return vMatch[1] as ArtworkType;
     }
     // Standard format
-    const match = token.match(/^fx-(flow|grid|mosaic|rotated|tree|text|lamb)-/);
+    const match = token.match(/^fx-(flow|grid|mosaic|rotated|tree|text|textdesign|lamb)-/);
     return match ? (match[1] as ArtworkType) : null;
 }
 
