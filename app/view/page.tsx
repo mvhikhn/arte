@@ -2,9 +2,10 @@
 
 import { useState, useEffect, useRef, MouseEvent } from "react";
 import Link from "next/link";
-import { ExternalLink, Download } from "lucide-react";
+import { ExternalLink, Download, MapPin, Calendar, User, MessageCircle } from "lucide-react";
 import { validateToken, getTokenArtworkType } from "@/utils/token";
 import { ARTWORKS } from "@/config/artworks";
+import { ProvenanceData } from "@/utils/serialization";
 
 export default function ViewPage() {
     const [tokenInput, setTokenInput] = useState("");
@@ -13,6 +14,8 @@ export default function ViewPage() {
     const [error, setError] = useState<string | null>(null);
     const [isHoveringInput, setIsHoveringInput] = useState(false);
     const [isEncrypted, setIsEncrypted] = useState(false);
+    const [isV4, setIsV4] = useState(false);
+    const [provenance, setProvenance] = useState<ProvenanceData | null>(null);
 
     // 3D card tilt state
     const [tiltX, setTiltX] = useState(0);
@@ -37,6 +40,8 @@ export default function ViewPage() {
         if (!trimmedToken) {
             setCurrentArtwork(null);
             setParams(null);
+            setProvenance(null);
+            setIsV4(false);
             return;
         }
 
@@ -48,6 +53,8 @@ export default function ViewPage() {
             }
             setCurrentArtwork(null);
             setParams(null);
+            setProvenance(null);
+            setIsV4(false);
             return;
         }
 
@@ -58,28 +65,36 @@ export default function ViewPage() {
             setCurrentArtwork(artworkType);
             setError(null);
             setIsEncrypted(trimmedToken.includes('-v2e.'));
+            setIsV4(trimmedToken.includes('-v4.'));
 
-            // Async decoding to support v2e (encrypted) tokens
+            // Async decoding to support all token versions
             const decode = async () => {
                 try {
-                    // Import dynamically to avoid circular deps if any
-                    const { decodeParams } = await import("@/utils/serialization");
+                    const { decodeParamsUniversal, isV4Token } = await import("@/utils/serialization");
 
-                    // For v1/v2 local tokens, we can try sync generators first for speed
-                    // But for v2e, we must use decodeParams
-                    if (trimmedToken.includes("-v2e.")) {
+                    if (isV4Token(trimmedToken)) {
+                        // v4 tokens - use universal decoder which returns provenance
+                        const result = await decodeParamsUniversal(trimmedToken);
+                        setParams(result.params);
+                        setProvenance(result.provenance || null);
+                    } else if (trimmedToken.includes("-v2e.")) {
+                        // v2e tokens
+                        const { decodeParams } = await import("@/utils/serialization");
                         const result = await decodeParams(trimmedToken);
                         setParams(result.params);
+                        setProvenance(null);
                     } else {
-                        // Use generator from registry
+                        // v1/v2 tokens - use generator from registry
                         const generator = ARTWORKS[artworkType].generator;
                         setParams(generator(trimmedToken));
+                        setProvenance(null);
                     }
                 } catch (error: any) {
                     console.error("Decoding error:", error);
                     setError(`Error: ${error.message || "Invalid key or decryption failed"}`);
                     setCurrentArtwork(null);
                     setParams(null);
+                    setProvenance(null);
                 }
             };
 
@@ -88,6 +103,7 @@ export default function ViewPage() {
             setError("Invalid key");
             setCurrentArtwork(null);
             setParams(null);
+            setProvenance(null);
         }
     }, [tokenInput]);
 
@@ -322,6 +338,63 @@ export default function ViewPage() {
                                 />
                             </div>
                         </div>
+
+                        {/* Provenance Certificate - Only for v4 tokens */}
+                        {isV4 && provenance && (
+                            <div className="mt-6 w-full max-w-md mx-auto">
+                                <div className="bg-white/95 backdrop-blur-sm border border-zinc-200 rounded-xl p-5 shadow-lg">
+                                    <div className="text-center mb-4">
+                                        <p className="text-xs font-medium text-violet-600 uppercase tracking-wider">Certificate of Authenticity</p>
+                                        <p className="text-sm text-zinc-500 mt-1">
+                                            {currentArtwork && currentArtwork.charAt(0).toUpperCase() + currentArtwork.slice(1)} by {provenance.artist}
+                                        </p>
+                                    </div>
+
+                                    <div className="space-y-3">
+                                        <div className="flex items-start gap-3">
+                                            <User className="w-4 h-4 text-zinc-400 mt-0.5" />
+                                            <div>
+                                                <p className="text-xs text-zinc-400">Created for</p>
+                                                <p className="text-sm font-medium text-zinc-900">{provenance.creator}</p>
+                                            </div>
+                                        </div>
+
+                                        <div className="flex items-start gap-3">
+                                            <Calendar className="w-4 h-4 text-zinc-400 mt-0.5" />
+                                            <div>
+                                                <p className="text-xs text-zinc-400">Date</p>
+                                                <p className="text-sm font-medium text-zinc-900">
+                                                    {new Date(provenance.timestamp).toLocaleDateString('en-US', {
+                                                        year: 'numeric',
+                                                        month: 'long',
+                                                        day: 'numeric',
+                                                        hour: '2-digit',
+                                                        minute: '2-digit'
+                                                    })}
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        {provenance.location && (
+                                            <div className="flex items-start gap-3">
+                                                <MapPin className="w-4 h-4 text-zinc-400 mt-0.5" />
+                                                <div>
+                                                    <p className="text-xs text-zinc-400">Location</p>
+                                                    <p className="text-sm font-medium text-zinc-900">{provenance.location}</p>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        <div className="flex items-start gap-3 pt-2 border-t border-zinc-100">
+                                            <MessageCircle className="w-4 h-4 text-violet-500 mt-0.5" />
+                                            <div>
+                                                <p className="text-sm italic text-zinc-600">&ldquo;{provenance.feeling}&rdquo;</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 ) : (
                     <div className="flex flex-col items-center justify-center text-black/20 gap-4">

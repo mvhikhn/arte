@@ -4,17 +4,23 @@
  * Generic serialization system for artwork parameters.
  * Uses LZ-String compression and optional Cloudflare Workers for AES-256 encryption.
  * 
- * Token Format: fx-{type}-v2.{sha256hash16}.{compressedData}
+ * Token Formats:
+ * - v2:  fx-{type}-v2.{sha256hash16}.{compressedData}   (local, unencrypted)
+ * - v2e: fx-{type}-v2e.{sha256hash16}.{encryptedData}   (server-encrypted)
+ * - v4:  fx-{type}-v4.{sha256hash8}.{compressedData}    (aggressive compression + provenance)
  * 
  * Hybrid approach:
  * - encodeParams: Synchronous, local compression + hash (for instant UI feedback)
  * - encodeParamsSecure: Async, server-side AES encryption (for sharing)
- * - decodeParams: Automatic detection of secure vs local tokens
+ * - encodeParamsV4: Async, aggressive compression + provenance (for selling)
+ * - decodeParams: Automatic detection of all token versions
  */
 
 import LZString from 'lz-string';
 import { ArtworkType } from '@/utils/token';
 import { sha256Sync } from '@/utils/sha256';
+import { compressV4, decompressV4 } from '@/utils/compression';
+import { ProvenanceData } from '@/utils/schemaRegistry';
 
 // Cloudflare Worker endpoints
 const ENCRYPT_ENDPOINT = process.env.NEXT_PUBLIC_ENCRYPT_ENDPOINT || 'https://arte-encrypt.mvhikhn.workers.dev';
@@ -263,16 +269,17 @@ export const decodeParamsSync = (token: string): { type: ArtworkType; params: an
 
 /**
  * Validate a token format without decoding.
+ * Supports v2, v2e, and v4 tokens.
  */
 export const validateTokenFormat = (token: string): boolean => {
-    return /^fx-(\w+)-v2e?\.([a-f0-9]+)\.(.+)$/.test(token);
+    return /^fx-(\w+)-v(2e?|4)\.([a-f0-9]+)\.(.+)$/.test(token);
 };
 
 /**
  * Extract artwork type from token without decoding.
  */
 export const getTokenType = (token: string): ArtworkType | null => {
-    const match = token.match(/^fx-(\w+)-v2/);
+    const match = token.match(/^fx-(\w+)-v(2|4)/);
     return match ? (match[1] as ArtworkType) : null;
 };
 
@@ -282,3 +289,95 @@ export const getTokenType = (token: string): ArtworkType | null => {
 export const isEncryptedToken = (token: string): boolean => {
     return token.includes('-v2e.');
 };
+
+/**
+ * Check if a token is v4 format.
+ */
+export const isV4Token = (token: string): boolean => {
+    return token.includes('-v4.');
+};
+
+/**
+ * Encode params with v4 aggressive compression.
+ * Optionally includes provenance data for collectibles.
+ * 
+ * Token format: fx-{type}-v4.{hash8}.{compressedData}
+ */
+export const encodeParamsV4 = async (
+    type: string,
+    params: any,
+    provenance?: {
+        creator: string;
+        location?: string;
+        feeling: string;
+    }
+): Promise<string> => {
+    // Round floats for consistency
+    const rounded = roundFloats(params);
+
+    // Create full provenance if provided
+    const fullProvenance: ProvenanceData | undefined = provenance ? {
+        ...provenance,
+        timestamp: Date.now(),
+        artist: 'Mahi Khan',
+        artworkType: type,
+    } : undefined;
+
+    // Compress with v4 pipeline
+    const compressed = compressV4(type, rounded, fullProvenance);
+
+    // Create short hash (8 chars for v4)
+    const hash = sha256Sync(compressed).substring(0, 8);
+
+    return `fx-${type}-v4.${hash}.${compressed}`;
+};
+
+/**
+ * Decode a v4 token.
+ * Returns params and optional provenance data.
+ */
+export const decodeParamsV4 = async (
+    token: string
+): Promise<{ type: ArtworkType; params: any; provenance?: ProvenanceData }> => {
+    const match = token.match(/^fx-(\w+)-v4\.([a-f0-9]+)\.(.+)$/);
+
+    if (!match) {
+        throw new Error('Invalid v4 token format');
+    }
+
+    const [, type, hash, data] = match;
+
+    // Verify hash
+    const calculatedHash = sha256Sync(data).substring(0, 8);
+    if (calculatedHash !== hash) {
+        throw new Error('Token validation failed - hash mismatch');
+    }
+
+    // Decompress
+    const { params, provenance } = decompressV4(type, data);
+
+    // Restore token reference in params
+    params.token = token;
+
+    return { type: type as ArtworkType, params, provenance };
+};
+
+/**
+ * Universal decode function - handles all token versions.
+ * Updated to support v4 tokens.
+ */
+export const decodeParamsUniversal = async (
+    token: string
+): Promise<{ type: ArtworkType; params: any; provenance?: ProvenanceData }> => {
+    // Check for v4 first (new format)
+    if (isV4Token(token)) {
+        return decodeParamsV4(token);
+    }
+
+    // Fall back to existing v2/v2e decode
+    const result = await decodeParams(token);
+    return { ...result, provenance: undefined };
+};
+
+// Re-export ProvenanceData for external use
+export type { ProvenanceData };

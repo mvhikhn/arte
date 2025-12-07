@@ -7,10 +7,11 @@ import { ARTWORKS } from "@/config/artworks";
 import { ExportPopup } from "@/components/ExportPopup";
 import { PaymentModal } from "@/components/PaymentModal";
 import { EmailVerificationModal } from "@/components/EmailVerificationModal";
-import { ArrowLeft, SlidersHorizontal, RefreshCw, Shuffle, Download, Link2, Check } from "lucide-react";
+import { ArrowLeft, SlidersHorizontal, RefreshCw, Shuffle, Download, Link2, Check, Sparkles } from "lucide-react";
 import { hasGifAccess, grantGifAccess } from "@/lib/paymentUtils";
 import { validateToken } from "@/utils/token";
-import { encodeParams, encodeParamsSecure } from "@/utils/serialization";
+import { encodeParams, encodeParamsSecure, encodeParamsV4 } from "@/utils/serialization";
+import { PurchaseModal } from "@/components/PurchaseModal";
 
 // Force dynamic rendering
 export const dynamic = 'force-dynamic';
@@ -59,6 +60,7 @@ function StudioContent() {
 
   const [tokenInput, setTokenInput] = useState<string>("");
   const [secureLinkStatus, setSecureLinkStatus] = useState({ loading: false, copied: false });
+  const [showPurchaseModal, setShowPurchaseModal] = useState(false);
 
   const handleGetSecureLink = async () => {
     setSecureLinkStatus({ loading: true, copied: false });
@@ -74,6 +76,15 @@ function StudioContent() {
       setSecureLinkStatus({ loading: false, copied: false });
       alert("Failed to generate secure link. Please try again.");
     }
+  };
+
+  const handlePurchase = async (provenance: {
+    creator: string;
+    location?: string;
+    feeling: string;
+  }): Promise<string> => {
+    const token = await encodeParamsV4(currentArtwork, currentParams, provenance);
+    return token;
   };
 
   // Initialize from URL token if provided
@@ -305,6 +316,12 @@ function StudioContent() {
         onClose={() => setShowEmailVerification(false)}
         onSuccess={() => window.location.reload()}
       />
+      <PurchaseModal
+        isOpen={showPurchaseModal}
+        onClose={() => setShowPurchaseModal(false)}
+        onPurchase={handlePurchase}
+        artworkType={currentArtwork}
+      />
 
       {/* Preview Mode - Only show artwork */}
       {isPreview ? (
@@ -371,6 +388,16 @@ function StudioContent() {
               aria-label="Export"
             >
               <Download className="w-4 h-4" />
+            </button>
+
+            {/* Buy Edition Button */}
+            <button
+              onClick={() => setShowPurchaseModal(true)}
+              className="group flex items-center gap-1.5 px-3 py-2 rounded-full bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white hover:from-violet-700 hover:to-fuchsia-700 transition-all text-sm font-medium shadow-lg shadow-violet-500/25"
+              aria-label="Buy this edition"
+            >
+              <Sparkles className="w-4 h-4" />
+              <span>Buy</span>
             </button>
           </div>
 
