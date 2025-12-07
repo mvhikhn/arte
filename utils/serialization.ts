@@ -298,10 +298,11 @@ export const isV4Token = (token: string): boolean => {
 };
 
 /**
- * Encode params with v4 aggressive compression.
+ * Encode params with v4 aggressive compression + Cloudflare encryption.
+ * Compresses first for shorter encrypted payload, then encrypts via Cloudflare.
  * Optionally includes provenance data for collectibles.
  * 
- * Token format: fx-{type}-v4.{hash8}.{compressedData}
+ * Token format: fx-{type}-v4.{hash8}.{encryptedData}
  */
 export const encodeParamsV4 = async (
     type: string,
@@ -323,17 +324,45 @@ export const encodeParamsV4 = async (
         artworkType: type,
     } : undefined;
 
-    // Compress with v4 pipeline
+    // Compress with v4 pipeline (msgpack + pako + base91)
     const compressed = compressV4(type, rounded, fullProvenance);
 
-    // Create short hash (8 chars for v4)
+    // Create short hash (8 chars for integrity check)
     const hash = sha256Sync(compressed).substring(0, 8);
 
-    return `fx-${type}-v4.${hash}.${compressed}`;
+    // Encrypt via Cloudflare
+    if (!ENCRYPT_ENDPOINT) {
+        // Fallback to unencrypted if no endpoint
+        return `fx-${type}-v4.${hash}.${compressed}`;
+    }
+
+    try {
+        const response = await fetch(ENCRYPT_ENDPOINT, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ type, data: compressed, hash, version: 'v4' }),
+        });
+
+        if (!response.ok) {
+            throw new Error(`Encryption service error: ${response.status}`);
+        }
+
+        const { token, error } = await response.json();
+
+        if (error) {
+            throw new Error(error);
+        }
+
+        // Token comes back as fx-{type}-v2.{hash}.{data}, convert to v4
+        return token.replace('-v2.', '-v4.');
+    } catch (error) {
+        console.error('V4 encryption failed:', error);
+        throw new Error('Encryption failed. Please check your connection and try again.');
+    }
 };
 
 /**
- * Decode a v4 token.
+ * Decode a v4 token with Cloudflare decryption.
  * Returns params and optional provenance data.
  */
 export const decodeParamsV4 = async (
@@ -347,19 +376,51 @@ export const decodeParamsV4 = async (
 
     const [, type, hash, data] = match;
 
-    // Verify hash
-    const calculatedHash = sha256Sync(data).substring(0, 8);
-    if (calculatedHash !== hash) {
-        throw new Error('Token validation failed - hash mismatch');
+    // Decrypt via Cloudflare
+    if (!DECRYPT_ENDPOINT) {
+        throw new Error('Decryption service not configured');
     }
 
-    // Decompress
-    const { params, provenance } = decompressV4(type, data);
+    try {
+        // Convert v4 token format to v2 for the decrypt endpoint
+        const v2Token = token.replace('-v4.', '-v2.');
 
-    // Restore token reference in params
-    params.token = token;
+        const response = await fetch(DECRYPT_ENDPOINT, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ token: v2Token }),
+        });
 
-    return { type: type as ArtworkType, params, provenance };
+        if (!response.ok) {
+            throw new Error(`Decryption service error: ${response.status}`);
+        }
+
+        const result = await response.json();
+
+        if (result.error) {
+            throw new Error(result.error);
+        }
+
+        // Result.data is the compressed v4 data
+        const compressedData = result.data;
+
+        // Verify hash
+        const calculatedHash = sha256Sync(compressedData).substring(0, 8);
+        if (calculatedHash !== hash) {
+            throw new Error('Token validation failed - hash mismatch');
+        }
+
+        // Decompress v4 data
+        const { params, provenance } = decompressV4(type, compressedData);
+
+        // Restore token reference in params
+        params.token = token;
+
+        return { type: type as ArtworkType, params, provenance };
+    } catch (error) {
+        console.error('V4 decryption failed:', error);
+        throw new Error('Decryption failed. Token may be invalid or corrupted.');
+    }
 };
 
 /**
