@@ -183,6 +183,41 @@ export const compressV4 = (
 };
 
 /**
+ * V4 compression for encrypted tokens.
+ * Uses base64url instead of base91 since encryption will add its own encoding.
+ * This avoids double-encoding and keeps tokens shorter.
+ */
+export const compressV4ForEncrypt = (
+    type: string,
+    params: Record<string, any>,
+    provenance?: ProvenanceData
+): string => {
+    // 1. Strip defaults
+    const stripped = stripDefaults(type, params);
+
+    // 2. Remove token and colorSeed (they're redundant in encoded form)
+    const { token, colorSeed, ...paramsWithoutToken } = stripped;
+
+    // 3. Create payload with optional provenance
+    const payload = provenance
+        ? { p: paramsWithoutToken, m: provenance }
+        : { p: paramsWithoutToken };
+
+    // 4. MessagePack encode
+    const binary = pack(payload);
+
+    // 5. Gzip compress
+    const compressed = compressBinary(binary);
+    // 6. Base64url encode (for encryption transport)
+    const base64 = btoa(Array.from(compressed).map(b => String.fromCharCode(b)).join(''))
+        .replace(/\+/g, '-')
+        .replace(/\//g, '_')
+        .replace(/=+$/, '');
+
+    return base64;
+};
+
+/**
  * Full v4 decompression pipeline.
  * Returns params and optional provenance.
  */
@@ -192,6 +227,37 @@ export const decompressV4 = (
 ): { params: Record<string, any>; provenance?: ProvenanceData } => {
     // 1. Base91 decode
     const compressed = decodeBase91(encoded);
+
+    // 2. Gzip decompress
+    const binary = decompressBinary(compressed);
+
+    // 3. MessagePack decode
+    const payload = unpack(binary) as { p: Record<string, any>; m?: ProvenanceData };
+
+    // 4. Restore defaults
+    const params = restoreDefaults(type, payload.p);
+
+    return {
+        params,
+        provenance: payload.m
+    };
+};
+
+/**
+ * V4 decompression for decrypted tokens.
+ * Input is base64url encoded (from Cloudflare decrypt).
+ */
+export const decompressV4FromEncrypt = (
+    type: string,
+    encoded: string
+): { params: Record<string, any>; provenance?: ProvenanceData } => {
+    // 1. Base64url decode
+    const base64 = encoded
+        .replace(/-/g, '+')
+        .replace(/_/g, '/');
+    const padding = (4 - (base64.length % 4)) % 4;
+    const paddedBase64 = base64 + '='.repeat(padding);
+    const compressed = Uint8Array.from(atob(paddedBase64), c => c.charCodeAt(0));
 
     // 2. Gzip decompress
     const binary = decompressBinary(compressed);

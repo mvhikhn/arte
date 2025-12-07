@@ -19,7 +19,7 @@
 import LZString from 'lz-string';
 import { ArtworkType } from '@/utils/token';
 import { sha256Sync } from '@/utils/sha256';
-import { compressV4, decompressV4 } from '@/utils/compression';
+import { compressV4, decompressV4, compressV4ForEncrypt, decompressV4FromEncrypt } from '@/utils/compression';
 import { ProvenanceData } from '@/utils/schemaRegistry';
 
 // Cloudflare Worker endpoints
@@ -324,8 +324,8 @@ export const encodeParamsV4 = async (
         artworkType: type,
     } : undefined;
 
-    // Compress with v4 pipeline (msgpack + pako + base91)
-    const compressed = compressV4(type, rounded, fullProvenance);
+    // Compress with v4 pipeline (msgpack + pako + base64) for encryption
+    const compressed = compressV4ForEncrypt(type, rounded, fullProvenance);
 
     // Create short hash (8 chars for integrity check)
     const hash = sha256Sync(compressed).substring(0, 8);
@@ -412,8 +412,8 @@ export const decodeParamsV4 = async (
             throw new Error('Token validation failed - hash mismatch');
         }
 
-        // Decompress v4 data
-        const { params, provenance } = decompressV4(type, compressedData);
+        // Decompress v4 data (from base64)
+        const { params, provenance } = decompressV4FromEncrypt(type, compressedData);
 
         // Restore token reference in params
         params.token = token;
