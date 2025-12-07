@@ -353,7 +353,8 @@ export const encodeParamsV4 = async (
             throw new Error(error);
         }
 
-        // Token comes back as fx-{type}-v2.{hash}.{data}, convert to v4
+        // Token comes back as fx-{type}-v2.{hash}.{data}, we need v4
+        // The encrypt endpoint returns v2 format, convert to v4
         return token.replace('-v2.', '-v4.');
     } catch (error) {
         console.error('V4 encryption failed:', error);
@@ -382,13 +383,14 @@ export const decodeParamsV4 = async (
     }
 
     try {
-        // Convert v4 token format to v2 for the decrypt endpoint
-        const v2Token = token.replace('-v4.', '-v2.');
+        // Convert v4 token format to v2e for the decrypt endpoint
+        // The decrypt Worker expects v2e format tokens
+        const v2eToken = token.replace('-v4.', '-v2e.');
 
         const response = await fetch(DECRYPT_ENDPOINT, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ token: v2Token }),
+            body: JSON.stringify({ token: v2eToken }),
         });
 
         if (!response.ok) {
