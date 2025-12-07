@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { X, Sparkles, MapPin, MessageCircle, User, Loader2, Copy, Check, ExternalLink, CreditCard } from 'lucide-react';
+import { hasGifAccess } from '@/lib/paymentUtils';
 
 interface PurchaseModalProps {
     isOpen: boolean;
@@ -35,9 +36,16 @@ export function PurchaseModal({
     const [checkoutUrl, setCheckoutUrl] = useState<string | null>(null);
     const [isLoadingCheckout, setIsLoadingCheckout] = useState(false);
 
-    // Create Polar checkout session when modal opens
+    // Check if user already has access (verified payment) - skip to provenance
     useEffect(() => {
-        if (isOpen && step === 'payment') {
+        if (isOpen && hasGifAccess()) {
+            setStep('provenance');
+        }
+    }, [isOpen]);
+
+    // Create Polar checkout session when modal opens (only if not already verified)
+    useEffect(() => {
+        if (isOpen && step === 'payment' && !hasGifAccess()) {
             createCheckoutSession();
         }
     }, [isOpen, step]);
