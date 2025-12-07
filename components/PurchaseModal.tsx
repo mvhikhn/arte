@@ -243,6 +243,19 @@ export function PurchaseModal({
                             </a>
                         </p>
 
+                        <p className="text-xs text-center text-zinc-400">
+                            Already purchased?{' '}
+                            <button
+                                onClick={() => {
+                                    handleClose();
+                                    window.dispatchEvent(new CustomEvent('showEmailVerification'));
+                                }}
+                                className="text-violet-500 hover:underline"
+                            >
+                                Verify your email
+                            </button>
+                        </p>
+
                         {/* Dev/Testing: Skip payment button */}
                         {process.env.NODE_ENV === 'development' && (
                             <button
