@@ -415,8 +415,11 @@ export const decodeParamsV4 = async (
         // Decompress v4 data (from base64)
         const { params, provenance } = decompressV4FromEncrypt(type, compressedData);
 
-        // Restore token reference in params
-        params.token = token;
+        // Only set token reference if not already present from payload
+        // (New v4 tokens preserve the original layout seed in params.token)
+        if (!params.token) {
+            params.token = token;
+        }
 
         return { type: type as ArtworkType, params, provenance };
     } catch (error) {
