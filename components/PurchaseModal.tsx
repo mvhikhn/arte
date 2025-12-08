@@ -172,8 +172,8 @@ export function PurchaseModal({
                     </button>
 
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center">
-                            <Sparkles className="w-5 h-5 text-white" />
+                        <div className="w-10 h-10 rounded-full bg-zinc-100 flex items-center justify-center">
+                            <Sparkles className="w-5 h-5 text-zinc-600" />
                         </div>
                         <div>
                             <h2 className="text-lg font-semibold text-zinc-900">
@@ -191,27 +191,27 @@ export function PurchaseModal({
                 {/* Step 1: Payment */}
                 {step === 'payment' && (
                     <div className="p-6 space-y-5">
-                        <div className="p-4 bg-gradient-to-br from-violet-50 to-fuchsia-50 rounded-xl border border-violet-100">
+                        <div className="p-4 bg-zinc-50 rounded-xl border border-zinc-200">
                             <div className="flex items-baseline gap-2 mb-2">
                                 <span className="text-lg font-bold text-zinc-900">{price}</span>
                                 <span className="text-sm text-zinc-500">· one-time</span>
                             </div>
                             <ul className="space-y-2 text-sm text-zinc-700">
                                 <li className="flex items-center gap-2">
-                                    <span className="text-violet-500">✓</span>
-                                    <span>Unique v4 token with your name</span>
+                                    <span className="text-zinc-400">✓</span>
+                                    <span>Unique token with your name</span>
                                 </li>
                                 <li className="flex items-center gap-2">
-                                    <span className="text-violet-500">✓</span>
-                                    <span>Certificate of authenticity</span>
+                                    <span className="text-zinc-400">✓</span>
+                                    <span>Ownership provenance</span>
                                 </li>
                                 <li className="flex items-center gap-2">
-                                    <span className="text-violet-500">✓</span>
-                                    <span>Works forever (no subscription)</span>
+                                    <span className="text-zinc-400">✓</span>
+                                    <span>Works forever</span>
                                 </li>
                                 <li className="flex items-center gap-2">
-                                    <span className="text-violet-500">✓</span>
-                                    <span>High-res exports included</span>
+                                    <span className="text-zinc-400">✓</span>
+                                    <span>High-res exports</span>
                                 </li>
                             </ul>
                         </div>
@@ -224,13 +224,13 @@ export function PurchaseModal({
 
                         {isLoadingCheckout ? (
                             <div className="flex items-center justify-center py-4">
-                                <Loader2 className="w-6 h-6 animate-spin text-violet-500" />
+                                <Loader2 className="w-6 h-6 animate-spin text-zinc-500" />
                                 <span className="ml-2 text-sm text-zinc-600">Creating checkout...</span>
                             </div>
                         ) : checkoutUrl ? (
                             <a
                                 href={checkoutUrl}
-                                className="w-full py-3 px-4 bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white font-medium rounded-xl hover:from-violet-700 hover:to-fuchsia-700 transition-all flex items-center justify-center gap-2"
+                                className="w-full py-3 px-4 bg-zinc-900 text-white font-medium rounded-xl hover:bg-zinc-800 transition-colors flex items-center justify-center gap-2"
                             >
                                 <CreditCard className="w-5 h-5" />
                                 Continue to Payment
@@ -247,7 +247,7 @@ export function PurchaseModal({
 
                         <p className="text-xs text-center text-zinc-400">
                             Secure payment powered by{' '}
-                            <a href="https://polar.sh" target="_blank" rel="noopener noreferrer" className="text-violet-500 hover:underline">
+                            <a href="https://polar.sh" target="_blank" rel="noopener noreferrer" className="text-zinc-600 hover:underline">
                                 Polar
                             </a>
                         </p>
@@ -259,7 +259,7 @@ export function PurchaseModal({
                                     handleClose();
                                     window.dispatchEvent(new CustomEvent('showEmailVerification'));
                                 }}
-                                className="text-violet-500 hover:underline"
+                                className="text-zinc-600 hover:underline"
                             >
                                 Verify your email
                             </button>
@@ -358,7 +358,7 @@ export function PurchaseModal({
                         <button
                             type="submit"
                             disabled={isProcessing}
-                            className="w-full py-3 px-4 bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white font-medium rounded-xl hover:from-violet-700 hover:to-fuchsia-700 focus:outline-none focus:ring-2 focus:ring-violet-500/50 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
+                            className="w-full py-3 px-4 bg-zinc-900 text-white font-medium rounded-xl hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-zinc-500/50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
                         >
                             {isProcessing ? (
                                 <>
@@ -379,8 +379,8 @@ export function PurchaseModal({
                 {step === 'success' && generatedToken && (
                     <div className="p-6 space-y-5">
                         <div className="text-center">
-                            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-green-400 to-emerald-500 flex items-center justify-center">
-                                <Check className="w-8 h-8 text-white" />
+                            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-zinc-100 flex items-center justify-center">
+                                <Check className="w-8 h-8 text-zinc-600" />
                             </div>
                             <h3 className="text-xl font-semibold text-zinc-900 mb-2">
                                 Your Edition is Ready!

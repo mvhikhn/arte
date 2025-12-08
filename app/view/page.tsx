@@ -353,60 +353,38 @@ export default function ViewPage() {
                             </div>
                         </div>
 
-                        {/* Provenance Certificate - Only for v4 tokens */}
+                        {/* Provenance - Minimal Bottom Right */}
                         {isV4 && provenance && (
-                            <div className="mt-6 w-full max-w-md mx-auto">
-                                <div className="bg-white/95 backdrop-blur-sm border border-zinc-200 rounded-xl p-5 shadow-lg">
-                                    <div className="text-center mb-4">
-                                        <p className="text-xs font-medium text-violet-600 uppercase tracking-wider">Certificate of Authenticity</p>
-                                        <p className="text-sm text-zinc-500 mt-1">
-                                            {currentArtwork && currentArtwork.charAt(0).toUpperCase() + currentArtwork.slice(1)} by {provenance.artist}
-                                        </p>
-                                    </div>
-
-                                    <div className="space-y-3">
-                                        <div className="flex items-start gap-3">
-                                            <User className="w-4 h-4 text-zinc-400 mt-0.5" />
-                                            <div>
-                                                <p className="text-xs text-zinc-400">Created for</p>
-                                                <p className="text-sm font-medium text-zinc-900">{provenance.creator}</p>
-                                            </div>
-                                        </div>
-
-                                        <div className="flex items-start gap-3">
-                                            <Calendar className="w-4 h-4 text-zinc-400 mt-0.5" />
-                                            <div>
-                                                <p className="text-xs text-zinc-400">Date</p>
-                                                <p className="text-sm font-medium text-zinc-900">
-                                                    {new Date(provenance.timestamp).toLocaleDateString('en-US', {
-                                                        year: 'numeric',
-                                                        month: 'long',
-                                                        day: 'numeric',
-                                                        hour: '2-digit',
-                                                        minute: '2-digit'
-                                                    })}
-                                                </p>
-                                            </div>
-                                        </div>
-
-                                        {provenance.location && (
-                                            <div className="flex items-start gap-3">
-                                                <MapPin className="w-4 h-4 text-zinc-400 mt-0.5" />
-                                                <div>
-                                                    <p className="text-xs text-zinc-400">Location</p>
-                                                    <p className="text-sm font-medium text-zinc-900">{provenance.location}</p>
-                                                </div>
-                                            </div>
-                                        )}
-
-                                        <div className="flex items-start gap-3 pt-2 border-t border-zinc-100">
-                                            <MessageCircle className="w-4 h-4 text-violet-500 mt-0.5" />
-                                            <div>
-                                                <p className="text-sm italic text-zinc-600">&ldquo;{provenance.feeling}&rdquo;</p>
-                                            </div>
-                                        </div>
-                                    </div>
+                            <div className="fixed bottom-8 right-8 z-40 text-right hidden md:block">
+                                <div className="space-y-1">
+                                    <p className="text-sm font-medium text-zinc-900">
+                                        {provenance.creator}
+                                    </p>
+                                    <p className="text-xs text-zinc-400">
+                                        {new Date(provenance.timestamp).toLocaleDateString('en-US', {
+                                            year: 'numeric',
+                                            month: 'long',
+                                            day: 'numeric'
+                                        })}
+                                        {provenance.location && ` · ${provenance.location}`}
+                                    </p>
+                                    <p className="text-xs text-zinc-500 italic mt-2 max-w-xs ml-auto">
+                                        &ldquo;{provenance.feeling}&rdquo;
+                                    </p>
                                 </div>
+                            </div>
+                        )}
+
+                        {/* Mobile Provenance (Simple text below artwork) */}
+                        {isV4 && provenance && (
+                            <div className="mt-8 text-center md:hidden px-6 pb-12">
+                                <p className="text-sm font-medium text-zinc-900">{provenance.creator}</p>
+                                <p className="text-xs text-zinc-500 mt-1">
+                                    {new Date(provenance.timestamp).toLocaleDateString('en-US', { dateStyle: 'medium' })}
+                                </p>
+                                <p className="text-xs text-zinc-500 italic mt-2">
+                                    &ldquo;{provenance.feeling}&rdquo;
+                                </p>
                             </div>
                         )}
                     </div>

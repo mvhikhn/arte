@@ -393,11 +393,11 @@ function StudioContent() {
             {/* Buy Edition Button */}
             <button
               onClick={() => setShowPurchaseModal(true)}
-              className="group flex items-center gap-1.5 px-3 py-2 rounded-full bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white hover:from-violet-700 hover:to-fuchsia-700 transition-all text-sm font-medium shadow-lg shadow-violet-500/25"
+              className="group p-2 rounded-full text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 transition-colors"
               aria-label="Buy this edition"
+              title="Buy this edition"
             >
               <Sparkles className="w-4 h-4" />
-              <span>Buy</span>
             </button>
           </div>
 
