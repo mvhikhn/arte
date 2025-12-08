@@ -188,10 +188,10 @@ export default function ViewPage() {
     const ArtworkComponent = currentArtwork ? ARTWORKS[currentArtwork].component : null;
 
     return (
-        <div className="min-h-screen w-full bg-[#fafafa] flex flex-col items-center justify-between relative overflow-hidden overscroll-none touch-none">
+        <div className="h-screen w-full bg-[#fafafa] flex flex-col items-center justify-between relative overflow-hidden">
 
             {/* Header Zone */}
-            <div className="w-full p-6 flex justify-between items-start z-50 relative shrink-0 h-[100px]">
+            <div className="w-full px-4 py-3 flex justify-between items-center z-50 relative shrink-0">
                 {/* Home Button */}
                 <Link
                     href="/"
@@ -254,78 +254,160 @@ export default function ViewPage() {
             </div>
 
             {/* Main Content Zone - The Card */}
-            {/* Added pb-12 to shift center of gravity upwards */}
-            <div className="flex-1 w-full flex items-center justify-center p-4 min-h-0 z-10 pb-12 md:pb-4">
+            <div className="flex-1 w-full flex items-center justify-center p-4 min-h-0 z-10" style={{ perspective: '1500px' }}>
                 {currentArtwork && !error && ArtworkComponent && params ? (
-                    <div
-                        className="relative w-full max-w-[90vw] max-h-[55vh] aspect-[2.5/3.5] flex items-center justify-center"
-                        style={{ perspective: '1500px' }}
-                    >
-                        <div
-                            ref={cardRef}
-                            className="relative w-full h-full rounded-lg overflow-hidden transition-transform duration-100 ease-out preserve-3d"
-                            style={{
-                                transform: `rotateX(${tiltX}deg) rotateY(${tiltY}deg) translateZ(30px)`,
-                                boxShadow: `
-                                    ${-tiltY * 2}px ${tiltX * 2}px 20px rgba(0,0,0,0.1),
-                                    0 20px 50px rgba(0,0,0,0.1)
-                                `,
-                                padding: '4px',
-                                background: 'linear-gradient(145deg, #ffffff 0%, #f8f8f8 100%)',
-                            }}
-                            onMouseMove={(e) => handleTilt(e.clientX, e.clientY)}
-                            onMouseLeave={handleResetTilt}
-                            onTouchMove={(e) => {
-                                if (e.touches.length > 0) {
-                                    handleTilt(e.touches[0].clientX, e.touches[0].clientY);
-                                }
-                            }}
-                            onTouchEnd={handleResetTilt}
-                        >
-                            {/* Force canvas to scale to container */}
-                            <div className="w-full h-full [&>canvas]:!w-full [&>canvas]:!h-full [&>canvas]:!object-contain">
-                                <ArtworkComponent ref={artworkRef} params={params} />
-                            </div>
-
-                            {/* Holographic Overlay */}
+                    <>
+                        <div className="relative flex items-center justify-center">
+                            {/* 3D Card with Premium Physics, Tight Frame, and Holographic Effect */}
                             <div
-                                className="absolute inset-0 pointer-events-none mix-blend-overlay opacity-30"
+                                ref={cardRef}
+                                onMouseMove={handleCardMouseMove}
+                                onMouseLeave={handleResetTilt}
+                                onTouchMove={handleCardTouchMove}
+                                onTouchEnd={handleResetTilt}
+                                className="relative rounded-lg overflow-hidden transition-transform duration-100 ease-out"
                                 style={{
-                                    background: `linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.8) 45%, rgba(255,255,255,0) 50%)`,
-                                    transform: `translateX(${holoX}%) translateY(${holoY}%)`
+                                    transform: `rotateX(${tiltX}deg) rotateY(${tiltY}deg) translateZ(30px)`,
+                                    boxShadow: `
+                                        0 2px 4px rgba(0, 0, 0, 0.08),
+                                        0 4px 8px rgba(0, 0, 0, 0.08),
+                                        0 8px 16px rgba(0, 0, 0, 0.08),
+                                        0 16px 32px rgba(0, 0, 0, 0.1),
+                                        0 32px 64px rgba(0, 0, 0, 0.12),
+                                        ${-tiltY * 2}px ${tiltX * 2}px 40px rgba(0, 0, 0, 0.15),
+                                        inset 0 0 0 1px rgba(255, 255, 255, 0.1)
+                                    `,
+                                    // Dynamic sizing logic - adjusted for mobile to prevent cut-off
+                                    // Max height is reduced to leave space for provenance at bottom
+                                    width: `min(80vw, 55vh * ${aspectRatio})`,
+                                    height: `min(55vh, 80vw / ${aspectRatio})`,
+                                    padding: '4px',
+                                    background: 'linear-gradient(145deg, #ffffff 0%, #f8f8f8 100%)',
                                 }}
-                            />
-                        </div>
-                    </div>
+                            >
+                                {/* Inner card with tight border */}
+                                <div
+                                    className="relative overflow-hidden rounded-md w-full h-full"
+                                    style={{
+                                        boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.06), 0 0 0 1px rgba(0,0,0,0.04)',
+                                    }}
+                                >
+                                    {/* Force canvas to scale to container */}
+                                    <div className="w-full h-full [&>canvas]:!w-full [&>canvas]:!h-full [&>canvas]:!object-contain">
+                                        <ArtworkComponent ref={artworkRef} params={params} />
+                                    </div>
 
-                        {/* Provenance Display - Mobile (Bottom of Screen) */}
-                {isV4 && provenance && (
-                    <div className="absolute bottom-6 left-0 right-0 text-center md:hidden px-6 z-20">
-                        <div className="font-mono text-xs text-zinc-400 mb-2 tracking-wider uppercase">Provenance</div>
-                        <div className="font-serif text-lg text-zinc-800 italic">
-                            {provenance.feeling} in {provenance.location}
-                        </div>
-                        <div className="font-mono text-[10px] text-zinc-300 mt-1">
-                            {new Date(provenance.timestamp).toLocaleDateString()} • {provenance.creator}
-                        </div>
-                    </div>
-                )}
+                                    {/* Holographic Light Reflection Overlay */}
+                                    <div
+                                        className="absolute inset-0 pointer-events-none transition-opacity duration-300"
+                                        style={{
+                                            background: `
+                                                radial-gradient(
+                                                    ellipse 80% 50% at ${holoX}% ${holoY}%,
+                                                    rgba(255, 0, 128, 0.15) 0%,
+                                                    rgba(255, 128, 0, 0.12) 15%,
+                                                    rgba(255, 255, 0, 0.1) 30%,
+                                                    rgba(0, 255, 128, 0.08) 45%,
+                                                    rgba(0, 128, 255, 0.1) 60%,
+                                                    rgba(128, 0, 255, 0.12) 75%,
+                                                    rgba(255, 0, 128, 0.08) 90%,
+                                                    transparent 100%
+                                                )
+                                            `,
+                                            mixBlendMode: 'overlay',
+                                            opacity: Math.abs(tiltX) + Math.abs(tiltY) > 1 ? 1 : 0.3,
+                                        }}
+                                    />
 
-                {/* Provenance Display - Desktop (Below Card) */}
-                {isV4 && provenance && (
-                    <div className="hidden md:block absolute -bottom-32 left-0 right-0 text-center">
-                        <div className="font-mono text-xs text-zinc-400 mb-2 tracking-wider uppercase">Provenance</div>
-                        <div className="font-serif text-xl text-zinc-800 italic">
-                            {provenance.feeling} in {provenance.location}
+                                    {/* Shimmer/Glare Effect */}
+                                    <div
+                                        className="absolute inset-0 pointer-events-none transition-all duration-200"
+                                        style={{
+                                            background: `
+                                                linear-gradient(
+                                                    ${135 + (holoX - 50) * 0.5}deg,
+                                                    transparent 0%,
+                                                    transparent ${40 + (holoY - 50) * 0.3}%,
+                                                    rgba(255, 255, 255, 0.4) ${50 + (holoY - 50) * 0.3}%,
+                                                    transparent ${60 + (holoY - 50) * 0.3}%,
+                                                    transparent 100%
+                                                )
+                                            `,
+                                            opacity: Math.abs(tiltX) + Math.abs(tiltY) > 2 ? 0.6 : 0.2,
+                                        }}
+                                    />
+
+                                    {/* Iridescent Edge Highlight */}
+                                    <div
+                                        className="absolute inset-0 pointer-events-none"
+                                        style={{
+                                            background: `
+                                                conic-gradient(
+                                                    from ${(holoX + holoY) * 1.8}deg at ${holoX}% ${holoY}%,
+                                                    rgba(255, 0, 100, 0.05),
+                                                    rgba(255, 200, 0, 0.05),
+                                                    rgba(0, 255, 150, 0.05),
+                                                    rgba(0, 150, 255, 0.05),
+                                                    rgba(200, 0, 255, 0.05),
+                                                    rgba(255, 0, 100, 0.05)
+                                                )
+                                            `,
+                                            mixBlendMode: 'color-dodge',
+                                            opacity: Math.abs(tiltX) + Math.abs(tiltY) > 1 ? 0.8 : 0.3,
+                                        }}
+                                    />
+                                </div>
+                            </div>
                         </div>
-                        <div className="font-mono text-xs text-zinc-300 mt-1">
-                            {new Date(provenance.timestamp).toLocaleDateString()} • {provenance.creator}
+
+                        {/* Provenance - Minimal Bottom Right (Desktop) */}
+                        {isV4 && provenance && (
+                            <div className="fixed bottom-8 right-8 z-40 text-right hidden md:block">
+                                <div className="space-y-1">
+                                    <p className="text-sm font-medium text-zinc-900">
+                                        {provenance.creator}
+                                    </p>
+                                    <p className="text-xs text-zinc-400">
+                                        {new Date(provenance.timestamp).toLocaleDateString('en-US', {
+                                            year: 'numeric',
+                                            month: 'long',
+                                            day: 'numeric'
+                                        })}
+                                        {provenance.location && ` · ${provenance.location}`}
+                                    </p>
+                                    <p className="text-xs text-zinc-500 italic mt-2 max-w-xs ml-auto">
+                                        &ldquo;{provenance.feeling}&rdquo;
+                                    </p>
+                                </div>
+                            </div>
+                        )}
+                    </>
+                ) : (
+                    <div className="flex flex-col items-center justify-center text-black/20 gap-4">
+                        <div className="w-16 h-16 rounded-full border border-dashed border-black/10 flex items-center justify-center">
+                            <div className="w-2 h-2 rounded-full bg-black/20" />
                         </div>
+                        <p className="text-sm">Awaiting key...</p>
                     </div>
-                )}
                 )}
             </div>
-        </div>
+
+            {/* Footer Zone - Mobile Provenance */}
+            {isV4 && provenance && (
+                <div className="w-full px-4 py-4 shrink-0 z-40 md:hidden">
+                    <div className="text-center">
+                        <p className="text-sm font-medium text-zinc-900">{provenance.creator}</p>
+                        <p className="text-xs text-zinc-500 mt-0.5">
+                            {new Date(provenance.timestamp).toLocaleDateString('en-US', { dateStyle: 'medium' })}
+                            {provenance.location && ` · ${provenance.location}`}
+                        </p>
+                        <p className="text-xs text-zinc-500 italic mt-0.5">
+                            &ldquo;{provenance.feeling}&rdquo;
+                        </p>
+                    </div>
+                </div>
+            )}
+        </div >
     );
 }
 
