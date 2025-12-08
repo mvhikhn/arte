@@ -18,6 +18,7 @@ import RotatedGridControls from '@/components/RotatedGridControls';
 import TreeControls from '@/components/TreeControls';
 import TextDesignControls from '@/components/TextDesignControls';
 import LambControls from '@/components/LambControls';
+import FlowGenericControls from '@/components/FlowGenericControls';
 
 // Generators
 import {
@@ -42,7 +43,7 @@ export const ARTWORKS: Record<string, ArtworkDefinition> = {
         title: 'Flow Field',
         description: 'Generative flow particles',
         component: Artwork,
-        controls: Controls,
+        controls: FlowGenericControls,
         generator: generateFlowParamsFromToken,
         randomGenerator: createRandomGenerator('flow', generateFlowParamsFromToken),
         defaultParams: generateFlowParamsFromToken(generateToken('flow'))

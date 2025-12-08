@@ -16,12 +16,27 @@ export interface ProvenanceData {
     artworkType: string;  // e.g., "flow", "tree"
 }
 
+// Control types for generic UI generation
+export type ControlType = 'range' | 'color' | 'boolean' | 'select' | 'text';
+
+export interface ControlConfig {
+    type: ControlType;
+    label: string;
+    min?: number;
+    max?: number;
+    step?: number;
+    options?: string[];
+    section?: string; // To group controls in the UI
+}
+
 // Schema definition type
 interface ParamSchema {
     // Ordered list of param keys (for positional encoding)
     keys: string[];
     // Default values (params matching defaults are omitted)
     defaults: Record<string, any>;
+    // UI Control definitions (optional, for generic controls)
+    controls?: Record<string, ControlConfig>;
 }
 
 /**
@@ -48,6 +63,27 @@ export const PARAM_SCHEMAS: Record<string, ParamSchema> = {
             exportWidth: 1600,
             exportHeight: 2000,
             isAnimating: true,
+        },
+        controls: {
+            // Colors
+            color1: { type: 'color', label: 'Color 1', section: 'Colors' },
+            color2: { type: 'color', label: 'Color 2', section: 'Colors' },
+            color3: { type: 'color', label: 'Color 3', section: 'Colors' },
+            color4: { type: 'color', label: 'Color 4', section: 'Colors' },
+            color5: { type: 'color', label: 'Color 5', section: 'Colors' },
+
+            // Movement
+            numPoints: { type: 'range', label: 'Density', min: 500, max: 5000, step: 100, section: 'Movement' },
+            noiseSpeed: { type: 'range', label: 'Speed', min: 0.001, max: 0.05, step: 0.001, section: 'Movement' },
+            movementDistance: { type: 'range', label: 'Flow', min: 0.5, max: 5, step: 0.1, section: 'Movement' },
+            angleMultiplier1: { type: 'range', label: 'Chaos X', min: 0.1, max: 5, step: 0.1, section: 'Movement' },
+            angleMultiplier2: { type: 'range', label: 'Chaos Y', min: 0.1, max: 5, step: 0.1, section: 'Movement' },
+
+            // Style
+            circleSize: { type: 'range', label: 'Particle Size', min: 0.5, max: 5, step: 0.1, section: 'Style' },
+            backgroundFade: { type: 'range', label: 'Trails', min: 1, max: 50, step: 1, section: 'Style' },
+            strokeWeightMin: { type: 'range', label: 'Min Stroke', min: 0.1, max: 5, step: 0.1, section: 'Style' },
+            strokeWeightMax: { type: 'range', label: 'Max Stroke', min: 0.1, max: 5, step: 0.1, section: 'Style' },
         }
     },
     grid: {
