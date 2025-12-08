@@ -188,7 +188,7 @@ export default function ViewPage() {
     const ArtworkComponent = currentArtwork ? ARTWORKS[currentArtwork].component : null;
 
     return (
-        <div className="h-[100dvh] bg-[#fafafa] flex flex-col items-center justify-center p-4 relative overflow-hidden">
+        <div className="h-[100dvh] min-h-[-webkit-fill-available] bg-[#fafafa] flex flex-col items-center justify-center p-4 relative overflow-hidden">
             {/* Home Button - Top Left */}
             <Link
                 href="/"
@@ -200,20 +200,20 @@ export default function ViewPage() {
                 </svg>
             </Link>
 
-            {/* Input Area - Fixed hover detection */}
+            {/* Input Area - Fixed hover detection & Mobile Positioning */}
             <div
-                className="absolute top-8 left-1/2 -translate-x-1/2 z-20 transition-opacity duration-300"
+                className="absolute top-24 md:top-8 left-1/2 -translate-x-1/2 z-20 transition-opacity duration-300"
                 style={{ opacity: currentArtwork && !isHoveringInput ? 0 : 1 }}
                 onMouseEnter={() => setIsHoveringInput(true)}
                 onMouseLeave={() => setIsHoveringInput(false)}
             >
-                <div className="w-[500px] max-w-[90vw]">
+                <div className="w-[300px] md:w-[500px] max-w-[90vw]">
                     <input
                         type="text"
                         value={tokenInput}
                         onChange={handleTokenChange}
                         placeholder="input key to unveil"
-                        className={`w-full h-12 px-4 bg-white/90 backdrop-blur-sm border outline-none transition-all font-mono text-sm
+                        className={`w-full h-12 px-4 bg-white/90 backdrop-blur-sm border outline-none transition-all font-mono text-sm rounded-md shadow-sm
                             ${error
                                 ? "border-red-400 text-red-600 placeholder:text-red-300"
                                 : "border-black/10 text-black/60 placeholder:text-black/30"
