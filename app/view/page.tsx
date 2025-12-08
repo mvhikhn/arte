@@ -188,7 +188,10 @@ export default function ViewPage() {
     const ArtworkComponent = currentArtwork ? ARTWORKS[currentArtwork].component : null;
 
     return (
-        <div className="fixed inset-0 bg-[#fafafa] flex flex-col items-center justify-between overflow-hidden touch-none">
+        <div
+            className="h-screen w-full bg-[#fafafa] flex flex-col items-center justify-between relative overflow-hidden"
+            style={{ touchAction: 'none' }}
+        >
 
             {/* Header Zone */}
             <div className="w-full px-4 py-3 flex justify-between items-center z-50 relative shrink-0">
