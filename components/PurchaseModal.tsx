@@ -1,8 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { X, Sparkles, MapPin, MessageCircle, User, Loader2, Copy, Check, ExternalLink, CreditCard } from 'lucide-react';
+import { X, Sparkles, MapPin, MessageCircle, User, Loader2, Copy, Check, ExternalLink, CreditCard, Download } from 'lucide-react';
 import { hasGifAccess } from '@/lib/paymentUtils';
+import { QRCodeSVG } from 'qrcode.react';
 
 interface PurchaseModalProps {
     isOpen: boolean;
@@ -385,26 +386,50 @@ export function PurchaseModal({
                                 Your Edition is Ready!
                             </h3>
                             <p className="text-sm text-zinc-500">
-                                Copy your token below. Paste it in the viewer anytime to see your artwork.
+                                Scan the QR code or copy the token to view your artwork.
                             </p>
                         </div>
 
-                        {/* Token Display */}
-                        <div className="relative">
-                            <div className="p-4 bg-zinc-900 rounded-xl font-mono text-xs text-green-400 break-all">
-                                {generatedToken}
+                        {/* QR Code */}
+                        <div className="flex justify-center">
+                            <div className="p-4 bg-white rounded-xl border-2 border-zinc-200 shadow-sm">
+                                <QRCodeSVG
+                                    value={`${typeof window !== 'undefined' ? window.location.origin : 'https://arte.mahikhan.com'}/view?token=${encodeURIComponent(generatedToken)}`}
+                                    size={160}
+                                    level="M"
+                                    includeMargin={false}
+                                    bgColor="#ffffff"
+                                    fgColor="#18181b"
+                                />
                             </div>
-                            <button
-                                onClick={handleCopyToken}
-                                className="absolute top-2 right-2 p-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg transition-colors"
-                            >
-                                {copied ? (
-                                    <Check className="w-4 h-4 text-green-400" />
-                                ) : (
-                                    <Copy className="w-4 h-4 text-zinc-400" />
-                                )}
-                            </button>
                         </div>
+
+                        <p className="text-xs text-center text-zinc-400">
+                            Scan to instantly view your artwork
+                        </p>
+
+                        {/* Token Display (collapsible) */}
+                        <details className="group">
+                            <summary className="flex items-center justify-center gap-2 cursor-pointer text-sm text-zinc-500 hover:text-zinc-700 transition-colors">
+                                <span>Show token</span>
+                                <span className="group-open:rotate-180 transition-transform">▼</span>
+                            </summary>
+                            <div className="mt-3 relative">
+                                <div className="p-4 bg-zinc-900 rounded-xl font-mono text-xs text-green-400 break-all max-h-24 overflow-y-auto">
+                                    {generatedToken}
+                                </div>
+                                <button
+                                    onClick={handleCopyToken}
+                                    className="absolute top-2 right-2 p-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg transition-colors"
+                                >
+                                    {copied ? (
+                                        <Check className="w-4 h-4 text-green-400" />
+                                    ) : (
+                                        <Copy className="w-4 h-4 text-zinc-400" />
+                                    )}
+                                </button>
+                            </div>
+                        </details>
 
                         <p className="text-xs text-center text-zinc-500">
                             This token is yours forever. Keep it safe!

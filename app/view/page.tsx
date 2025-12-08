@@ -33,6 +33,20 @@ export default function ViewPage() {
         setError(null);
     };
 
+    // Read token from URL query params on page load (for QR code scanning)
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const urlParams = new URLSearchParams(window.location.search);
+            const tokenFromUrl = urlParams.get('token');
+            if (tokenFromUrl) {
+                setTokenInput(decodeURIComponent(tokenFromUrl));
+                // Clean up URL to remove token param
+                const newUrl = window.location.pathname;
+                window.history.replaceState({}, '', newUrl);
+            }
+        }
+    }, []);
+
     // Debounced token validation and decoding
     useEffect(() => {
         const trimmedToken = tokenInput.trim();
