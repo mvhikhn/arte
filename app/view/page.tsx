@@ -188,7 +188,7 @@ export default function ViewPage() {
     const ArtworkComponent = currentArtwork ? ARTWORKS[currentArtwork].component : null;
 
     return (
-        <div className="min-h-screen bg-[#fafafa] flex flex-col items-center justify-center p-4 relative overflow-hidden">
+        <div className="h-[100dvh] bg-[#fafafa] flex flex-col items-center justify-center p-4 relative overflow-hidden">
             {/* Home Button - Top Left */}
             <Link
                 href="/"
@@ -250,110 +250,113 @@ export default function ViewPage() {
             )}
 
             {/* Artwork Display */}
-            <div className="flex-1 w-full flex items-center justify-center" style={{ perspective: '1500px' }}>
+            <div className="flex-1 w-full flex items-center justify-center relative" style={{ perspective: '1500px' }}>
                 {currentArtwork && !error && ArtworkComponent && params ? (
-                    <div className="relative flex items-center justify-center">
-                        {/* 3D Card with Premium Physics, Tight Frame, and Holographic Effect */}
-                        <div
-                            ref={cardRef}
-                            onMouseMove={handleCardMouseMove}
-                            onMouseLeave={handleResetTilt}
-                            onTouchMove={handleCardTouchMove}
-                            onTouchEnd={handleResetTilt}
-                            className="relative rounded-lg overflow-hidden transition-transform duration-100 ease-out"
-                            style={{
-                                transform: `rotateX(${tiltX}deg) rotateY(${tiltY}deg) translateZ(30px)`,
-                                boxShadow: `
-                                    0 2px 4px rgba(0, 0, 0, 0.08),
-                                    0 4px 8px rgba(0, 0, 0, 0.08),
-                                    0 8px 16px rgba(0, 0, 0, 0.08),
-                                    0 16px 32px rgba(0, 0, 0, 0.1),
-                                    0 32px 64px rgba(0, 0, 0, 0.12),
-                                    ${-tiltY * 2}px ${tiltX * 2}px 40px rgba(0, 0, 0, 0.15),
-                                    inset 0 0 0 1px rgba(255, 255, 255, 0.1)
-                                `,
-                                // Dynamic sizing logic
-                                width: `min(85vw, 70vh * ${aspectRatio})`,
-                                height: `min(70vh, 85vw / ${aspectRatio})`,
-                                padding: '4px',
-                                background: 'linear-gradient(145deg, #ffffff 0%, #f8f8f8 100%)',
-                            }}
-                        >
-                            {/* Inner card with tight border */}
+                    <>
+                        <div className="relative flex items-center justify-center">
+                            {/* 3D Card with Premium Physics, Tight Frame, and Holographic Effect */}
                             <div
-                                className="relative overflow-hidden rounded-md w-full h-full"
+                                ref={cardRef}
+                                onMouseMove={handleCardMouseMove}
+                                onMouseLeave={handleResetTilt}
+                                onTouchMove={handleCardTouchMove}
+                                onTouchEnd={handleResetTilt}
+                                className="relative rounded-lg overflow-hidden transition-transform duration-100 ease-out"
                                 style={{
-                                    boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.06), 0 0 0 1px rgba(0,0,0,0.04)',
+                                    transform: `rotateX(${tiltX}deg) rotateY(${tiltY}deg) translateZ(30px)`,
+                                    boxShadow: `
+                                        0 2px 4px rgba(0, 0, 0, 0.08),
+                                        0 4px 8px rgba(0, 0, 0, 0.08),
+                                        0 8px 16px rgba(0, 0, 0, 0.08),
+                                        0 16px 32px rgba(0, 0, 0, 0.1),
+                                        0 32px 64px rgba(0, 0, 0, 0.12),
+                                        ${-tiltY * 2}px ${tiltX * 2}px 40px rgba(0, 0, 0, 0.15),
+                                        inset 0 0 0 1px rgba(255, 255, 255, 0.1)
+                                    `,
+                                    // Dynamic sizing logic - adjusted for mobile to prevent cut-off
+                                    // Max height is reduced to leave space for provenance at bottom
+                                    width: `min(85vw, 65vh * ${aspectRatio})`,
+                                    height: `min(65vh, 85vw / ${aspectRatio})`,
+                                    padding: '4px',
+                                    background: 'linear-gradient(145deg, #ffffff 0%, #f8f8f8 100%)',
                                 }}
                             >
-                                {/* Force canvas to scale to container */}
-                                <div className="w-full h-full [&>canvas]:!w-full [&>canvas]:!h-full [&>canvas]:!object-contain">
-                                    <ArtworkComponent ref={artworkRef} params={params} />
+                                {/* Inner card with tight border */}
+                                <div
+                                    className="relative overflow-hidden rounded-md w-full h-full"
+                                    style={{
+                                        boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.06), 0 0 0 1px rgba(0,0,0,0.04)',
+                                    }}
+                                >
+                                    {/* Force canvas to scale to container */}
+                                    <div className="w-full h-full [&>canvas]:!w-full [&>canvas]:!h-full [&>canvas]:!object-contain">
+                                        <ArtworkComponent ref={artworkRef} params={params} />
+                                    </div>
+
+                                    {/* Holographic Light Reflection Overlay */}
+                                    <div
+                                        className="absolute inset-0 pointer-events-none transition-opacity duration-300"
+                                        style={{
+                                            background: `
+                                                radial-gradient(
+                                                    ellipse 80% 50% at ${holoX}% ${holoY}%,
+                                                    rgba(255, 0, 128, 0.15) 0%,
+                                                    rgba(255, 128, 0, 0.12) 15%,
+                                                    rgba(255, 255, 0, 0.1) 30%,
+                                                    rgba(0, 255, 128, 0.08) 45%,
+                                                    rgba(0, 128, 255, 0.1) 60%,
+                                                    rgba(128, 0, 255, 0.12) 75%,
+                                                    rgba(255, 0, 128, 0.08) 90%,
+                                                    transparent 100%
+                                                )
+                                            `,
+                                            mixBlendMode: 'overlay',
+                                            opacity: Math.abs(tiltX) + Math.abs(tiltY) > 1 ? 1 : 0.3,
+                                        }}
+                                    />
+
+                                    {/* Shimmer/Glare Effect */}
+                                    <div
+                                        className="absolute inset-0 pointer-events-none transition-all duration-200"
+                                        style={{
+                                            background: `
+                                                linear-gradient(
+                                                    ${135 + (holoX - 50) * 0.5}deg,
+                                                    transparent 0%,
+                                                    transparent ${40 + (holoY - 50) * 0.3}%,
+                                                    rgba(255, 255, 255, 0.4) ${50 + (holoY - 50) * 0.3}%,
+                                                    transparent ${60 + (holoY - 50) * 0.3}%,
+                                                    transparent 100%
+                                                )
+                                            `,
+                                            opacity: Math.abs(tiltX) + Math.abs(tiltY) > 2 ? 0.6 : 0.2,
+                                        }}
+                                    />
+
+                                    {/* Iridescent Edge Highlight */}
+                                    <div
+                                        className="absolute inset-0 pointer-events-none"
+                                        style={{
+                                            background: `
+                                                conic-gradient(
+                                                    from ${(holoX + holoY) * 1.8}deg at ${holoX}% ${holoY}%,
+                                                    rgba(255, 0, 100, 0.05),
+                                                    rgba(255, 200, 0, 0.05),
+                                                    rgba(0, 255, 150, 0.05),
+                                                    rgba(0, 150, 255, 0.05),
+                                                    rgba(200, 0, 255, 0.05),
+                                                    rgba(255, 0, 100, 0.05)
+                                                )
+                                            `,
+                                            mixBlendMode: 'color-dodge',
+                                            opacity: Math.abs(tiltX) + Math.abs(tiltY) > 1 ? 0.8 : 0.3,
+                                        }}
+                                    />
                                 </div>
-
-                                {/* Holographic Light Reflection Overlay */}
-                                <div
-                                    className="absolute inset-0 pointer-events-none transition-opacity duration-300"
-                                    style={{
-                                        background: `
-                                            radial-gradient(
-                                                ellipse 80% 50% at ${holoX}% ${holoY}%,
-                                                rgba(255, 0, 128, 0.15) 0%,
-                                                rgba(255, 128, 0, 0.12) 15%,
-                                                rgba(255, 255, 0, 0.1) 30%,
-                                                rgba(0, 255, 128, 0.08) 45%,
-                                                rgba(0, 128, 255, 0.1) 60%,
-                                                rgba(128, 0, 255, 0.12) 75%,
-                                                rgba(255, 0, 128, 0.08) 90%,
-                                                transparent 100%
-                                            )
-                                        `,
-                                        mixBlendMode: 'overlay',
-                                        opacity: Math.abs(tiltX) + Math.abs(tiltY) > 1 ? 1 : 0.3,
-                                    }}
-                                />
-
-                                {/* Shimmer/Glare Effect */}
-                                <div
-                                    className="absolute inset-0 pointer-events-none transition-all duration-200"
-                                    style={{
-                                        background: `
-                                            linear-gradient(
-                                                ${135 + (holoX - 50) * 0.5}deg,
-                                                transparent 0%,
-                                                transparent ${40 + (holoY - 50) * 0.3}%,
-                                                rgba(255, 255, 255, 0.4) ${50 + (holoY - 50) * 0.3}%,
-                                                transparent ${60 + (holoY - 50) * 0.3}%,
-                                                transparent 100%
-                                            )
-                                        `,
-                                        opacity: Math.abs(tiltX) + Math.abs(tiltY) > 2 ? 0.6 : 0.2,
-                                    }}
-                                />
-
-                                {/* Iridescent Edge Highlight */}
-                                <div
-                                    className="absolute inset-0 pointer-events-none"
-                                    style={{
-                                        background: `
-                                            conic-gradient(
-                                                from ${(holoX + holoY) * 1.8}deg at ${holoX}% ${holoY}%,
-                                                rgba(255, 0, 100, 0.05),
-                                                rgba(255, 200, 0, 0.05),
-                                                rgba(0, 255, 150, 0.05),
-                                                rgba(0, 150, 255, 0.05),
-                                                rgba(200, 0, 255, 0.05),
-                                                rgba(255, 0, 100, 0.05)
-                                            )
-                                        `,
-                                        mixBlendMode: 'color-dodge',
-                                        opacity: Math.abs(tiltX) + Math.abs(tiltY) > 1 ? 0.8 : 0.3,
-                                    }}
-                                />
                             </div>
                         </div>
 
-                        {/* Provenance - Minimal Bottom Right */}
+                        {/* Provenance - Minimal Bottom Right (Desktop) */}
                         {isV4 && provenance && (
                             <div className="fixed bottom-8 right-8 z-40 text-right hidden md:block">
                                 <div className="space-y-1">
@@ -375,19 +378,19 @@ export default function ViewPage() {
                             </div>
                         )}
 
-                        {/* Mobile Provenance (Simple text below artwork) */}
+                        {/* Mobile Provenance (Absolute Bottom) */}
                         {isV4 && provenance && (
-                            <div className="mt-8 text-center md:hidden px-6 pb-12">
+                            <div className="absolute bottom-6 left-0 right-0 text-center md:hidden px-6 z-10 pointer-events-none">
                                 <p className="text-sm font-medium text-zinc-900">{provenance.creator}</p>
                                 <p className="text-xs text-zinc-500 mt-1">
                                     {new Date(provenance.timestamp).toLocaleDateString('en-US', { dateStyle: 'medium' })}
                                 </p>
-                                <p className="text-xs text-zinc-500 italic mt-2">
+                                <p className="text-xs text-zinc-500 italic mt-1">
                                     &ldquo;{provenance.feeling}&rdquo;
                                 </p>
                             </div>
                         )}
-                    </div>
+                    </>
                 ) : (
                     <div className="flex flex-col items-center justify-center text-black/20 gap-4">
                         <div className="w-16 h-16 rounded-full border border-dashed border-black/10 flex items-center justify-center">
