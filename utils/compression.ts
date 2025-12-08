@@ -164,13 +164,13 @@ export const compressV4 = (
     // 1. Strip defaults
     const stripped = stripDefaults(type, params);
 
-    // 2. Remove token and colorSeed (they're redundant in encoded form)
-    const { token, colorSeed, ...paramsWithoutToken } = stripped;
+    // 2. Keep token and colorSeed - they're needed for deterministic layout!
+    // (Artworks use params.token as seed for p.randomSeed())
 
     // 3. Create payload with optional provenance
     const payload = provenance
-        ? { p: paramsWithoutToken, m: provenance }
-        : { p: paramsWithoutToken };
+        ? { p: stripped, m: provenance }
+        : { p: stripped };
 
     // 4. MessagePack encode
     const binary = pack(payload);
@@ -195,13 +195,13 @@ export const compressV4ForEncrypt = (
     // 1. Strip defaults
     const stripped = stripDefaults(type, params);
 
-    // 2. Remove token and colorSeed (they're redundant in encoded form)
-    const { token, colorSeed, ...paramsWithoutToken } = stripped;
+    // 2. Keep token and colorSeed - they're needed for deterministic layout!
+    // (Artworks use params.token as seed for p.randomSeed())
 
     // 3. Create payload with optional provenance
     const payload = provenance
-        ? { p: paramsWithoutToken, m: provenance }
-        : { p: paramsWithoutToken };
+        ? { p: stripped, m: provenance }
+        : { p: stripped };
 
     // 4. MessagePack encode
     const binary = pack(payload);
