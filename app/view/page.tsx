@@ -189,7 +189,7 @@ export default function ViewPage() {
 
     return (
         <div
-            className="h-screen w-full bg-[#fafafa] flex flex-col items-center justify-between relative overflow-hidden"
+            className="h-[100dvh] w-full bg-[#fafafa] flex flex-col items-center justify-between relative overflow-hidden"
             style={{ touchAction: 'none' }}
         >
 
@@ -280,9 +280,9 @@ export default function ViewPage() {
                                         ${-tiltY * 2}px ${tiltX * 2}px 40px rgba(0, 0, 0, 0.15),
                                         inset 0 0 0 1px rgba(255, 255, 255, 0.1)
                                     `,
-                                    // Dynamic sizing logic - smaller to guarantee provenance fits
-                                    width: `min(70vw, 45vh * ${aspectRatio})`,
-                                    height: `min(45vh, 70vw / ${aspectRatio})`,
+                                    // Pokemon card size (~2.5:3.5 aspect ratio) with dynamic viewport height
+                                    width: `min(75vw, 55dvh * ${aspectRatio})`,
+                                    height: `min(55dvh, 75vw / ${aspectRatio})`,
                                     padding: '4px',
                                     background: 'linear-gradient(145deg, #ffffff 0%, #f8f8f8 100%)',
                                 }}
