@@ -12,12 +12,13 @@ import LambArtwork from '@/components/LambArtwork';
 
 // Controls
 import Controls from '@/components/Controls';
-import GridControls from '@/components/GridControls';
-import MosaicControls from '@/components/MosaicControls';
-import RotatedGridControls from '@/components/RotatedGridControls';
-import TreeControls from '@/components/TreeControls';
+// Legacy controls removed in favor of GenericControls
+// import GridControls from '@/components/GridControls';
+// import MosaicControls from '@/components/MosaicControls';
+// import RotatedGridControls from '@/components/RotatedGridControls';
+// import TreeControls from '@/components/TreeControls';
 import TextDesignControls from '@/components/TextDesignControls';
-import LambControls from '@/components/LambControls';
+// import LambControls from '@/components/LambControls';
 import FlowGenericControls from '@/components/FlowGenericControls';
 import GridGenericControls from '@/components/GridGenericControls';
 import MosaicGenericControls from '@/components/MosaicGenericControls';
