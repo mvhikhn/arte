@@ -188,7 +188,7 @@ export default function ViewPage() {
     const ArtworkComponent = currentArtwork ? ARTWORKS[currentArtwork].component : null;
 
     return (
-        <div className="h-screen w-full bg-[#fafafa] flex flex-col items-center justify-between relative overflow-hidden">
+        <div className="fixed inset-0 bg-[#fafafa] flex flex-col items-center justify-between overflow-hidden touch-none">
 
             {/* Header Zone */}
             <div className="w-full px-4 py-3 flex justify-between items-center z-50 relative shrink-0">
@@ -277,10 +277,9 @@ export default function ViewPage() {
                                         ${-tiltY * 2}px ${tiltX * 2}px 40px rgba(0, 0, 0, 0.15),
                                         inset 0 0 0 1px rgba(255, 255, 255, 0.1)
                                     `,
-                                    // Dynamic sizing logic - adjusted for mobile to prevent cut-off
-                                    // Max height is reduced to leave space for provenance at bottom
-                                    width: `min(80vw, 55vh * ${aspectRatio})`,
-                                    height: `min(55vh, 80vw / ${aspectRatio})`,
+                                    // Dynamic sizing logic - smaller to guarantee fit
+                                    width: `min(75vw, 50vh * ${aspectRatio})`,
+                                    height: `min(50vh, 75vw / ${aspectRatio})`,
                                     padding: '4px',
                                     background: 'linear-gradient(145deg, #ffffff 0%, #f8f8f8 100%)',
                                 }}
@@ -394,7 +393,7 @@ export default function ViewPage() {
 
             {/* Footer Zone - Mobile Provenance */}
             {isV4 && provenance && (
-                <div className="w-full px-4 py-2 mb-12 shrink-0 z-40 md:hidden md:mb-0">
+                <div className="w-full px-4 py-3 shrink-0 z-40 md:hidden">
                     <div className="text-center">
                         <p className="text-sm font-medium text-zinc-900">{provenance.creator}</p>
                         <p className="text-xs text-zinc-500 mt-0.5">
