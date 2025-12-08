@@ -394,7 +394,7 @@ export default function ViewPage() {
 
             {/* Footer Zone - Mobile Provenance */}
             {isV4 && provenance && (
-                <div className="w-full px-4 py-2 shrink-0 z-40 md:hidden">
+                <div className="w-full px-4 py-2 mb-12 shrink-0 z-40 md:hidden md:mb-0">
                     <div className="text-center">
                         <p className="text-sm font-medium text-zinc-900">{provenance.creator}</p>
                         <p className="text-xs text-zinc-500 mt-0.5">
