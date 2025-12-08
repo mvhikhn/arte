@@ -188,7 +188,7 @@ export default function ViewPage() {
     const ArtworkComponent = currentArtwork ? ARTWORKS[currentArtwork].component : null;
 
     return (
-        <div className="h-[100dvh] min-h-[-webkit-fill-available] bg-[#fafafa] flex flex-col items-center justify-center p-4 relative overflow-hidden">
+        <div className="fixed inset-0 bg-[#fafafa] flex flex-col items-center justify-center p-4 overflow-hidden z-0">
             {/* Home Button - Top Left */}
             <Link
                 href="/"
