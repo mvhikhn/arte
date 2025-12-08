@@ -280,9 +280,9 @@ export default function ViewPage() {
                                         ${-tiltY * 2}px ${tiltX * 2}px 40px rgba(0, 0, 0, 0.15),
                                         inset 0 0 0 1px rgba(255, 255, 255, 0.1)
                                     `,
-                                    // Dynamic sizing logic - smaller to guarantee fit
-                                    width: `min(75vw, 50vh * ${aspectRatio})`,
-                                    height: `min(50vh, 75vw / ${aspectRatio})`,
+                                    // Dynamic sizing logic - smaller to guarantee provenance fits
+                                    width: `min(70vw, 45vh * ${aspectRatio})`,
+                                    height: `min(45vh, 70vw / ${aspectRatio})`,
                                     padding: '4px',
                                     background: 'linear-gradient(145deg, #ffffff 0%, #f8f8f8 100%)',
                                 }}
