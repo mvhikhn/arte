@@ -188,21 +188,47 @@ export default function ViewPage() {
     const ArtworkComponent = currentArtwork ? ARTWORKS[currentArtwork].component : null;
 
     return (
-        <div className="fixed inset-0 bg-[#fafafa] flex flex-col items-center justify-center p-4 overflow-hidden">
-            {/* Home Button - Top Left */}
-            <Link
-                href="/"
-                className="absolute top-6 left-6 group p-2 rounded-full text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 transition-colors z-50"
-                title="Return Home"
-            >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                </svg>
-            </Link>
+        <div className="min-h-screen w-full bg-[#fafafa] flex flex-col items-center justify-between relative overflow-hidden">
 
-            {/* Input Area - Fixed hover detection & Mobile Positioning */}
+            {/* Header Zone */}
+            <div className="w-full p-6 flex justify-between items-start z-50 relative shrink-0 h-[100px]">
+                {/* Home Button */}
+                <Link
+                    href="/"
+                    className="group p-2 rounded-full text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 transition-colors"
+                    title="Return Home"
+                >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                    </svg>
+                </Link>
+
+                {/* Action Buttons */}
+                {currentArtwork && !error && (
+                    <div className="flex gap-2">
+                        <button
+                            onClick={handleDownload}
+                            className="group p-2 rounded-full text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 transition-colors"
+                            title="Download (4x Resolution)"
+                        >
+                            <Download className="w-5 h-5" />
+                        </button>
+                        {!isEncrypted && (
+                            <Link
+                                href={`/studio?artwork=${currentArtwork === 'text' ? 'textdesign' : currentArtwork}&token=${encodeURIComponent(tokenInput.trim())}`}
+                                className="group p-2 rounded-full text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 transition-colors"
+                                title="Open in Studio"
+                            >
+                                <ExternalLink className="w-5 h-5" />
+                            </Link>
+                        )}
+                    </div>
+                )}
+            </div>
+
+            {/* Input Area - Absolute Centered (Safe from Header) */}
             <div
-                className="absolute top-24 md:top-8 left-1/2 -translate-x-1/2 z-40 transition-opacity duration-300"
+                className="absolute top-24 left-1/2 -translate-x-1/2 z-50 transition-opacity duration-300"
                 style={{ opacity: currentArtwork && !isHoveringInput ? 0 : 1 }}
                 onMouseEnter={() => setIsHoveringInput(true)}
                 onMouseLeave={() => setIsHoveringInput(false)}
@@ -227,30 +253,8 @@ export default function ViewPage() {
                 </div>
             </div>
 
-            {/* Buttons - Top Right of Page (outside canvas) */}
-            {currentArtwork && !error && (
-                <div className="absolute top-6 right-6 flex gap-2 z-50">
-                    <button
-                        onClick={handleDownload}
-                        className="group p-2 rounded-full text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 transition-colors"
-                        title="Download (4x Resolution)"
-                    >
-                        <Download className="w-5 h-5" />
-                    </button>
-                    {!isEncrypted && (
-                        <Link
-                            href={`/studio?artwork=${currentArtwork === 'text' ? 'textdesign' : currentArtwork}&token=${encodeURIComponent(tokenInput.trim())}`}
-                            className="group p-2 rounded-full text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 transition-colors"
-                            title="Open in Studio"
-                        >
-                            <ExternalLink className="w-5 h-5" />
-                        </Link>
-                    )}
-                </div>
-            )}
-
-            {/* Artwork Display */}
-            <div className="flex-1 w-full flex items-center justify-center relative z-10" style={{ perspective: '1500px' }}>
+            {/* Main Content Zone - The Card */}
+            <div className="flex-1 w-full flex items-center justify-center p-4 min-h-0 z-10" style={{ perspective: '1500px' }}>
                 {currentArtwork && !error && ArtworkComponent && params ? (
                     <>
                         <div className="relative flex items-center justify-center">
