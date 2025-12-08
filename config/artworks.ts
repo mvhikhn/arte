@@ -19,6 +19,11 @@ import TreeControls from '@/components/TreeControls';
 import TextDesignControls from '@/components/TextDesignControls';
 import LambControls from '@/components/LambControls';
 import FlowGenericControls from '@/components/FlowGenericControls';
+import GridGenericControls from '@/components/GridGenericControls';
+import MosaicGenericControls from '@/components/MosaicGenericControls';
+import RotatedGridGenericControls from '@/components/RotatedGridGenericControls';
+import TreeGenericControls from '@/components/TreeGenericControls';
+import LambGenericControls from '@/components/LambGenericControls';
 
 // Generators
 import {
@@ -53,7 +58,7 @@ export const ARTWORKS: Record<string, ArtworkDefinition> = {
         title: 'Grid System',
         description: 'Structured chaos',
         component: GridArtwork,
-        controls: GridControls,
+        controls: GridGenericControls,
         generator: generateGridParamsFromToken,
         randomGenerator: createRandomGenerator('grid', generateGridParamsFromToken),
         defaultParams: generateGridParamsFromToken(generateToken('grid'))
@@ -63,7 +68,7 @@ export const ARTWORKS: Record<string, ArtworkDefinition> = {
         title: 'Mosaic',
         description: 'Tiled patterns',
         component: MosaicArtwork,
-        controls: MosaicControls,
+        controls: MosaicGenericControls,
         generator: generateMosaicParamsFromToken,
         randomGenerator: createRandomGenerator('mosaic', generateMosaicParamsFromToken),
         regenerator: (currentParams: any) => {
@@ -86,7 +91,7 @@ export const ARTWORKS: Record<string, ArtworkDefinition> = {
         title: 'Rotated Grid',
         description: 'Angular compositions',
         component: RotatedGridArtwork,
-        controls: RotatedGridControls,
+        controls: RotatedGridGenericControls,
         generator: generateRotatedGridParamsFromToken,
         randomGenerator: createRandomGenerator('rotated', generateRotatedGridParamsFromToken),
         regenerator: (currentParams: any) => {
@@ -108,9 +113,9 @@ export const ARTWORKS: Record<string, ArtworkDefinition> = {
     tree: {
         id: 'tree',
         title: 'Recursive Tree',
-        description: 'Organic growth algorithms',
+        description: 'Organic growth patterns',
         component: TreeArtwork,
-        controls: TreeControls,
+        controls: TreeGenericControls,
         generator: generateTreeParamsFromToken,
         randomGenerator: createRandomGenerator('tree', generateTreeParamsFromToken),
         regenerator: (currentParams: any) => {
@@ -185,7 +190,7 @@ export const ARTWORKS: Record<string, ArtworkDefinition> = {
         title: 'Lamb',
         description: 'Generative noise field',
         component: LambArtwork,
-        controls: LambControls,
+        controls: LambGenericControls,
         generator: generateLambParamsFromToken,
         randomGenerator: createRandomGenerator('lamb', generateLambParamsFromToken),
         defaultParams: generateLambParamsFromToken(generateToken('lamb'))

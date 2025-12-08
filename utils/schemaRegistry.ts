@@ -84,6 +84,10 @@ export const PARAM_SCHEMAS: Record<string, ParamSchema> = {
             backgroundFade: { type: 'range', label: 'Trails', min: 1, max: 50, step: 1, section: 'Style' },
             strokeWeightMin: { type: 'range', label: 'Min Stroke', min: 0.1, max: 5, step: 0.1, section: 'Style' },
             strokeWeightMax: { type: 'range', label: 'Max Stroke', min: 0.1, max: 5, step: 0.1, section: 'Style' },
+
+            // Canvas
+            canvasWidth: { type: 'range', label: 'Width', min: 400, max: 2000, step: 10, section: 'Canvas' },
+            canvasHeight: { type: 'range', label: 'Height', min: 400, max: 2000, step: 10, section: 'Canvas' },
         }
     },
     grid: {
@@ -99,6 +103,30 @@ export const PARAM_SCHEMAS: Record<string, ParamSchema> = {
             isAnimating: true,
             exportWidth: 1600,
             exportHeight: 2000,
+        },
+        controls: {
+            // Grid Settings
+            minColumns: { type: 'range', label: 'Min Columns', min: 3, max: 8, step: 1, section: 'Grid Settings' },
+            maxColumns: { type: 'range', label: 'Max Columns', min: 6, max: 12, step: 1, section: 'Grid Settings' },
+            minModuleSize: { type: 'range', label: 'Min Module', min: 20, max: 100, step: 1, section: 'Grid Settings' },
+            maxDepth: { type: 'range', label: 'Max Depth', min: 1, max: 4, step: 1, section: 'Grid Settings' },
+            subdivideChance: { type: 'range', label: 'Subdivide', min: 0, max: 1, step: 0.01, section: 'Grid Settings' },
+
+            // Animation
+            animationSpeed: { type: 'range', label: 'Speed', min: 0.001, max: 0.15, step: 0.001, section: 'Animation' },
+            crossSize: { type: 'range', label: 'Cross Size', min: 0.3, max: 1, step: 0.01, section: 'Animation' },
+
+            // Colors
+            backgroundColor: { type: 'color', label: 'Background', section: 'Colors' },
+            borderColor: { type: 'color', label: 'Border', section: 'Colors' },
+            color1: { type: 'color', label: 'Color 1', section: 'Colors' },
+            color2: { type: 'color', label: 'Color 2', section: 'Colors' },
+            color3: { type: 'color', label: 'Color 3', section: 'Colors' },
+            color4: { type: 'color', label: 'Color 4', section: 'Colors' },
+
+            // Canvas
+            canvasWidth: { type: 'range', label: 'Width', min: 400, max: 2000, step: 10, section: 'Canvas' },
+            canvasHeight: { type: 'range', label: 'Height', min: 400, max: 2000, step: 10, section: 'Canvas' },
         }
     },
     mosaic: {
@@ -116,6 +144,40 @@ export const PARAM_SCHEMAS: Record<string, ParamSchema> = {
             canvasHeight: 790,
             exportWidth: 1600,
             exportHeight: 2000,
+        },
+        controls: {
+            // Initial Rectangle
+            initialRectMinSize: { type: 'range', label: 'Min Size', min: 0.2, max: 0.8, step: 0.01, section: 'Initial Rectangle' },
+            initialRectMaxSize: { type: 'range', label: 'Max Size', min: 0.4, max: 1, step: 0.01, section: 'Initial Rectangle' },
+
+            // Division
+            gridDivisionChance: { type: 'range', label: 'Grid Chance', min: 0, max: 1, step: 0.01, section: 'Division' },
+            recursionChance: { type: 'range', label: 'Recursion', min: 0, max: 1, step: 0.01, section: 'Division' },
+            minRecursionSize: { type: 'range', label: 'Min Size', min: 20, max: 100, step: 1, section: 'Division' },
+
+            // Grid Settings
+            minGridRows: { type: 'range', label: 'Min Rows', min: 2, max: 6, step: 1, section: 'Grid Settings' },
+            maxGridRows: { type: 'range', label: 'Max Rows', min: 3, max: 10, step: 1, section: 'Grid Settings' },
+            minGridCols: { type: 'range', label: 'Min Cols', min: 2, max: 6, step: 1, section: 'Grid Settings' },
+            maxGridCols: { type: 'range', label: 'Max Cols', min: 3, max: 10, step: 1, section: 'Grid Settings' },
+
+            // Details
+            splitRatioMin: { type: 'range', label: 'Split Min', min: 0.1, max: 0.4, step: 0.01, section: 'Details' },
+            splitRatioMax: { type: 'range', label: 'Split Max', min: 0.6, max: 0.9, step: 0.01, section: 'Details' },
+            marginMultiplier: { type: 'range', label: 'Margin', min: 0.05, max: 0.3, step: 0.001, section: 'Details' },
+            detailGridMin: { type: 'range', label: 'Detail Min', min: 2, max: 4, step: 1, section: 'Details' },
+            detailGridMax: { type: 'range', label: 'Detail Max', min: 3, max: 6, step: 1, section: 'Details' },
+            noiseDensity: { type: 'range', label: 'Noise', min: 0, max: 0.3, step: 0.001, section: 'Details' },
+
+            // Colors
+            color1: { type: 'color', label: 'Color 1', section: 'Colors' },
+            color2: { type: 'color', label: 'Color 2', section: 'Colors' },
+            color3: { type: 'color', label: 'Color 3', section: 'Colors' },
+            color4: { type: 'color', label: 'Color 4', section: 'Colors' },
+
+            // Canvas
+            canvasWidth: { type: 'range', label: 'Width', min: 400, max: 2000, step: 10, section: 'Canvas' },
+            canvasHeight: { type: 'range', label: 'Height', min: 400, max: 2000, step: 10, section: 'Canvas' },
         }
     },
     rotated: {
@@ -131,6 +193,30 @@ export const PARAM_SCHEMAS: Record<string, ParamSchema> = {
             isAnimating: true,
             exportWidth: 1600,
             exportHeight: 2000,
+        },
+        controls: {
+            // Layout
+            offsetRatio: { type: 'range', label: 'Offset', min: 0.01, max: 0.15, step: 0.001, section: 'Layout' },
+            marginRatio: { type: 'range', label: 'Margin', min: 0.1, max: 0.5, step: 0.01, section: 'Layout' },
+
+            // Grid Settings
+            minCellCount: { type: 'range', label: 'Min Cells', min: 2, max: 4, step: 1, section: 'Grid Settings' },
+            maxCellCount: { type: 'range', label: 'Max Cells', min: 3, max: 6, step: 1, section: 'Grid Settings' },
+            minRecursionSize: { type: 'range', label: 'Min Size', min: 0.03, max: 0.15, step: 0.001, section: 'Grid Settings' },
+
+            // Style
+            strokeWeight: { type: 'range', label: 'Stroke', min: 0.5, max: 4, step: 0.1, section: 'Style' },
+
+            // Colors
+            backgroundColor: { type: 'color', label: 'Background', section: 'Colors' },
+            color1: { type: 'color', label: 'Color 1', section: 'Colors' },
+            color2: { type: 'color', label: 'Color 2', section: 'Colors' },
+            color3: { type: 'color', label: 'Color 3', section: 'Colors' },
+            color4: { type: 'color', label: 'Color 4', section: 'Colors' },
+
+            // Canvas
+            canvasWidth: { type: 'range', label: 'Width', min: 400, max: 2000, step: 10, section: 'Canvas' },
+            canvasHeight: { type: 'range', label: 'Height', min: 400, max: 2000, step: 10, section: 'Canvas' },
         }
     },
     tree: {
@@ -179,6 +265,46 @@ export const PARAM_SCHEMAS: Record<string, ParamSchema> = {
             exportWidth: 1600,
             exportHeight: 2000,
             isAnimating: true,
+        },
+        controls: {
+            // Tree Structure
+            initialPaths: { type: 'range', label: 'Initial Branches', min: 1, max: 5, step: 1, section: 'Tree Structure' },
+            initialVelocity: { type: 'range', label: 'Initial Velocity', min: 5, max: 20, step: 0.5, section: 'Tree Structure' },
+            branchProbability: { type: 'range', label: 'Branch Probability', min: 0.05, max: 0.4, step: 0.01, section: 'Tree Structure' },
+            diameterShrink: { type: 'range', label: 'Diameter Shrink', min: 0.5, max: 0.8, step: 0.01, section: 'Tree Structure' },
+            minDiameter: { type: 'range', label: 'Min Diameter', min: 0.1, max: 1.0, step: 0.05, section: 'Tree Structure' },
+
+            // Movement
+            bumpMultiplier: { type: 'range', label: 'Bump Strength', min: 0.1, max: 0.5, step: 0.01, section: 'Movement' },
+            velocityRetention: { type: 'range', label: 'Velocity Retention', min: 0.5, max: 0.95, step: 0.01, section: 'Movement' },
+            speedMin: { type: 'range', label: 'Speed Min', min: 3, max: 8, step: 0.5, section: 'Movement' },
+            speedMax: { type: 'range', label: 'Speed Max', min: 8, max: 15, step: 0.5, section: 'Movement' },
+
+            // Visual
+            finishedCircleSize: { type: 'range', label: 'Tip Circle Size', min: 5, max: 20, step: 0.5, section: 'Visual' },
+            strokeWeightMultiplier: { type: 'range', label: 'Stroke Weight', min: 0.5, max: 2.0, step: 0.05, section: 'Visual' },
+            grainAmount: { type: 'range', label: 'Grain Amount', min: 0, max: 50, step: 1, section: 'Global Settings' },
+
+            // Colors
+            backgroundColor: { type: 'color', label: 'Background', section: 'Colors' },
+            stemColor1: { type: 'color', label: 'Stem Color 1', section: 'Colors' },
+            stemColor2: { type: 'color', label: 'Stem Color 2', section: 'Colors' },
+            stemColor3: { type: 'color', label: 'Stem Color 3', section: 'Colors' },
+            tipColor1: { type: 'color', label: 'Tip Color 1', section: 'Colors' },
+            tipColor2: { type: 'color', label: 'Tip Color 2', section: 'Colors' },
+            tipColor3: { type: 'color', label: 'Tip Color 3', section: 'Colors' },
+
+            // Text Overlay (Simplified)
+            textEnabled: { type: 'boolean', label: 'Enable Text', section: 'Text Overlay' },
+            textContent: { type: 'text', label: 'Text Content', section: 'Text Overlay' },
+            fontSize: { type: 'range', label: 'Font Size', min: 10, max: 100, step: 1, section: 'Text Overlay' },
+            textColor: { type: 'color', label: 'Text Color', section: 'Text Overlay' },
+            textX: { type: 'range', label: 'Position X', min: 0, max: 800, step: 10, section: 'Text Overlay' },
+            textY: { type: 'range', label: 'Position Y', min: 0, max: 800, step: 10, section: 'Text Overlay' },
+
+            // Canvas
+            canvasWidth: { type: 'range', label: 'Width', min: 400, max: 2000, step: 10, section: 'Canvas' },
+            canvasHeight: { type: 'range', label: 'Height', min: 400, max: 2000, step: 10, section: 'Canvas' },
         }
     },
     textdesign: {
@@ -229,6 +355,24 @@ export const PARAM_SCHEMAS: Record<string, ParamSchema> = {
             canvasWidth: 1200,
             canvasHeight: 370,
             isAnimating: true,
+        },
+        controls: {
+            // Grid Settings
+            cols: { type: 'range', label: 'Columns', min: 10, max: 200, step: 10, section: 'Grid Settings' },
+            rows: { type: 'range', label: 'Rows', min: 10, max: 200, step: 10, section: 'Grid Settings' },
+
+            // Physics
+            noiseScale: { type: 'range', label: 'Noise Scale', min: 0.001, max: 0.05, step: 0.001, section: 'Physics' },
+            lifeStep: { type: 'range', label: 'Life Step', min: 0.001, max: 0.02, step: 0.001, section: 'Physics' },
+            weiRangeMax: { type: 'range', label: 'Weight Range', min: 4, max: 512, step: 4, section: 'Physics' },
+
+            // Layout
+            wOff: { type: 'range', label: 'Width Offset', min: 0, max: 500, step: 10, section: 'Layout' },
+            hOff: { type: 'range', label: 'Height Offset', min: 0, max: 500, step: 10, section: 'Layout' },
+
+            // Canvas
+            canvasWidth: { type: 'range', label: 'Width', min: 400, max: 2000, step: 10, section: 'Canvas' },
+            canvasHeight: { type: 'range', label: 'Height', min: 400, max: 2000, step: 10, section: 'Canvas' },
         }
     }
 };
