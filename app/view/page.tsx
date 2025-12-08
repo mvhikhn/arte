@@ -188,11 +188,11 @@ export default function ViewPage() {
     const ArtworkComponent = currentArtwork ? ARTWORKS[currentArtwork].component : null;
 
     return (
-        <div className="fixed inset-0 bg-[#fafafa] flex flex-col items-center justify-center p-4 overflow-hidden z-0">
+        <div className="fixed inset-0 bg-[#fafafa] flex flex-col items-center justify-center p-4 overflow-hidden">
             {/* Home Button - Top Left */}
             <Link
                 href="/"
-                className="absolute top-6 left-6 group p-2 rounded-full text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 transition-colors z-30"
+                className="absolute top-6 left-6 group p-2 rounded-full text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 transition-colors z-50"
                 title="Return Home"
             >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -202,7 +202,7 @@ export default function ViewPage() {
 
             {/* Input Area - Fixed hover detection & Mobile Positioning */}
             <div
-                className="absolute top-24 md:top-8 left-1/2 -translate-x-1/2 z-20 transition-opacity duration-300"
+                className="absolute top-24 md:top-8 left-1/2 -translate-x-1/2 z-40 transition-opacity duration-300"
                 style={{ opacity: currentArtwork && !isHoveringInput ? 0 : 1 }}
                 onMouseEnter={() => setIsHoveringInput(true)}
                 onMouseLeave={() => setIsHoveringInput(false)}
@@ -229,7 +229,7 @@ export default function ViewPage() {
 
             {/* Buttons - Top Right of Page (outside canvas) */}
             {currentArtwork && !error && (
-                <div className="absolute top-6 right-6 flex gap-2 z-30">
+                <div className="absolute top-6 right-6 flex gap-2 z-50">
                     <button
                         onClick={handleDownload}
                         className="group p-2 rounded-full text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 transition-colors"
@@ -250,7 +250,7 @@ export default function ViewPage() {
             )}
 
             {/* Artwork Display */}
-            <div className="flex-1 w-full flex items-center justify-center relative" style={{ perspective: '1500px' }}>
+            <div className="flex-1 w-full flex items-center justify-center relative z-10" style={{ perspective: '1500px' }}>
                 {currentArtwork && !error && ArtworkComponent && params ? (
                     <>
                         <div className="relative flex items-center justify-center">
