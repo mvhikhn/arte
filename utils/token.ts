@@ -35,15 +35,14 @@ export function validateToken(token: string, artworkType?: string): boolean {
 
     if (hasArtworkType) {
         // Token format: fx-[type]-[44 random chars][2 checksum]
-        // Check if this is a v2/v2e/v4 state token (new secure format)
+        // Check if this is a v2/v4 state token (new secure format)
         // Format: fx-[type]-v2.[hash].[data]
-        // Format: fx-[type]-v2e.[hash].[data]
         // Format: fx-[type]-v4.[hash].[data]
         // Check this FIRST because data can contain hyphens, breaking the split('-') logic below
-        if (token.includes('-v2.') || token.includes('-v2e.') || token.includes('-v4.')) {
-            // Simple regex check for format - v4 uses 8-char hash, v2/v2e uses 16-char hash
+        if (token.includes('-v2.') || token.includes('-v4.')) {
+            // Simple regex check for format - v4 uses 8-char hash, v2 uses 16-char hash
             // For v4, the data part can contain special Base91 characters
-            return /^fx-(flow|grid|mosaic|rotated|tree|text|textdesign|lamb)-v(2e?|4)\.([a-f0-9]+)\.(.+)$/.test(token);
+            return /^fx-(flow|grid|mosaic|rotated|tree|text|textdesign|lamb)-v(2|4)\.([a-f0-9]+)\.(.+)$/.test(token);
         }
 
         const parts = token.split('-');
@@ -113,8 +112,8 @@ export function validateToken(token: string, artworkType?: string): boolean {
 }
 
 export function getTokenArtworkType(token: string): ArtworkType | null {
-    // Check for v2/v2e/v4 format first
-    const vMatch = token.match(/^fx-(flow|grid|mosaic|rotated|tree|text|textdesign|lamb)-v(2e?|4)\./);
+    // Check for v2/v4 format first
+    const vMatch = token.match(/^fx-(flow|grid|mosaic|rotated|tree|text|textdesign|lamb)-v(2|4)\./);
     if (vMatch) {
         return vMatch[1] as ArtworkType;
     }

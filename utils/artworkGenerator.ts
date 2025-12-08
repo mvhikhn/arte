@@ -14,7 +14,7 @@ const randomInRange = (min: number, max: number) => Math.random() * (max - min) 
 // Generate flow params from a token (deterministic)
 export const generateFlowParamsFromToken = (token: string): ArtworkParams => {
     // Check for encoded params (v2 state tokens)
-    if (token.includes("-v2.") || token.includes("-v2e.")) {
+    if (token.includes("-v2.")) {
         const result = decodeParamsSync(token);
         if (result) {
             return result.params as ArtworkParams;
@@ -103,7 +103,7 @@ export const generateFlowParamsFromToken = (token: string): ArtworkParams => {
 // Generate grid params from token
 export const generateGridParamsFromToken = (token: string): GridArtworkParams => {
     // Check for encoded params (v2 state tokens)
-    if (token.includes("-v2.") || token.includes("-v2e.")) {
+    if (token.includes("-v2.")) {
         const result = decodeParamsSync(token);
         if (result) {
             return result.params as GridArtworkParams;
@@ -148,7 +148,7 @@ export const generateGridParamsFromToken = (token: string): GridArtworkParams =>
 // Generate mosaic params from token
 export const generateMosaicParamsFromToken = (token: string): MosaicArtworkParams => {
     // Check for encoded params (v2 state tokens)
-    if (token.includes("-v2.") || token.includes("-v2e.")) {
+    if (token.includes("-v2.")) {
         const result = decodeParamsSync(token);
         if (result) {
             return result.params as MosaicArtworkParams;
@@ -198,7 +198,7 @@ export const generateMosaicParamsFromToken = (token: string): MosaicArtworkParam
 // Generate rotated grid params from token
 export const generateRotatedGridParamsFromToken = (token: string): RotatedGridArtworkParams => {
     // Check for encoded params (v2 state tokens)
-    if (token.includes("-v2.") || token.includes("-v2e.")) {
+    if (token.includes("-v2.")) {
         const result = decodeParamsSync(token);
         if (result) {
             return result.params as RotatedGridArtworkParams;
@@ -240,7 +240,7 @@ export const generateRotatedGridParamsFromToken = (token: string): RotatedGridAr
 // Generate tree params from token
 export const generateTreeParamsFromToken = (token: string): TreeArtworkParams => {
     // Check for encoded params (v2 state tokens)
-    if (token.includes("-v2.") || token.includes("-v2e.")) {
+    if (token.includes("-v2.")) {
         const result = decodeParamsSync(token);
         if (result) {
             return result.params as TreeArtworkParams;
@@ -314,7 +314,7 @@ export const generateTreeParamsFromToken = (token: string): TreeArtworkParams =>
 // Generate text design params from token
 export const generateTextDesignParamsFromToken = (token: string): TextDesignArtworkParams => {
     // Check for encoded params (v2 state tokens)
-    if (token.includes("-v2.") || token.includes("-v2e.")) {
+    if (token.includes("-v2.")) {
         const result = decodeParamsSync(token);
         if (result) {
             return result.params as TextDesignArtworkParams;
@@ -403,7 +403,7 @@ export const generateTextDesignParamsFromToken = (token: string): TextDesignArtw
 // Generate lamb params from token
 export const generateLambParamsFromToken = (token: string): LambArtworkParams => {
     // Check for encoded params (v2 state tokens)
-    if (token.includes("-v2.") || token.includes("-v2e.")) {
+    if (token.includes("-v2.")) {
         const result = decodeParamsSync(token);
         if (result) {
             return result.params as LambArtworkParams;

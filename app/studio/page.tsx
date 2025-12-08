@@ -10,7 +10,7 @@ import { EmailVerificationModal } from "@/components/EmailVerificationModal";
 import { ArrowLeft, SlidersHorizontal, RefreshCw, Shuffle, Download, Link2, Check, Sparkles } from "lucide-react";
 import { hasGifAccess, grantGifAccess } from "@/lib/paymentUtils";
 import { validateToken } from "@/utils/token";
-import { encodeParams, encodeParamsSecure, encodeParamsV4 } from "@/utils/serialization";
+import { encodeParams, encodeParamsV4 } from "@/utils/serialization";
 import { PurchaseModal } from "@/components/PurchaseModal";
 
 // Force dynamic rendering
@@ -65,16 +65,17 @@ function StudioContent() {
   const handleGetSecureLink = async () => {
     setSecureLinkStatus({ loading: true, copied: false });
     try {
-      const token = await encodeParamsSecure(currentArtwork, currentParams);
+      // Use v2 local token (unencrypted but validated)
+      const token = encodeParams(currentArtwork, currentParams);
       await navigator.clipboard.writeText(token);
       setSecureLinkStatus({ loading: false, copied: true });
       setTimeout(() => {
         setSecureLinkStatus(prev => ({ ...prev, copied: false }));
       }, 2000);
     } catch (error) {
-      console.error("Failed to generate secure link:", error);
+      console.error("Failed to generate link:", error);
       setSecureLinkStatus({ loading: false, copied: false });
-      alert("Failed to generate secure link. Please try again.");
+      alert("Failed to copy link. Please try again.");
     }
   };
 

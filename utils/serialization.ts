@@ -6,14 +6,13 @@
  * 
  * Token Formats:
  * - v2:  fx-{type}-v2.{sha256hash16}.{compressedData}   (local, unencrypted)
- * - v2e: fx-{type}-v2e.{sha256hash16}.{encryptedData}   (server-encrypted)
- * - v4:  fx-{type}-v4.{sha256hash8}.{compressedData}    (aggressive compression + provenance)
+ * - v4:  fx-{type}-v4.{sha256hash8}.{compressedData}    (encrypted + provenance)
  * 
  * Hybrid approach:
  * - encodeParams: Synchronous, local compression + hash (for instant UI feedback)
- * - encodeParamsSecure: Async, server-side AES encryption (for sharing)
  * - encodeParamsV4: Async, aggressive compression + provenance (for selling)
- * - decodeParams: Automatic detection of all token versions
+ * - decodeParams: Automatic detection of v2 tokens
+ * - decodeParamsUniversal: Handles v2 and v4 tokens
  */
 
 import LZString from 'lz-string';
@@ -130,94 +129,17 @@ export const encodeParams = (type: string, params: any): string => {
 };
 
 /**
- * Async encode with server-side encryption - for secure sharing.
- * Falls back to local encoding if server unavailable.
- * 
- * Token format: fx-{type}-v2e.{hash}.{encrypted}
- */
-export const encodeParamsSecure = async (type: string, params: any): Promise<string> => {
-    const canonical = canonicalize(params);
-    const hash = await sha256Async(canonical);
-    const compressed = compress(canonical);
-
-    // If no endpoint configured, return local token
-    if (!ENCRYPT_ENDPOINT) {
-        return `fx-${type}-v2.${hash}.${compressed}`;
-    }
-
-    try {
-        const response = await fetch(ENCRYPT_ENDPOINT, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ type, data: compressed, hash }),
-        });
-
-        if (!response.ok) {
-            throw new Error(`Encryption service error: ${response.status}`);
-        }
-
-        const { token, error } = await response.json();
-
-        if (error) {
-            throw new Error(error);
-        }
-
-        // Return encrypted token with 'e' suffix to indicate encrypted
-        return token.replace('-v2.', '-v2e.');
-    } catch (error) {
-        console.error('Encryption service failed:', error);
-        throw new Error('Encryption failed. Please check your connection and try again.');
-    }
-};
-
-/**
- * Decode a token back into artwork parameters.
- * Automatically handles both local (v2) and encrypted (v2e) tokens.
+ * Decode a v2 token back into artwork parameters.
  */
 export const decodeParams = async (token: string): Promise<{ type: ArtworkType; params: any }> => {
-    // Parse token: fx-{type}-v2[e].{hash}.{data}
-    const match = token.match(/^fx-(\w+)-v2(e)?\.([a-f0-9]+)\.(.+)$/);
+    // Parse token: fx-{type}-v2.{hash}.{data}
+    const match = token.match(/^fx-(\w+)-v2\.([a-f0-9]+)\.(.+)$/);
 
     if (!match) {
         throw new Error('Invalid token format. Expected: fx-{type}-v2.{hash}.{data}');
     }
 
-    const [, type, encrypted, providedHash, data] = match;
-
-    if (encrypted === 'e' && DECRYPT_ENDPOINT) {
-        // Encrypted token - use server decryption
-        try {
-            const response = await fetch(DECRYPT_ENDPOINT, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ token }),
-            });
-
-            if (!response.ok) {
-                throw new Error(`Decryption service error: ${response.status}`);
-            }
-
-            const result = await response.json();
-
-            if (result.error) {
-                throw new Error(result.error);
-            }
-
-            const canonical = decompress(result.data);
-            if (!canonical) {
-                console.error("Decompression failed. Received data:", result.data);
-                throw new Error(`Decompression failed. Data start: ${result.data?.substring(0, 50)}...`);
-            }
-
-            // For v2e tokens, we TRUST the server's validation.
-            // The server already validated the hash against the decrypted data.
-            // We do NOT need to re-validate locally.
-            return { type: type as ArtworkType, params: JSON.parse(canonical) };
-        } catch (error) {
-            console.error('Decryption service failed:', error);
-            throw error;
-        }
-    }
+    const [, type, providedHash, data] = match;
 
     // Local token (v2) - decompress and validate locally
     const canonical = decompress(data);
@@ -269,10 +191,10 @@ export const decodeParamsSync = (token: string): { type: ArtworkType; params: an
 
 /**
  * Validate a token format without decoding.
- * Supports v2, v2e, and v4 tokens.
+ * Supports v2 and v4 tokens.
  */
 export const validateTokenFormat = (token: string): boolean => {
-    return /^fx-(\w+)-v(2e?|4)\.([a-f0-9]+)\.(.+)$/.test(token);
+    return /^fx-(\w+)-v(2|4)\.([a-f0-9]+)\.(.+)$/.test(token);
 };
 
 /**
@@ -281,13 +203,6 @@ export const validateTokenFormat = (token: string): boolean => {
 export const getTokenType = (token: string): ArtworkType | null => {
     const match = token.match(/^fx-(\w+)-v(2|4)/);
     return match ? (match[1] as ArtworkType) : null;
-};
-
-/**
- * Check if a token uses server-side encryption.
- */
-export const isEncryptedToken = (token: string): boolean => {
-    return token.includes('-v2e.');
 };
 
 /**

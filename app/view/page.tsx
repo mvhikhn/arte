@@ -78,7 +78,7 @@ export default function ViewPage() {
         if (validateToken(trimmedToken, artworkType)) {
             setCurrentArtwork(artworkType);
             setError(null);
-            setIsEncrypted(trimmedToken.includes('-v2e.'));
+            setIsEncrypted(false); // v2e is deprecated, only v4 is encrypted
             setIsV4(trimmedToken.includes('-v4.'));
 
             // Async decoding to support all token versions
@@ -91,12 +91,6 @@ export default function ViewPage() {
                         const result = await decodeParamsUniversal(trimmedToken);
                         setParams(result.params);
                         setProvenance(result.provenance || null);
-                    } else if (trimmedToken.includes("-v2e.")) {
-                        // v2e tokens
-                        const { decodeParams } = await import("@/utils/serialization");
-                        const result = await decodeParams(trimmedToken);
-                        setParams(result.params);
-                        setProvenance(null);
                     } else {
                         // v1/v2 tokens - use generator from registry
                         const generator = ARTWORKS[artworkType].generator;
