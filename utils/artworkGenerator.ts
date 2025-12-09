@@ -431,20 +431,20 @@ export const generateLambParamsFromToken = (token: string): LambArtworkParams =>
     };
 };
 
-// Studioyorktown-style palettes (Clean, Vector, Vibrant or Pastel)
+// Studioyorktown-style palettes (Clean, Vector, Print-like)
 const isoCubePalettes = [
-    // 1. "SimCity 2000" (Classic Beige/Grey/Red)
-    { bg: '#e8e8e8', colors: ['#9c9c9c', '#b0b0b0', '#d45d5d', '#e0e0e0'] },
-    // 2. "Cyber Muted" (Dark Slate, Teal, Orange)
-    { bg: '#1a1f26', colors: ['#3b4252', '#4c566a', '#88c0d0', '#bf616a'] },
-    // 3. "Sunset Vector" (Pink, Purple, Peach)
-    { bg: '#2d1b2e', colors: ['#b06c85', '#ef8d6e', '#f4b9b2', '#ffeed0'] },
-    // 4. "Blueprint" (Blue on Blue)
-    { bg: '#002b36', colors: ['#073642', '#586e75', '#839496', '#2aa198'] },
-    // 5. "Tokyo Day" (White, Light Grey, Blue Glass)
-    { bg: '#f0f4f8', colors: ['#ffffff', '#dee2e6', '#a5d8ff', '#4dabf7'] },
-    // 6. "Industrial Rust" (Brown, Grey, Orange)
-    { bg: '#2b2520', colors: ['#4a403a', '#736b60', '#d65a31', '#eeeeee'] },
+    // 1. "Blueprint 2.0" (Clean Cyan/Blue)
+    { bg: '#e0f7fa', colors: ['#006064', '#0097a7', '#4dd0e1', '#b2ebf2'] },
+    // 2. "Salmon & Grey" (Architectural)
+    { bg: '#f5f5f5', colors: ['#2d3436', '#636e72', '#ff7675', '#fab1a0'] },
+    // 3. "Mint City" (Pastel Green/Pink)
+    { bg: '#f1f8e9', colors: ['#558b2f', '#8bc34a', '#dcedc8', '#f8bbd0'] },
+    // 4. "Night Vector" (Dark Navy, Neon Accents)
+    { bg: '#1a1a2e', colors: ['#16213e', '#0f3460', '#e94560', '#fcdab7'] },
+    // 5. "Solar Punk" (Cream, Orange, Teal)
+    { bg: '#fdfbf7', colors: ['#264653', '#2a9d8f', '#e9c46a', '#f4a261'] },
+    // 6. "Monochrome Hard" (Black/White/Red)
+    { bg: '#ffffff', colors: ['#000000', '#2d2d2d', '#d63031', '#636e72'] },
 ];
 
 // Window type options
