@@ -431,20 +431,16 @@ export const generateLambParamsFromToken = (token: string): LambArtworkParams =>
     };
 };
 
-// Studioyorktown-style palettes (Clean, Vector, Print-like)
+// User-provided Studioyorktown palettes
 const isoCubePalettes = [
-    // 1. "Blueprint 2.0" (Clean Cyan/Blue)
-    { bg: '#e0f7fa', colors: ['#006064', '#0097a7', '#4dd0e1', '#b2ebf2'] },
-    // 2. "Salmon & Grey" (Architectural)
-    { bg: '#f5f5f5', colors: ['#2d3436', '#636e72', '#ff7675', '#fab1a0'] },
-    // 3. "Mint City" (Pastel Green/Pink)
-    { bg: '#f1f8e9', colors: ['#558b2f', '#8bc34a', '#dcedc8', '#f8bbd0'] },
-    // 4. "Night Vector" (Dark Navy, Neon Accents)
-    { bg: '#1a1a2e', colors: ['#16213e', '#0f3460', '#e94560', '#fcdab7'] },
-    // 5. "Solar Punk" (Cream, Orange, Teal)
-    { bg: '#fdfbf7', colors: ['#264653', '#2a9d8f', '#e9c46a', '#f4a261'] },
-    // 6. "Monochrome Hard" (Black/White/Red)
-    { bg: '#ffffff', colors: ['#000000', '#2d2d2d', '#d63031', '#636e72'] },
+    // 1. Blue/Yellow/Dark
+    { bg: '#00161e', colors: ['#00aff0', '#fcb344', '#000c4c', '#0786c3'] },
+    // 2. Muted Purple/Grey
+    { bg: '#f2e5e3', colors: ['#22223b', '#4a4e69', '#8b9799', '#c9ada7'] },
+    // 3. Vibrant Neon
+    { bg: '#3a86ff', colors: ['#ead838', '#fb5607', '#ff006e', '#8338ec'] },
+    // 4. Dark/Beige/Orange
+    { bg: '#071013', colors: ['#f0b67f', '#e5cea9', '#dfdfcc', '#ff3300'] }
 ];
 
 // Window type options

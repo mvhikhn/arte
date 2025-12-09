@@ -3,77 +3,120 @@
 import { useEffect, useRef, forwardRef, useImperativeHandle } from "react";
 import { tokenToSeed, createSeededRandom } from "@/utils/token";
 
+// VERTEX SHADER
 const vertShader = `
 precision highp float;
 
+// attributes, in
 attribute vec3 aPosition;
 attribute vec3 aNormal;
 attribute vec2 aTexCoord;
 
+// attributes, out
 varying vec3 var_vertPos;
 varying vec3 var_vertNormal;
 varying vec2 var_vertTexCoord;
+varying vec4 var_centerGlPosition;
 
+// matrices
 uniform mat4 uModelViewMatrix;
 uniform mat4 uProjectionMatrix;
 uniform mat3 uNormalMatrix;
 
 void main() {
-  vec3 pos = aPosition;
+  vec3 pos = aPosition;  
   gl_Position = uProjectionMatrix * uModelViewMatrix * vec4(pos, 1.0);
 
-  var_vertPos = pos;
-  var_vertNormal = aNormal;
+  // set out value
+  var_vertPos      = pos;
+  var_vertNormal   =  aNormal;
   var_vertTexCoord = aTexCoord;
+  var_centerGlPosition = uProjectionMatrix * uModelViewMatrix * vec4(0., 0., 0., 1.0);
 }
 `;
 
-// Fragment shader: Flat shading + Grain + Texture
+// FRAGMENT SHADER
 const createFragShader = (grainIntensity: number) => `
 precision highp float;
 
 uniform vec2 u_resolution;
-uniform vec3 u_lightDir; // Direction of main light
-uniform sampler2D u_tex; // The facade texture
+uniform vec3 u_lightDir;
+uniform sampler2D u_tex;
+uniform mat3 uNormalMatrix; // p5 standard
 
+// attributes, in
+varying vec4 var_centerGlPosition;
 varying vec3 var_vertNormal;
 varying vec2 var_vertTexCoord;
 
-// Simple pseudo-random
-float random(vec2 st) {
-    return fract(sin(dot(st.xy, vec2(12.9898,78.233))) * 43758.5453123);
+float random (in vec2 st) {
+   	highp float a = 12.9898;
+    highp float b = 78.233;
+    highp float c = 43758.5453;
+    highp float dt= dot(st.xy ,vec2(a,b));
+    highp float sn= mod(dt,3.14);
+    return fract(sin(sn) * c);
+}
+
+float noise(vec2 st) {
+    vec2 i = vec2(0.);
+	i = floor(st);
+    vec2 f = vec2(0.);
+	f = fract(st);
+    vec2 u =  vec2(0.);
+	u = f*f*(3.0-2.0*f);
+    return mix( mix( random( i + vec2(0.0,0.0) ),
+                     random( i + vec2(1.0,0.0) ), u.x),
+                mix( random( i + vec2(0.0,1.0) ),
+                     random( i + vec2(1.0,1.0) ), u.x), u.y);
 }
 
 void main() {
-  vec2 st = gl_FragCoord.xy / u_resolution.xy;
-  
-  // 1. Calculate Lighting
-  vec3 normal = normalize(var_vertNormal);
-  vec3 light = normalize(u_lightDir);
-  
-  // Standard diffuse
-  float dot_val = max(dot(normal, light), 0.0);
-  
-  // Boost light slightly for flat look clarity
-  float lightIntensity = 0.5 + 0.5 * dot_val;
-  
-  vec4 texColor = texture2D(u_tex, var_vertTexCoord);
-  
-  // Lighting
-  vec3 col = texColor.rgb * (0.6 + 0.4 * dot_val);
+    vec2 st = gl_FragCoord.xy/u_resolution.xy;
+	st.x *= u_resolution.x/u_resolution.y;
 
-  // 2. Grain
-  if (${grainIntensity.toFixed(4)} > 0.001) {
-      float noiseVal = random(st * 999.0);
-      float grainAmount = ${grainIntensity.toFixed(4)};
-      col -= (noiseVal * grainAmount);
-  }
+	// centerPos logic from provided code
+	vec2 centerPos = var_centerGlPosition.xy/var_centerGlPosition.w; // Perspective divide
+	centerPos = (centerPos + 1.0)*0.5; // Map -1..1 to 0..1
+	centerPos.x *= u_resolution.x/u_resolution.y; // Aspect correction
+	
+	// Lighting
+	// Original code used uniform mat3 uNormalMatrix explicitly but p5 passes it.
+	// We need normal in view space? Or world?
+	// The provided code: normalize(uNormalMatrix * var_vertNormal)
+	vec3 vertNormal = normalize(var_vertNormal); 
+	// Wait, if lightDir is world space, we need world normal.
+	// uNormalMatrix transforms normal to View Space.
+	// let's assume standard p5 normal handling.
+	
+    float dotVal = dot(vertNormal, -normalize(u_lightDir));
+    dotVal = (dotVal * 0.5) + 0.5;
+		
+	// Texture
+	vec4 smpColor0 = texture2D(u_tex, var_vertTexCoord);
 
-  gl_FragColor = vec4(col, 1.0);
+	// Noise
+	// The user code subtracts centerPos to make noise local to object center in screen space?
+	// Scale 700 and 1000
+    float noise1 = noise((st-centerPos) * 700.0);
+	float noise2 = noise((st-centerPos) * 1000.0);
+
+	// Combine
+	// "tone" maps lighting to a step function based on noise1
+	// This creates an etched/noisy shading edge
+	float tone = step(noise1, dotVal * 1.2);
+	
+	vec3 col = smpColor0.xyz * tone + (smpColor0.xyz - 0.25) * (1.0 - tone);
+	
+	// Add grain
+	// Original: col += noise2 * 0.15;
+	// We use grainIntensity param
+	float grain = ${grainIntensity.toFixed(4)};
+	col += noise2 * grain;
+
+	gl_FragColor = vec4(col, 1.0);
 }
 `;
-
-// -----------------------------------------------------
 
 export interface IsoCubeArtworkParams {
     backgroundColor: string;
@@ -83,7 +126,7 @@ export interface IsoCubeArtworkParams {
     color4: string;
     gridSize: number;
     density: number;
-    fillRatio: number;
+    fillRatio: number; // mapped to splitting chance?
     cubeWidthMin: number;
     cubeWidthMax: number;
     cubeHeightMin: number;
@@ -120,16 +163,12 @@ const IsoCubeArtwork = forwardRef<IsoCubeArtworkRef, IsoCubeArtworkProps>(({ par
     const sketchRef = useRef<any>(null);
     const paramsRef = useRef(params);
 
-    useEffect(() => {
-        paramsRef.current = params;
-    }, [params]);
+    useEffect(() => { paramsRef.current = params; }, [params]);
 
     useImperativeHandle(ref, () => ({
-        exportImage: () => {
-            if (!sketchRef.current) return;
-            sketchRef.current.saveCanvas(`isocube-arte-${Date.now()}`, 'png');
-        },
+        exportImage: () => { if (sketchRef.current) sketchRef.current.saveCanvas(`isocube-${Date.now()}`, 'png'); },
         exportWallpapers: () => {
+            // Standard export logic reused
             if (!sketchRef.current) return;
             const p = sketchRef.current;
             const timestamp = Date.now();
@@ -156,48 +195,26 @@ const IsoCubeArtwork = forwardRef<IsoCubeArtworkRef, IsoCubeArtworkProps>(({ par
             };
             const desktopCanvas = centerArtwork(6144, 3456);
             if (desktopCanvas) {
-                const link = document.createElement('a');
-                link.download = `isocube-desktop-wallpaper-${timestamp}.png`;
-                link.href = desktopCanvas.toDataURL();
-                link.click();
+                const link = document.createElement('a'); link.download = `isocube-desktop-${timestamp}.png`;
+                link.href = desktopCanvas.toDataURL(); link.click();
             }
-            setTimeout(() => {
-                const mobileCanvas = centerArtwork(1290, 2796);
-                if (mobileCanvas) {
-                    const link = document.createElement('a');
-                    link.download = `isocube-mobile-wallpaper-${timestamp}.png`;
-                    link.href = mobileCanvas.toDataURL();
-                    link.click();
-                }
-            }, 100);
         },
-        regenerate: () => {
-            if (sketchRef.current) sketchRef.current.redraw();
-        },
+        regenerate: () => { if (sketchRef.current) sketchRef.current.redraw(); },
         exportHighRes: (scale: number = 4) => {
             if (!sketchRef.current) return;
             const p = sketchRef.current;
             p.pixelDensity(scale);
             p.redraw();
-            setTimeout(() => {
-                p.saveCanvas(`isocube-${Date.now()}-${scale}x`, 'png');
-                p.pixelDensity(1);
-                p.redraw();
-            }, 100);
-        },
+            setTimeout(() => { p.saveCanvas(`isocube-high-${Date.now()}`, 'png'); p.pixelDensity(1); p.redraw(); }, 100);
+        }
     }));
 
-    // Trigger redraw params
+    // Trigger effect
     useEffect(() => {
-        if (sketchRef.current && sketchRef.current.redraw) {
-            sketchRef.current.redraw();
-        }
+        if (sketchRef.current && sketchRef.current.redraw) sketchRef.current.redraw();
     }, [
         params.backgroundColor, params.color1, params.color2, params.color3, params.color4,
-        params.gridSize, params.fillRatio, params.cubeWidthMin, params.cubeWidthMax,
-        params.cubeHeightMin, params.cubeHeightMax, params.skyscraperChance, params.towerChance,
-        params.windowDensity, params.windowType, params.grainIntensity, params.roofDetailChance,
-        params.rotateX, params.rotateY
+        params.gridSize, params.fillRatio, params.grainIntensity, params.rotateX, params.rotateY
     ]);
 
     useEffect(() => {
@@ -207,182 +224,185 @@ const IsoCubeArtwork = forwardRef<IsoCubeArtworkRef, IsoCubeArtworkProps>(({ par
         const initSketch = async () => {
             if (sketchRef.current) { sketchRef.current.remove(); sketchRef.current = null; }
             if (containerRef.current) containerRef.current.innerHTML = '';
-
             const p5Module = await import("p5");
             const p5 = p5Module.default;
             if (cancelled || !containerRef.current) return;
 
             const sketch = (p: any) => {
                 let shader: any;
+                let obj: Cube[] = [];
+                let COLS: string[] = [];
 
-                // --- TEXTURE CACHE ---
-                // Key: "colorMain|colorDetail|widthBucket|heightBucket|winType"
-                // We bucket sizes to avoid minimal differences creating new textures
-                const textureCache = new Map<string, any>();
+                class Cube {
+                    pos: any;
+                    size: any;
+                    col: string[];
+                    tex: any;
+                    topPos: any;
+                    rectWindow: boolean;
+                    windowSize: number;
+                    spanMult: number;
 
-                const getCachedTexture = (w: number, h: number, colMain: string, colDetail: string, winType: string, rng: () => number) => {
-                    // Bucket dimensions to nearest 50 units ?
-                    // Actually, we texture mapped 0..1, but we chose window rows based on H.
-                    // Let's bucket rows/cols directly.
-                    const rows = Math.max(3, Math.floor(h / 25 * paramsRef.current.windowDensity)); // Increased divider (was 15) for fewer windows
-                    const cols = Math.max(2, Math.floor(w / 25 * paramsRef.current.windowDensity));
+                    constructor(_pos: any, _size: any, _col1: string, _col2: string, rng: () => number) {
+                        this.pos = _pos;
+                        this.size = _size;
+                        this.col = [_col1, _col2];
+                        // Texture
+                        // We multiply size by 2 for resolution? User code: createGraphics(_size.x*2, _size.y*2)
+                        // Need to ensure non-zero
+                        const tx = Math.max(1, _size.x * 2);
+                        const ty = Math.max(1, _size.y * 2);
+                        this.tex = p.createGraphics(tx, ty);
 
-                    const key = `${colMain}|${colDetail}|${rows}|${cols}|${winType}`;
+                        this.spanMult = 1 + rng() * 2; // random(1,3)
+                        this.topPos = p.createVector(_size.x * (rng() - 0.5) * 0.8, 0, _size.z * (rng() - 0.5) * 0.8);
+                        this.rectWindow = rng() > 0.3;
+                        this.windowSize = 15 + rng() * 5; // random(15,20)
 
-                    if (textureCache.has(key)) {
-                        return textureCache.get(key);
+                        this.makeTex();
                     }
 
-                    // Create New
-                    const texSize = 512;
-                    const pg = p.createGraphics(texSize, texSize);
-                    pg.background(colMain);
+                    makeTex() {
+                        this.tex.noStroke();
+                        let margin = Math.max(this.tex.width * 0.1, 10);
+                        // spanNum logic
+                        let spanNum = Math.floor((this.tex.width - margin * 2) / (this.windowSize * 2)) * 2 + 1;
+                        if (spanNum < 1) spanNum = 1;
+                        let span = (this.tex.width - margin * 2) / spanNum;
 
-                    const margin = texSize * 0.05;
-                    const workingSize = texSize - margin * 2;
-                    const cellW = workingSize / cols;
-                    const cellH = workingSize / rows;
+                        this.tex.background(this.col[0]);
+                        this.tex.fill(this.col[1]);
 
-                    pg.noStroke();
-
-                    // Always generate fresh pattern? No, cache implies same pattern for same key.
-                    // If we want random variation per building but caching, we need to include a "variant" in key?
-                    // Or just accept all "5-row red buildings" look same? 
-                    // Ideally we want some variation. Let's add a random "variantId" (0-4).
-                    // But for now, unified look is fine for performance.
-
-                    const isGlassy = winType === 'lines';
-
-                    if (isGlassy) {
-                        pg.stroke(colDetail);
-                        pg.strokeWeight(texSize * 0.012);
-                        for (let y = 0; y <= rows; y++) {
-                            pg.line(0, margin + y * cellH, texSize, margin + y * cellH);
-                        }
-                        // Verticals
-                        pg.strokeWeight(texSize * 0.005);
-                        for (let x = 0; x <= cols; x += 2) { // sparse verts
-                            pg.line(margin + x * cellW, 0, margin + x * cellW, texSize);
-                        }
-                    } else {
-                        // Windows
-                        for (let y = 0; y < rows; y++) {
-                            for (let x = 0; x < cols; x++) {
-                                // Deterministic pattern based on coordinates to look random but stable
-                                // Simple hash
-                                const pseudoRand = Math.sin(x * 12.9898 + y * 78.233) * 43758.5453;
-                                const r = pseudoRand - Math.floor(pseudoRand);
-
-                                if (r < 0.5) { // 50% lit
-                                    const cx = margin + x * cellW + cellW * 0.5;
-                                    const cy = margin + y * cellH + cellH * 0.5;
-                                    const sizeW = cellW * 0.6;
-                                    const sizeH = cellH * 0.6;
-
-                                    pg.fill(colDetail);
-
-                                    if (winType === 'ellipse') {
-                                        pg.ellipse(cx, cy, sizeW, sizeH);
-                                    } else if (winType === 'arch') {
-                                        pg.arc(cx, cy, sizeW, sizeH, p.PI, 0);
-                                        pg.rect(cx - sizeW / 2, cy, sizeW, sizeH / 2);
-                                    } else if (winType === 'diamond') {
-                                        pg.push();
-                                        pg.translate(cx, cy);
-                                        pg.rotate(p.PI / 4);
-                                        pg.rectMode(p.CENTER);
-                                        pg.rect(0, 0, sizeW * 0.6, sizeH * 0.6);
-                                        pg.pop();
+                        for (let y = margin; y < this.tex.height - margin - span / 2; y += span * this.spanMult) {
+                            let i = 0;
+                            for (let x = margin; x < this.tex.width - margin - span / 2; x += span) {
+                                if (i % 2 === 0) {
+                                    if (this.rectWindow) {
+                                        this.tex.rect(x, y, span, span);
                                     } else {
-                                        pg.rectMode(p.CENTER);
-                                        pg.rect(cx, cy, sizeW, sizeH);
+                                        // ellipse logic
+                                        // user: ellipse(x, height-y, span, span)
+                                        this.tex.ellipse(x, this.tex.height - y, span, span);
                                     }
                                 }
+                                i++;
                             }
                         }
                     }
 
-                    // Cornice
-                    pg.stroke(0, 40);
-                    pg.strokeWeight(texSize * 0.01);
-                    pg.noFill();
-                    pg.rectMode(p.CORNER);
-                    pg.rect(0, 0, texSize, texSize);
-
-                    textureCache.set(key, pg);
-                    return pg;
-                };
-
-                class Structure {
-                    pos: any;
-                    dims: any;
-                    tex: any;
-                    children: Structure[];
-
-                    constructor(pos: any, dims: any, type: string, colors: string[], rng: () => number) {
-                        this.pos = pos;
-                        this.dims = dims;
-                        this.children = [];
-
-                        const colMain = colors[Math.floor(rng() * colors.length)];
-                        const colDetail = colors[Math.floor(rng() * colors.length)];
-
-                        // Use Cache
-                        this.tex = getCachedTexture(dims.x, dims.y, colMain, colDetail, paramsRef.current.windowType, rng);
-
-                        this.generateDetails(rng, colors);
-                    }
-
-                    generateDetails(rng: () => number, colors: string[]) {
-                        // Tiers
-                        if (this.dims.y > 150 && rng() < 0.4) {
-                            const tierH = this.dims.y * (0.3 + rng() * 0.3);
-                            const tierW = this.dims.x * 0.7;
-                            const tierD = this.dims.z * 0.7;
-                            const offset = p.createVector(0, -(this.dims.y + tierH) / 2, 0);
-
-                            this.children.push(new Structure(offset, p.createVector(tierW, tierH, tierD), 'tier', colors, rng));
-                        } else if (rng() < paramsRef.current.roofDetailChance) {
-                            this.addRoofTopper(rng, colors);
-                        }
-                    }
-
-                    addRoofTopper(rng: () => number, colors: string[]) {
-                        const topY = -this.dims.y / 2;
-                        const type = rng();
-                        if (type < 0.3) { // AC
-                            const w = this.dims.x * 0.25; const d = this.dims.z * 0.25; const h = 8;
-                            const offset = p.createVector((rng() - 0.5) * (this.dims.x - w), topY - h / 2, (rng() - 0.5) * (this.dims.z - d));
-                            // Use simple solid texture for AC
-                            this.children.push(new Structure(offset, p.createVector(w, h, d), 'ac', colors, rng));
-                        } else if (type < 0.5) { // Tank
-                            const w = this.dims.x * 0.35; const h = 20;
-                            const offset = p.createVector(0, topY - h / 2, 0);
-                            this.children.push(new Structure(offset, p.createVector(w, h, w), 'tank', colors, rng));
-                        }
-                    }
-
                     display() {
+                        shader.setUniform("u_tex", this.tex);
+
                         p.push();
                         p.translate(this.pos.x, this.pos.y, this.pos.z);
+                        p.box(this.size.x, this.size.y, this.size.z);
 
-                        // Reuse texture
-                        shader.setUniform("u_tex", this.tex);
-                        p.box(this.dims.x, this.dims.y, this.dims.z);
+                        // Details
+                        // Roof trim
+                        this.tex.background(this.col[1]); // Fill tex with col1 temporarily for solid color?
+                        // Wait, display calls makeTex() in user code? No, in user code makeTex is called inside display?
+                        // "this.makeTex(); sh.setUniform... push..."
+                        // User code calls makeTex EVERY FRAME? That's horrendous for performance.
+                        // But `noLoop()` is called in helper code?
+                        // User code: setup() { ... noLoop not called? init() -> build() ... }
+                        // Actually the user included "noLoop" inside `makeTex` line 1: `this.tex.noLoop();`
+                        // But `makeTex` clears background.
+                        // User code calls `makeTex` inside `display`.
+                        // If it's static (`noLoop` in setup), it's fine.
+                        // We are using `p.noLoop()`. So we can draw once.
 
-                        for (const child of this.children) {
-                            child.display();
-                        }
+                        // Roof trim box
+                        p.translate(0, this.size.y * 0.525, 0); // Up?
+                        // Note: user code `translate(0, this.size.y * 0.525, 0)`
+                        // In p5 default, +Y is down.
+                        // So this puts it BELOW the building?
+                        // Unless camera is upside down?
+                        // In user code `rotateX(PI/10); rotateY(PI/3.5);`
+                        // Let's stick to our orientation or user's?
+                        // User request: "put this artwork instead". I should respect their math.
+
+                        p.box(this.size.x, this.size.y * 0.05, this.size.z);
+
+                        // Top Box
+                        p.translate(this.topPos.x, -this.size.y * 0.525, this.topPos.z); // Go back up?
+                        // No, topPos is vector(x, 0, z).
+                        // We are currently at y = +0.525Y.
+                        // User code: `translate(this.topPos); box(...)`
+                        // topPos is small offset.
+                        // Wait, user code:
+                        // 1. translate(pos); box(size);
+                        // 2. translate(0, size.y*0.525, 0); box(trim);
+                        // 3. translate(topPos); box(small);
+                        // 3 accumulates. So it's at y=0.525Y + 0.
+                        // If default +Y is down, this creates "feet" or "foundations".
+                        // UNLESS `ortho` params flipped Y.
+                        // User code: `ortho(-w, w, h, -h, ...)` -> Standard p5 (Bottom=h, Top=-h).
+                        // So +Y is DOWN.
+                        // So buildings grow "down" if y is positive?
+                        // User code: `y = h/2 + _groundY`. `_groundY = -height*0.1`.
+                        // If `_groundY` is negative (top of screen), and `h/2` adds to it, they are near top growing down?
+
+                        p.box(this.size.x * 0.1, this.size.y * 0.15, this.size.z * 0.1);
                         p.pop();
+
+                        // Restore texture? Only if we draw again.
                     }
                 }
 
-                let buildings: Structure[] = [];
+                // Recursive Builder
+                // _groundY default in user code: -height*0.1
+                const build = (x: number, z: number, size: number, cellNum: number, groundY: number, rng: () => number) => {
+                    let span = size / cellNum;
+                    // Limit recursion
+                    if (span < 10) return; // safety
+
+                    const startX = x;
+                    const startZ = z;
+                    // User loop: x from startX - size/2 to startX + size/2
+                    // We need to iterate through grid cells
+
+                    // Wait, logic:
+                    // x from (startX - size/2) ...
+
+                    for (let cx = startX - size / 2; cx <= startX + size / 2 - span / 2; cx += span) {
+                        for (let cz = startZ - size / 2; cz <= startZ + size / 2 - span / 2; cz += span) {
+
+                            // Random subdivide?
+                            // user: `if(random() < 0.5 && span > width/20)`
+                            const chance = rng();
+                            // Map `fillRatio` to split chance?
+                            // User code used 0.5 fixed.
+                            // span > width/20 checks if too small.
+
+                            if (chance < 0.5 && span > p.width / 20) {
+                                // Recurse
+                                build(cx, cz, span * (0.6 + rng() * 0.3), Math.floor(2 + rng() * 2), groundY, rng);
+                            } else {
+                                // Build Cube
+                                // Pick colors
+                                if (COLS.length === 0) return;
+                                const ri = Math.floor(rng() * COLS.length);
+                                const ri2 = (ri + Math.floor(1 + rng() * (COLS.length - 1))) % COLS.length;
+
+                                const w = span * (0.6 + rng() * 0.3);
+                                const h = span * (0.5 + rng() * 1.5);
+                                // user: y = h/2 + groundY
+                                const y = h / 2 + groundY;
+
+                                obj.push(new Cube(p.createVector(cx, y, cz), p.createVector(w, h, w), COLS[ri], COLS[ri2], rng));
+                            }
+                        }
+                    }
+                };
 
                 p.setup = () => {
-                    p.createCanvas(paramsRef.current.canvasWidth, paramsRef.current.canvasHeight, p.WEBGL).parent(containerRef.current!);
-                    const camSize = Math.max(p.width, p.height) * 0.8;
-                    p.ortho(-p.width / 2, p.width / 2, p.height / 2, -p.height / 2, -5000, 5000); // Standard p5 Y-down ortho
+                    const can = p.createCanvas(paramsRef.current.canvasWidth, paramsRef.current.canvasHeight, p.WEBGL);
+                    can.parent(containerRef.current!);
+
+                    // Ortho per user code
+                    const dep = Math.max(p.width, p.height);
+                    // User: ortho(-width / 2, width / 2, height / 2, -height / 2,-dep*3 , dep*3);
+                    p.ortho(-p.width / 2, p.width / 2, p.height / 2, -p.height / 2, -dep * 3, dep * 3);
 
                     shader = p.createShader(vertShader, createFragShader(paramsRef.current.grainIntensity));
                     p.shader(shader);
@@ -390,61 +410,36 @@ const IsoCubeArtwork = forwardRef<IsoCubeArtworkRef, IsoCubeArtworkProps>(({ par
                 };
 
                 p.draw = () => {
-                    // Clear Cache on regenerate/redraw to avoid memory leak if params change drastically
-                    textureCache.clear();
-
                     const rng = createSeededRandom(paramsRef.current.token);
-                    const colorRng = createSeededRandom(paramsRef.current.colorSeed || paramsRef.current.token);
+                    const colorSeed = paramsRef.current.colorSeed || paramsRef.current.token;
+                    // Colors from params
+                    COLS = [paramsRef.current.color1, paramsRef.current.color2, paramsRef.current.color3, paramsRef.current.color4];
+                    obj = [];
 
-                    // Init World
-                    buildings = [];
-                    const palette = [paramsRef.current.color1, paramsRef.current.color2, paramsRef.current.color3, paramsRef.current.color4];
-                    const gridSize = paramsRef.current.gridSize;
-                    const s = Math.min(p.width, p.height);
-                    const cellSize = (s * 0.9) / gridSize;
-                    const offset = - (gridSize * cellSize) / 2 + cellSize / 2;
+                    shader.setUniform("u_resolution", [p.width, p.height]);
+                    // User: [1, -1, -1]
+                    shader.setUniform("u_lightDir", [1, -1, -1]);
 
-                    for (let xi = 0; xi < gridSize; xi++) {
-                        for (let zi = 0; zi < gridSize; zi++) {
-                            if (rng() > paramsRef.current.fillRatio) continue;
-
-                            const x = offset + xi * cellSize;
-                            const z = offset + zi * cellSize;
-
-                            const margin = cellSize * 0.15;
-                            const w = cellSize - margin;
-                            const d = cellSize - margin;
-
-                            let h;
-                            if (rng() < paramsRef.current.skyscraperChance) h = cellSize * (4 + rng() * 3);
-                            else if (rng() < paramsRef.current.towerChance) h = cellSize * (2.5 + rng() * 2);
-                            else h = cellSize * (0.8 + rng() * 1.5);
-
-                            // Bottom at Y=0. Center at -h/2.
-                            const y = -h / 2;
-
-                            buildings.push(new Structure(p.createVector(x, y, z), p.createVector(w, h, d), 'block', palette, rng));
-                        }
-                    }
-
-                    // Painter Sort
-                    buildings.sort((a, b) => (b.pos.z + b.pos.x) - (a.pos.z + a.pos.x));
-
-                    // Draw
                     p.background(paramsRef.current.backgroundColor);
 
-                    shader = p.createShader(vertShader, createFragShader(paramsRef.current.grainIntensity));
-                    p.shader(shader);
-                    shader.setUniform("u_resolution", [p.width, p.height]);
-                    // FIX LIGHTING DIRECTION
-                    // Old: [0.5, 0.8, 0.5] (Top-Left-Front but Y is down so 0.8 is "down")
-                    // New: [0.5, -0.8, 0.5] (Y negative is UP, so light comes from TOP)
-                    shader.setUniform("u_lightDir", [0.5, -0.8, 0.5]);
+                    // Camera: User rotates X PI/10, Y PI/3.5
+                    // We use params
+                    p.rotateX(paramsRef.current.rotateX); // User default PI/10 = 0.314
+                    p.rotateY(paramsRef.current.rotateY); // User default PI/3.5 = 0.89
 
-                    p.rotateX(paramsRef.current.rotateX);
-                    p.rotateY(paramsRef.current.rotateY);
+                    // Init/Build
+                    // user: `let s = min(width,height)*3; build(0,0,s,8);`
+                    const s = Math.min(p.width, p.height) * 3 * (paramsRef.current.fillRatio); // scaling
+                    const groundY = -p.height * 0.1;
 
-                    for (const b of buildings) b.display();
+                    // Map gridSize to initial cellNum? User used 8.
+                    const initialCells = paramsRef.current.gridSize; // e.g. 4-8
+
+                    build(0, 0, s, initialCells, groundY, rng);
+
+                    for (let item of obj) {
+                        item.display();
+                    }
                 };
             };
 
