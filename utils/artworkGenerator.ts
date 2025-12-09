@@ -431,24 +431,24 @@ export const generateLambParamsFromToken = (token: string): LambArtworkParams =>
     };
 };
 
-// Studioyorktown-style palettes (dark backgrounds, light buildings)
+// Studioyorktown-style palettes (Clean, Vector, Vibrant or Pastel)
 const isoCubePalettes = [
-    // Studioyorktown monochrome
-    { bg: '#0a0a0a', colors: ['#ffffff', '#f5f5f5', '#e8e8e8', '#d4d4d4'] },
-    { bg: '#0f0f0f', colors: ['#faf8f3', '#f0ede6', '#e6e3dc', '#d0cdc6'] },
-    // Warm monochrome
-    { bg: '#1a1614', colors: ['#e8d5c4', '#f4e8d9', '#d4c0ab', '#c9b59a'] },
-    { bg: '#2b2520', colors: ['#f0e6d2', '#dcc8b3', '#c8b499', '#b4a080'] },
-    // Cool tones
-    { bg: '#0a0e27', colors: ['#7fcdcd', '#41b3d3', '#84fab0', '#8fd3f4'] },
-    { bg: '#001f3f', colors: ['#a8e6cf', '#88d8b0', '#6bc5b5', '#4ab3a0'] },
-    // Vibrant accent
-    { bg: '#1a1a2e', colors: ['#ff6b9d', '#c44569', '#f8b500', '#4a90e2'] },
-    { bg: '#16213e', colors: ['#e94b3c', '#ff8c00', '#ffd700', '#50c878'] },
+    // 1. "SimCity 2000" (Classic Beige/Grey/Red)
+    { bg: '#e8e8e8', colors: ['#9c9c9c', '#b0b0b0', '#d45d5d', '#e0e0e0'] },
+    // 2. "Cyber Muted" (Dark Slate, Teal, Orange)
+    { bg: '#1a1f26', colors: ['#3b4252', '#4c566a', '#88c0d0', '#bf616a'] },
+    // 3. "Sunset Vector" (Pink, Purple, Peach)
+    { bg: '#2d1b2e', colors: ['#b06c85', '#ef8d6e', '#f4b9b2', '#ffeed0'] },
+    // 4. "Blueprint" (Blue on Blue)
+    { bg: '#002b36', colors: ['#073642', '#586e75', '#839496', '#2aa198'] },
+    // 5. "Tokyo Day" (White, Light Grey, Blue Glass)
+    { bg: '#f0f4f8', colors: ['#ffffff', '#dee2e6', '#a5d8ff', '#4dabf7'] },
+    // 6. "Industrial Rust" (Brown, Grey, Orange)
+    { bg: '#2b2520', colors: ['#4a403a', '#736b60', '#d65a31', '#eeeeee'] },
 ];
 
 // Window type options
-const windowTypes = ['mixed', 'rect', 'ellipse', 'arch', 'cross', 'diamond'] as const;
+const windowTypes = ['mixed', 'rect', 'lines', 'arch', 'cross', 'diamond'] as const;
 
 // Generate isocube params from token
 export const generateIsoCubeParamsFromToken = (token: string): IsoCubeArtworkParams => {
@@ -472,35 +472,41 @@ export const generateIsoCubeParamsFromToken = (token: string): IsoCubeArtworkPar
     const windowTypeIndex = Math.floor(rand() * windowTypes.length);
 
     return {
-        // Colors (studioyorktown style - dark bg, light buildings)
+        // Colors
         backgroundColor: palette.bg,
         color1: palette.colors[0],
         color2: palette.colors[1],
         color3: palette.colors[2],
         color4: palette.colors[3],
-        // Density
-        gridSize: Math.floor(rand() * 4) + 4, // 4-7
-        density: 0.5 + rand() * 0.4, // 0.5-0.9
-        fillRatio: 0.7 + rand() * 0.25, // 0.7-0.95
-        // Building dimensions
-        cubeWidthMin: 0.25 + rand() * 0.15,
-        cubeWidthMax: 0.45 + rand() * 0.2,
-        cubeHeightMin: 0.5 + rand() * 0.4,
-        cubeHeightMax: 1.2 + rand() * 1.0,
+
+        // Grid & Density - Tighter, more filled
+        gridSize: Math.floor(rand() * 5) + 6, // 6-10 (Denser grid)
+        density: 1.0, // Unused in new logic? We use fillRatio now.
+        fillRatio: 0.85 + rand() * 0.14, // 0.85-0.99 (Very dense)
+
+        // Building dimensions (relative to cell size)
+        cubeWidthMin: 0.5, // Occupy most of cell
+        cubeWidthMax: 0.9,
+        cubeHeightMin: 0.5,
+        cubeHeightMax: 1.5,
+
         // Building types
-        skyscraperChance: rand() * 0.25, // 0-0.25
-        towerChance: rand() * 0.2, // 0-0.2
+        skyscraperChance: 0.1 + rand() * 0.15, // 10-25% skyscrapers
+        towerChance: 0.15 + rand() * 0.1,      // 15-25% towers
+
         // Details
-        windowDensity: Math.floor(rand() * 6) + 5, // 5-10
+        windowDensity: Math.floor(rand() * 4) + 6, // 6-9
         windowType: windowTypes[windowTypeIndex],
-        grainIntensity: 0.1 + rand() * 0.1, // 0.1-0.2
-        roofDetailChance: 0.4 + rand() * 0.4, // 0.4-0.8
-        // Camera
-        rotateX: 0.25 + rand() * 0.2,  // ~PI/12 to PI/8
-        rotateY: 0.75 + rand() * 0.3,  // ~PI/4 to PI/3
+        grainIntensity: 0.05 + rand() * 0.1, // Subtle grain
+        roofDetailChance: 0.6 + rand() * 0.3, // High chance of roof details
+
+        // Camera - Classic Isometric
+        rotateX: 0.615, // asin(1/sqrt(3)) approx 35.26 degrees in radians
+        rotateY: 0.785, // 45 degrees
+
         // Canvas
-        canvasWidth: isMobile ? 400 : 630,
-        canvasHeight: isMobile ? 500 : 790,
+        canvasWidth: isMobile ? 400 : 800, // Higher res default
+        canvasHeight: isMobile ? 500 : 1000,
         token: token,
         exportWidth: 1600,
         exportHeight: 2000,

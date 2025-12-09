@@ -427,7 +427,7 @@ export const PARAM_SCHEMAS: Record<string, ParamSchema> = {
 
             // Details
             windowDensity: { type: 'range', label: 'Window Density', min: 3, max: 12, step: 1, section: 'Details' },
-            windowType: { type: 'select', label: 'Window Type', options: ['mixed', 'rect', 'ellipse', 'arch', 'cross', 'diamond'], section: 'Details' },
+            windowType: { type: 'select', label: 'Window Type', options: ['mixed', 'rect', 'lines', 'arch', 'cross', 'diamond'], section: 'Details' },
             grainIntensity: { type: 'range', label: 'Grain', min: 0, max: 0.3, step: 0.01, section: 'Details' },
             roofDetailChance: { type: 'range', label: 'Roof Details', min: 0, max: 1.0, step: 0.1, section: 'Details' },
 
