@@ -431,15 +431,24 @@ export const generateLambParamsFromToken = (token: string): LambArtworkParams =>
     };
 };
 
-// Curated color palettes for isocube
+// Studioyorktown-style palettes (dark backgrounds, light buildings)
 const isoCubePalettes = [
-    ['#CACED1', '#B55D00', '#C48613', '#E8CA25'],
-    ['#FFF000', '#1FFa8c', '#FFBFC4', '#AA93C4'],
-    ['#38263F', '#593D66', '#CEA7D6', '#E4D0E8'],
-    ['#094074', '#1D7874', '#F18F01', '#FF0800'],
-    ['#2D3436', '#636E72', '#DFE6E9', '#74B9FF'],
-    ['#E17055', '#FDCB6E', '#00B894', '#6C5CE7'],
+    // Studioyorktown monochrome
+    { bg: '#0a0a0a', colors: ['#ffffff', '#f5f5f5', '#e8e8e8', '#d4d4d4'] },
+    { bg: '#0f0f0f', colors: ['#faf8f3', '#f0ede6', '#e6e3dc', '#d0cdc6'] },
+    // Warm monochrome
+    { bg: '#1a1614', colors: ['#e8d5c4', '#f4e8d9', '#d4c0ab', '#c9b59a'] },
+    { bg: '#2b2520', colors: ['#f0e6d2', '#dcc8b3', '#c8b499', '#b4a080'] },
+    // Cool tones
+    { bg: '#0a0e27', colors: ['#7fcdcd', '#41b3d3', '#84fab0', '#8fd3f4'] },
+    { bg: '#001f3f', colors: ['#a8e6cf', '#88d8b0', '#6bc5b5', '#4ab3a0'] },
+    // Vibrant accent
+    { bg: '#1a1a2e', colors: ['#ff6b9d', '#c44569', '#f8b500', '#4a90e2'] },
+    { bg: '#16213e', colors: ['#e94b3c', '#ff8c00', '#ffd700', '#50c878'] },
 ];
+
+// Window type options
+const windowTypes = ['mixed', 'rect', 'ellipse', 'arch', 'cross', 'diamond'] as const;
 
 // Generate isocube params from token
 export const generateIsoCubeParamsFromToken = (token: string): IsoCubeArtworkParams => {
@@ -459,20 +468,37 @@ export const generateIsoCubeParamsFromToken = (token: string): IsoCubeArtworkPar
     const paletteIndex = Math.floor(rand() * isoCubePalettes.length);
     const palette = isoCubePalettes[paletteIndex];
 
+    // Random window type
+    const windowTypeIndex = Math.floor(rand() * windowTypes.length);
+
     return {
-        color1: palette[0],
-        color2: palette[1],
-        color3: palette[2],
-        color4: palette[3],
-        gridSize: Math.floor(rand() * 4) + 3, // 3-6
-        cubeWidthMin: 0.3 + rand() * 0.2,
-        cubeWidthMax: 0.5 + rand() * 0.2,
-        cubeHeightMin: 0.4 + rand() * 0.3,
-        cubeHeightMax: 1.0 + rand() * 0.8,
-        rotateX: 0.2 + rand() * 0.3,  // ~PI/15 to PI/6
-        rotateY: 0.7 + rand() * 0.4,  // ~PI/4.5 to PI/2.8
-        windowDensity: Math.floor(rand() * 8) + 5, // 5-12
-        rectWindowChance: 0.5 + rand() * 0.4,
+        // Colors (studioyorktown style - dark bg, light buildings)
+        backgroundColor: palette.bg,
+        color1: palette.colors[0],
+        color2: palette.colors[1],
+        color3: palette.colors[2],
+        color4: palette.colors[3],
+        // Density
+        gridSize: Math.floor(rand() * 4) + 4, // 4-7
+        density: 0.5 + rand() * 0.4, // 0.5-0.9
+        fillRatio: 0.7 + rand() * 0.25, // 0.7-0.95
+        // Building dimensions
+        cubeWidthMin: 0.25 + rand() * 0.15,
+        cubeWidthMax: 0.45 + rand() * 0.2,
+        cubeHeightMin: 0.5 + rand() * 0.4,
+        cubeHeightMax: 1.2 + rand() * 1.0,
+        // Building types
+        skyscraperChance: rand() * 0.25, // 0-0.25
+        towerChance: rand() * 0.2, // 0-0.2
+        // Details
+        windowDensity: Math.floor(rand() * 6) + 5, // 5-10
+        windowType: windowTypes[windowTypeIndex],
+        grainIntensity: 0.1 + rand() * 0.1, // 0.1-0.2
+        roofDetailChance: 0.4 + rand() * 0.4, // 0.4-0.8
+        // Camera
+        rotateX: 0.25 + rand() * 0.2,  // ~PI/12 to PI/8
+        rotateY: 0.75 + rand() * 0.3,  // ~PI/4 to PI/3
+        // Canvas
         canvasWidth: isMobile ? 400 : 630,
         canvasHeight: isMobile ? 500 : 790,
         token: token,
@@ -480,3 +506,4 @@ export const generateIsoCubeParamsFromToken = (token: string): IsoCubeArtworkPar
         exportHeight: 2000,
     };
 };
+

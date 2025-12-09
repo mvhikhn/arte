@@ -377,49 +377,70 @@ export const PARAM_SCHEMAS: Record<string, ParamSchema> = {
     },
     isocube: {
         keys: [
-            'color1', 'color2', 'color3', 'color4',
-            'gridSize', 'cubeWidthMin', 'cubeWidthMax', 'cubeHeightMin', 'cubeHeightMax',
-            'rotateX', 'rotateY', 'windowDensity', 'rectWindowChance',
+            'backgroundColor', 'color1', 'color2', 'color3', 'color4',
+            'gridSize', 'density', 'fillRatio',
+            'cubeWidthMin', 'cubeWidthMax', 'cubeHeightMin', 'cubeHeightMax',
+            'skyscraperChance', 'towerChance',
+            'windowDensity', 'windowType', 'grainIntensity', 'roofDetailChance',
+            'rotateX', 'rotateY',
             'canvasWidth', 'canvasHeight', 'token', 'colorSeed', 'exportWidth', 'exportHeight'
         ],
         defaults: {
-            gridSize: 4,
-            cubeWidthMin: 0.4,
-            cubeWidthMax: 0.6,
-            cubeHeightMin: 0.5,
-            cubeHeightMax: 1.5,
-            rotateX: 0.314,  // PI/10
-            rotateY: 0.898,  // PI/3.5
-            windowDensity: 9,
-            rectWindowChance: 0.7,
+            backgroundColor: '#0a0a0a',
+            color1: '#ffffff',
+            color2: '#f5f5f5',
+            color3: '#e8e8e8',
+            color4: '#d4d4d4',
+            gridSize: 5,
+            density: 0.7,
+            fillRatio: 0.85,
+            cubeWidthMin: 0.35,
+            cubeWidthMax: 0.55,
+            cubeHeightMin: 0.6,
+            cubeHeightMax: 1.8,
+            skyscraperChance: 0.15,
+            towerChance: 0.1,
+            windowDensity: 7,
+            windowType: 'mixed',
+            grainIntensity: 0.15,
+            roofDetailChance: 0.6,
+            rotateX: 0.314,
+            rotateY: 0.898,
             canvasWidth: 630,
             canvasHeight: 790,
             exportWidth: 1600,
             exportHeight: 2000,
         },
         controls: {
-            // Grid Settings
-            gridSize: { type: 'range', label: 'Grid Size', min: 2, max: 8, step: 1, section: 'Grid Settings' },
+            // Density & Layout
+            gridSize: { type: 'range', label: 'Grid Size', min: 3, max: 10, step: 1, section: 'Density' },
+            density: { type: 'range', label: 'City Density', min: 0.3, max: 1.0, step: 0.05, section: 'Density' },
+            fillRatio: { type: 'range', label: 'Fill Ratio', min: 0.5, max: 1.0, step: 0.05, section: 'Density' },
 
-            // Cube Dimensions
-            cubeWidthMin: { type: 'range', label: 'Width Min', min: 0.2, max: 0.5, step: 0.05, section: 'Cube Dimensions' },
-            cubeWidthMax: { type: 'range', label: 'Width Max', min: 0.4, max: 0.8, step: 0.05, section: 'Cube Dimensions' },
-            cubeHeightMin: { type: 'range', label: 'Height Min', min: 0.3, max: 1.0, step: 0.1, section: 'Cube Dimensions' },
-            cubeHeightMax: { type: 'range', label: 'Height Max', min: 0.8, max: 2.0, step: 0.1, section: 'Cube Dimensions' },
-
-            // Camera
-            rotateX: { type: 'range', label: 'Tilt X', min: 0, max: 1.57, step: 0.05, section: 'Camera' },
-            rotateY: { type: 'range', label: 'Tilt Y', min: 0, max: 1.57, step: 0.05, section: 'Camera' },
+            // Building Types
+            skyscraperChance: { type: 'range', label: 'Skyscrapers', min: 0, max: 0.5, step: 0.05, section: 'Building Types' },
+            towerChance: { type: 'range', label: 'Towers', min: 0, max: 0.5, step: 0.05, section: 'Building Types' },
+            cubeWidthMin: { type: 'range', label: 'Width Min', min: 0.2, max: 0.5, step: 0.05, section: 'Building Types' },
+            cubeWidthMax: { type: 'range', label: 'Width Max', min: 0.4, max: 0.8, step: 0.05, section: 'Building Types' },
+            cubeHeightMin: { type: 'range', label: 'Height Min', min: 0.3, max: 1.2, step: 0.1, section: 'Building Types' },
+            cubeHeightMax: { type: 'range', label: 'Height Max', min: 1.0, max: 3.0, step: 0.1, section: 'Building Types' },
 
             // Details
-            windowDensity: { type: 'range', label: 'Window Density', min: 3, max: 15, step: 1, section: 'Details' },
-            rectWindowChance: { type: 'range', label: 'Rect Windows', min: 0, max: 1, step: 0.1, section: 'Details' },
+            windowDensity: { type: 'range', label: 'Window Density', min: 3, max: 12, step: 1, section: 'Details' },
+            windowType: { type: 'select', label: 'Window Type', options: ['mixed', 'rect', 'ellipse', 'arch', 'cross', 'diamond'], section: 'Details' },
+            grainIntensity: { type: 'range', label: 'Grain', min: 0, max: 0.3, step: 0.01, section: 'Details' },
+            roofDetailChance: { type: 'range', label: 'Roof Details', min: 0, max: 1.0, step: 0.1, section: 'Details' },
 
-            // Colors
-            color1: { type: 'color', label: 'Color 1', section: 'Colors' },
-            color2: { type: 'color', label: 'Color 2', section: 'Colors' },
-            color3: { type: 'color', label: 'Color 3', section: 'Colors' },
-            color4: { type: 'color', label: 'Color 4', section: 'Colors' },
+            // Camera
+            rotateX: { type: 'range', label: 'Tilt X', min: 0, max: 0.8, step: 0.05, section: 'Camera' },
+            rotateY: { type: 'range', label: 'Tilt Y', min: 0.5, max: 1.2, step: 0.05, section: 'Camera' },
+
+            // Colors (studioyorktown style)
+            backgroundColor: { type: 'color', label: 'Background', section: 'Colors' },
+            color1: { type: 'color', label: 'Building 1', section: 'Colors' },
+            color2: { type: 'color', label: 'Building 2', section: 'Colors' },
+            color3: { type: 'color', label: 'Building 3', section: 'Colors' },
+            color4: { type: 'color', label: 'Building 4', section: 'Colors' },
 
             // Canvas
             canvasWidth: { type: 'range', label: 'Width', min: 400, max: 2000, step: 10, section: 'Canvas' },

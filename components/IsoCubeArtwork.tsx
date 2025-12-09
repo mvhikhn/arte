@@ -31,8 +31,8 @@ void main() {
 }
 `;
 
-// Fragment shader with lighting and texture
-const fragShader = `
+// Fragment shader with lighting, texture and grain
+const createFragShader = (grainIntensity: number) => `
 precision highp float;
 
 uniform vec2 u_resolution;
@@ -83,26 +83,44 @@ void main() {
 
   float tone = step(noise1, dot_val * 1.2);
   vec3 col = smpColor0.xyz * tone + (smpColor0.xyz - 0.25) * (1.0 - tone);
-  col += noise2 * 0.15;
+  col += noise2 * ${grainIntensity.toFixed(2)};
 
   gl_FragColor = vec4(col, 1.0);
 }
 `;
 
+// Building types
+type BuildingType = 'cube' | 'skyscraper' | 'tower' | 'wide';
+// Window types
+type WindowType = 'rect' | 'ellipse' | 'arch' | 'cross' | 'diamond';
+
 export interface IsoCubeArtworkParams {
+    // Colors (studioyorktown style)
+    backgroundColor: string;
     color1: string;
     color2: string;
     color3: string;
     color4: string;
+    // Density & Layout
     gridSize: number;
+    density: number; // 0-1, how packed the buildings are
+    fillRatio: number; // % of grid cells that have buildings
+    // Building properties
     cubeWidthMin: number;
     cubeWidthMax: number;
     cubeHeightMin: number;
     cubeHeightMax: number;
+    skyscraperChance: number; // 0-1
+    towerChance: number; // 0-1
+    // Visual details
+    windowDensity: number;
+    windowType: string; // 'mixed', 'rect', 'ellipse', 'arch', 'cross', 'diamond'
+    grainIntensity: number; // 0-0.3
+    roofDetailChance: number; // 0-1
+    // Camera
     rotateX: number;
     rotateY: number;
-    windowDensity: number;
-    rectWindowChance: number;
+    // Canvas
     canvasWidth: number;
     canvasHeight: number;
     token: string;
@@ -141,8 +159,6 @@ const IsoCubeArtwork = forwardRef<IsoCubeArtworkRef, IsoCubeArtworkProps>(({ par
             if (!sketchRef.current) return;
             const p = sketchRef.current;
             const timestamp = Date.now();
-
-            // For WebGL, we need to capture the current frame
             const currentCanvas = p.canvas as HTMLCanvasElement;
 
             const centerArtwork = (targetWidth: number, targetHeight: number) => {
@@ -152,12 +168,11 @@ const IsoCubeArtwork = forwardRef<IsoCubeArtworkRef, IsoCubeArtworkProps>(({ par
                 const ctx = exportCanvas.getContext('2d');
                 if (!ctx) return null;
 
-                ctx.fillStyle = '#F5F5F5';
+                ctx.fillStyle = paramsRef.current.backgroundColor;
                 ctx.fillRect(0, 0, targetWidth, targetHeight);
 
                 const sourceAspect = currentCanvas.width / currentCanvas.height;
                 const targetAspect = targetWidth / targetHeight;
-
                 let drawWidth, drawHeight, offsetX, offsetY;
 
                 if (sourceAspect > targetAspect) {
@@ -176,7 +191,6 @@ const IsoCubeArtwork = forwardRef<IsoCubeArtworkRef, IsoCubeArtworkProps>(({ par
                 return exportCanvas;
             };
 
-            // Desktop 6K
             const desktopCanvas = centerArtwork(6144, 3456);
             if (desktopCanvas) {
                 const link = document.createElement('a');
@@ -185,7 +199,6 @@ const IsoCubeArtwork = forwardRef<IsoCubeArtworkRef, IsoCubeArtworkProps>(({ par
                 link.click();
             }
 
-            // iPhone
             setTimeout(() => {
                 const mobileCanvas = centerArtwork(1290, 2796);
                 if (mobileCanvas) {
@@ -220,19 +233,26 @@ const IsoCubeArtwork = forwardRef<IsoCubeArtworkRef, IsoCubeArtworkProps>(({ par
             sketchRef.current.redraw();
         }
     }, [
+        params.backgroundColor,
         params.color1,
         params.color2,
         params.color3,
         params.color4,
         params.gridSize,
+        params.density,
+        params.fillRatio,
         params.cubeWidthMin,
         params.cubeWidthMax,
         params.cubeHeightMin,
         params.cubeHeightMax,
+        params.skyscraperChance,
+        params.towerChance,
+        params.windowDensity,
+        params.windowType,
+        params.grainIntensity,
+        params.roofDetailChance,
         params.rotateX,
         params.rotateY,
-        params.windowDensity,
-        params.rectWindowChance,
     ]);
 
     useEffect(() => {
@@ -257,17 +277,41 @@ const IsoCubeArtwork = forwardRef<IsoCubeArtworkRef, IsoCubeArtworkProps>(({ par
 
             const sketch = (p: any) => {
                 let shader: any;
-                let cubes: any[] = [];
+                let buildings: any[] = [];
 
-                // Cube class
-                class Cube {
+                // Determine building type based on probabilities
+                const getBuildingType = (rng: () => number): BuildingType => {
+                    const r = rng();
+                    if (r < paramsRef.current.skyscraperChance) return 'skyscraper';
+                    if (r < paramsRef.current.skyscraperChance + paramsRef.current.towerChance) return 'tower';
+                    if (r < paramsRef.current.skyscraperChance + paramsRef.current.towerChance + 0.1) return 'wide';
+                    return 'cube';
+                };
+
+                // Get window type for this building
+                const getWindowType = (rng: () => number): WindowType => {
+                    const wt = paramsRef.current.windowType;
+                    if (wt === 'rect') return 'rect';
+                    if (wt === 'ellipse') return 'ellipse';
+                    if (wt === 'arch') return 'arch';
+                    if (wt === 'cross') return 'cross';
+                    if (wt === 'diamond') return 'diamond';
+                    // Mixed - pick randomly
+                    const types: WindowType[] = ['rect', 'ellipse', 'arch', 'cross', 'diamond'];
+                    return types[Math.floor(rng() * types.length)];
+                };
+
+                // Building class with multiple types
+                class Building {
                     pos: any;
                     size: any;
                     tex: any;
                     col: string[];
-                    spanMult: number;
-                    topPos: any;
-                    rectWindow: boolean;
+                    type: BuildingType;
+                    windowType: WindowType;
+                    windowSpacing: number;
+                    hasRoofDetail: boolean;
+                    roofPos: any;
 
                     constructor(
                         _pos: any,
@@ -279,35 +323,79 @@ const IsoCubeArtwork = forwardRef<IsoCubeArtworkRef, IsoCubeArtworkProps>(({ par
                         this.pos = _pos;
                         this.size = _size;
                         this.col = [_col1, _col2];
-                        this.spanMult = 1 + rng() * 2;
-                        this.topPos = p.createVector(
-                            _size.x * (rng() - 0.5) * 0.8,
+                        this.type = getBuildingType(rng);
+                        this.windowType = getWindowType(rng);
+                        this.windowSpacing = 1 + rng() * 2;
+                        this.hasRoofDetail = rng() < paramsRef.current.roofDetailChance;
+                        this.roofPos = p.createVector(
+                            _size.x * (rng() - 0.5) * 0.6,
                             0,
-                            _size.z * (rng() - 0.5) * 0.8
+                            _size.z * (rng() - 0.5) * 0.6
                         );
-                        this.rectWindow = rng() > (1 - paramsRef.current.rectWindowChance);
-                        this.tex = p.createGraphics(_size.x * 2, _size.y * 2);
+
+                        // Adjust size based on building type
+                        if (this.type === 'skyscraper') {
+                            this.size = p.createVector(_size.x * 0.6, _size.y * 2.5, _size.z * 0.6);
+                        } else if (this.type === 'tower') {
+                            this.size = p.createVector(_size.x * 0.4, _size.y * 3, _size.z * 0.4);
+                        } else if (this.type === 'wide') {
+                            this.size = p.createVector(_size.x * 1.5, _size.y * 0.5, _size.z * 1.5);
+                        }
+
+                        this.tex = p.createGraphics(this.size.x * 2, this.size.y * 2);
                     }
 
-                    update(rng: () => number) {
+                    drawWindow(tex: any, x: number, y: number, size: number) {
+                        switch (this.windowType) {
+                            case 'rect':
+                                tex.rect(x - size / 2, y - size / 2, size, size);
+                                break;
+                            case 'ellipse':
+                                tex.ellipse(x, y, size, size);
+                                break;
+                            case 'arch':
+                                tex.rect(x - size / 2, y, size, size * 0.6);
+                                tex.arc(x, y, size, size, p.PI, 0);
+                                break;
+                            case 'cross':
+                                tex.rect(x - size / 6, y - size / 2, size / 3, size);
+                                tex.rect(x - size / 2, y - size / 6, size, size / 3);
+                                break;
+                            case 'diamond':
+                                tex.push();
+                                tex.translate(x, y);
+                                tex.rotate(p.PI / 4);
+                                tex.rect(-size / 3, -size / 3, size * 0.66, size * 0.66);
+                                tex.pop();
+                                break;
+                        }
+                    }
+
+                    update() {
                         this.tex.noStroke();
-                        const margine = this.tex.width * 0.1;
-                        const span = (this.tex.width - margine * 2) / 9;
+                        const margin = this.tex.width * 0.08;
+                        const windowSize = (this.tex.width - margin * 2) / (paramsRef.current.windowDensity + 2);
+
                         this.tex.background(this.col[0]);
-                        let i = 0;
                         this.tex.fill(this.col[1]);
-                        for (let y = this.tex.height - margine * 1.5; y >= margine; y -= span * this.spanMult) {
-                            for (let x = margine; x <= this.tex.width - margine; x += span) {
+
+                        let i = 0;
+                        for (let y = this.tex.height - margin * 1.5; y >= margin; y -= windowSize * this.windowSpacing) {
+                            for (let x = margin + windowSize / 2; x <= this.tex.width - margin; x += windowSize * 1.2) {
                                 if (i % 2 === 0) {
-                                    if (this.rectWindow) {
-                                        this.tex.rect(x, y, span, span);
-                                    } else {
-                                        this.tex.ellipse(x, y, span, span);
-                                    }
+                                    this.drawWindow(this.tex, x, y, windowSize * 0.8);
                                 }
                                 i++;
                             }
                         }
+
+                        // Add subtle horizontal lines for floors (studioyorktown style)
+                        this.tex.stroke(this.col[1]);
+                        this.tex.strokeWeight(0.5);
+                        for (let y = margin; y < this.tex.height - margin; y += windowSize * this.windowSpacing * 0.5) {
+                            this.tex.line(margin * 0.5, y, this.tex.width - margin * 0.5, y);
+                        }
+                        this.tex.noStroke();
                     }
 
                     display() {
@@ -315,20 +403,36 @@ const IsoCubeArtwork = forwardRef<IsoCubeArtworkRef, IsoCubeArtworkProps>(({ par
                         shader.setUniform("u_tex", this.tex);
                         p.push();
                         p.translate(this.pos);
+
+                        // Main building body
                         p.box(this.size.x, this.size.y, this.size.z);
+
+                        // Roof cap
                         this.tex.background(this.col[1]);
-                        p.translate(0, this.size.y * 0.525, 0);
-                        p.box(this.size.x, this.size.y * 0.05, this.size.z);
-                        this.tex.background(this.col[0]);
-                        p.translate(this.topPos);
-                        p.box(this.size.x * 0.1, this.size.y * 0.15, this.size.z * 0.1);
+                        p.translate(0, this.size.y * 0.51, 0);
+                        p.box(this.size.x * 1.02, this.size.y * 0.02, this.size.z * 1.02);
+
+                        // Roof detail (antenna, AC unit, etc.)
+                        if (this.hasRoofDetail) {
+                            this.tex.background(this.col[0]);
+                            p.translate(this.roofPos);
+
+                            if (this.type === 'skyscraper' || this.type === 'tower') {
+                                // Antenna
+                                p.box(this.size.x * 0.03, this.size.y * 0.25, this.size.z * 0.03);
+                            } else {
+                                // AC or water tank
+                                p.box(this.size.x * 0.15, this.size.y * 0.1, this.size.z * 0.15);
+                            }
+                        }
+
                         p.pop();
                     }
                 }
 
-                const initCubes = (rng: () => number, colorRng: () => number) => {
-                    cubes = [];
-                    const s = Math.min(p.width, p.height) * 0.6;
+                const initBuildings = (rng: () => number, colorRng: () => number) => {
+                    buildings = [];
+                    const s = Math.min(p.width, p.height) * (0.5 + paramsRef.current.density * 0.3);
                     const gridSize = paramsRef.current.gridSize;
                     const span = s / gridSize;
 
@@ -339,16 +443,23 @@ const IsoCubeArtwork = forwardRef<IsoCubeArtworkRef, IsoCubeArtworkProps>(({ par
                         paramsRef.current.color4,
                     ];
 
-                    for (let x = -s / 2; x <= s / 2; x += span) {
-                        for (let z = -s / 2; z <= s / 2; z += span) {
+                    // Create denser grid with some random offset
+                    for (let gx = 0; gx <= gridSize; gx++) {
+                        for (let gz = 0; gz <= gridSize; gz++) {
+                            // Skip some cells based on fillRatio
+                            if (rng() > paramsRef.current.fillRatio) continue;
+
+                            const x = -s / 2 + gx * span + (rng() - 0.5) * span * 0.3;
+                            const z = -s / 2 + gz * span + (rng() - 0.5) * span * 0.3;
+
                             const ri = Math.floor(colorRng() * colors.length);
                             const ri2 = (ri + 1 + Math.floor(colorRng() * (colors.length - 1))) % colors.length;
 
                             const w = span * (paramsRef.current.cubeWidthMin + rng() * (paramsRef.current.cubeWidthMax - paramsRef.current.cubeWidthMin));
                             const h = span * (paramsRef.current.cubeHeightMin + rng() * (paramsRef.current.cubeHeightMax - paramsRef.current.cubeHeightMin));
-                            const y = h / 2 - p.height * 0.1;
+                            const y = h / 2 - p.height * 0.08;
 
-                            cubes.push(new Cube(
+                            buildings.push(new Building(
                                 p.createVector(x, y, z),
                                 p.createVector(w, h, w),
                                 colors[ri],
@@ -357,6 +468,11 @@ const IsoCubeArtwork = forwardRef<IsoCubeArtworkRef, IsoCubeArtworkProps>(({ par
                             ));
                         }
                     }
+
+                    // Sort buildings by distance for proper depth rendering
+                    buildings.sort((a: any, b: any) => {
+                        return (b.pos.x + b.pos.z) - (a.pos.x + a.pos.z);
+                    });
                 };
 
                 p.setup = () => {
@@ -370,7 +486,7 @@ const IsoCubeArtwork = forwardRef<IsoCubeArtworkRef, IsoCubeArtworkProps>(({ par
                     const dep = Math.max(p.width, p.height);
                     p.ortho(-p.width / 2, p.width / 2, p.height / 2, -p.height / 2, -dep * 2, dep * 2);
 
-                    shader = p.createShader(vertShader, fragShader);
+                    shader = p.createShader(vertShader, createFragShader(paramsRef.current.grainIntensity));
                     p.shader(shader);
                     shader.setUniform("u_resolution", [p.width, p.height]);
                     shader.setUniform("u_lightDir", [1, -1, -1]);
@@ -379,20 +495,28 @@ const IsoCubeArtwork = forwardRef<IsoCubeArtworkRef, IsoCubeArtworkProps>(({ par
                 };
 
                 p.draw = () => {
-                    const seed = tokenToSeed(paramsRef.current.token);
                     const rng = createSeededRandom(paramsRef.current.token);
                     const colorSeed = paramsRef.current.colorSeed || paramsRef.current.token;
                     const colorRng = createSeededRandom(colorSeed);
 
-                    initCubes(rng, colorRng);
+                    // Update shader with current grain
+                    shader = p.createShader(vertShader, createFragShader(paramsRef.current.grainIntensity));
+                    p.shader(shader);
+                    shader.setUniform("u_resolution", [p.width, p.height]);
+                    shader.setUniform("u_lightDir", [1, -1, -1]);
 
-                    p.background(245);
+                    initBuildings(rng, colorRng);
+
+                    // Dark background for studioyorktown style
+                    const bgColor = p.color(paramsRef.current.backgroundColor);
+                    p.background(bgColor);
+
                     p.rotateX(paramsRef.current.rotateX);
                     p.rotateY(paramsRef.current.rotateY);
 
-                    for (const cube of cubes) {
-                        cube.update(rng);
-                        cube.display();
+                    for (const building of buildings) {
+                        building.update();
+                        building.display();
                     }
                 };
             };
@@ -411,7 +535,7 @@ const IsoCubeArtwork = forwardRef<IsoCubeArtworkRef, IsoCubeArtworkProps>(({ par
                 sketchRef.current = null;
             }
         };
-    }, [params.token, params.canvasWidth, params.canvasHeight]);
+    }, [params.token, params.canvasWidth, params.canvasHeight, params.grainIntensity]);
 
     return (
         <div
