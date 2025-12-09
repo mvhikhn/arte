@@ -8,8 +8,7 @@ import MosaicArtwork from '@/components/MosaicArtwork';
 import RotatedGridArtwork from '@/components/RotatedGridArtwork';
 import TreeArtwork from '@/components/TreeArtwork';
 import TextDesignArtwork from '@/components/TextDesignArtwork';
-import LambArtwork from '@/components/LambArtwork';
-import IsoCubeArtwork from '@/components/IsoCubeArtwork';
+
 
 // Controls
 import Controls from '@/components/Controls';
@@ -25,8 +24,7 @@ import GridGenericControls from '@/components/GridGenericControls';
 import MosaicGenericControls from '@/components/MosaicGenericControls';
 import RotatedGridGenericControls from '@/components/RotatedGridGenericControls';
 import TreeGenericControls from '@/components/TreeGenericControls';
-import LambGenericControls from '@/components/LambGenericControls';
-import IsoCubeGenericControls from '@/components/IsoCubeGenericControls';
+
 
 import {
     generateFlowParamsFromToken,
@@ -35,8 +33,7 @@ import {
     generateRotatedGridParamsFromToken,
     generateTreeParamsFromToken,
     generateTextDesignParamsFromToken,
-    generateLambParamsFromToken,
-    generateIsoCubeParamsFromToken
+
 } from '@/utils/artworkGenerator';
 
 // Default Params Helper
@@ -188,37 +185,5 @@ export const ARTWORKS: Record<string, ArtworkDefinition> = {
         randomGenerator: createRandomGenerator('text', generateTextDesignParamsFromToken),
         defaultParams: generateTextDesignParamsFromToken(generateToken('text'))
     },
-    lamb: {
-        id: 'lamb',
-        title: 'Lamb',
-        description: 'Generative noise field',
-        component: LambArtwork,
-        controls: LambGenericControls,
-        generator: generateLambParamsFromToken,
-        randomGenerator: createRandomGenerator('lamb', generateLambParamsFromToken),
-        defaultParams: generateLambParamsFromToken(generateToken('lamb'))
-    },
-    isocube: {
-        id: 'isocube',
-        title: 'Iso Cube',
-        description: 'Isometric city blocks',
-        component: IsoCubeArtwork,
-        controls: IsoCubeGenericControls,
-        generator: generateIsoCubeParamsFromToken,
-        randomGenerator: createRandomGenerator('isocube', generateIsoCubeParamsFromToken),
-        regenerator: (currentParams: any) => {
-            const newToken = generateToken('isocube');
-            const newParams = generateIsoCubeParamsFromToken(newToken);
-            return {
-                ...newParams,
-                colorSeed: currentParams.colorSeed || currentParams.token,
-                color1: currentParams.color1,
-                color2: currentParams.color2,
-                color3: currentParams.color3,
-                color4: currentParams.color4,
-                token: newToken
-            };
-        },
-        defaultParams: generateIsoCubeParamsFromToken(generateToken('isocube'))
-    }
+
 };

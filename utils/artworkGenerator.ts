@@ -4,8 +4,7 @@ import { MosaicArtworkParams } from "@/components/MosaicArtwork";
 import { RotatedGridArtworkParams } from "@/components/RotatedGridArtwork";
 import { TreeArtworkParams } from "@/components/TreeArtwork";
 import { TextDesignArtworkParams } from "@/components/TextDesignArtwork";
-import { LambArtworkParams } from "@/components/LambArtwork";
-import { IsoCubeArtworkParams } from "@/components/IsoCubeArtwork";
+
 import { createSeededRandom } from "@/utils/token";
 import { decodeParamsSync } from "@/utils/serialization";
 
@@ -402,110 +401,5 @@ export const generateTextDesignParamsFromToken = (token: string): TextDesignArtw
 };
 
 // Generate lamb params from token
-export const generateLambParamsFromToken = (token: string): LambArtworkParams => {
-    // Check for encoded params (v2 state tokens)
-    if (token.includes("-v2.")) {
-        const result = decodeParamsSync(token);
-        if (result) {
-            return result.params as LambArtworkParams;
-        }
-        throw new Error('Invalid state token');
-    }
 
-    const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
-    const rand = createSeededRandom(token);
-
-    return {
-        cols: Math.floor(rand() * 10 + 1) * 10,
-        rows: Math.floor(rand() * 10 + 1) * 10,
-        wOff: 200,
-        hOff: 200,
-        noiseScale: rand() * 0.005 + 0.005,
-        lifeStep: 0.005,
-        weiRangeMax: Math.pow(2, Math.floor(rand() * 6) + 3),
-        totalFrame: 1000,
-        canvasWidth: isMobile ? 400 : 1200,
-        canvasHeight: isMobile ? 123 : 370,
-        token: token,
-        isAnimating: true,
-    };
-};
-
-// User-provided Studioyorktown palettes
-const isoCubePalettes = [
-    // 1. Blue/Yellow/Dark
-    { bg: '#00161e', colors: ['#00aff0', '#fcb344', '#000c4c', '#0786c3'] },
-    // 2. Muted Purple/Grey
-    { bg: '#f2e5e3', colors: ['#22223b', '#4a4e69', '#8b9799', '#c9ada7'] },
-    // 3. Vibrant Neon
-    { bg: '#3a86ff', colors: ['#ead838', '#fb5607', '#ff006e', '#8338ec'] },
-    // 4. Dark/Beige/Orange
-    { bg: '#071013', colors: ['#f0b67f', '#e5cea9', '#dfdfcc', '#ff3300'] }
-];
-
-// Window type options
-const windowTypes = ['mixed', 'rect', 'lines', 'arch', 'cross', 'diamond'] as const;
-
-// Generate isocube params from token
-export const generateIsoCubeParamsFromToken = (token: string): IsoCubeArtworkParams => {
-    // Check for encoded params (v2 state tokens)
-    if (token.includes("-v2.")) {
-        const result = decodeParamsSync(token);
-        if (result) {
-            return result.params as IsoCubeArtworkParams;
-        }
-        throw new Error('Invalid state token');
-    }
-
-    const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
-    const rand = createSeededRandom(token);
-
-    // Pick a random palette
-    const paletteIndex = Math.floor(rand() * isoCubePalettes.length);
-    const palette = isoCubePalettes[paletteIndex];
-
-    // Random window type
-    const windowTypeIndex = Math.floor(rand() * windowTypes.length);
-
-    return {
-        // Colors
-        backgroundColor: palette.bg,
-        color1: palette.colors[0],
-        color2: palette.colors[1],
-        color3: palette.colors[2],
-        color4: palette.colors[3],
-
-        // Grid & Density - Tighter, more filled
-        gridSize: Math.floor(rand() * 5) + 6, // 6-10 (Denser grid)
-        density: 1.0, // Unused in new logic? We use fillRatio now.
-        fillRatio: 0.85 + rand() * 0.14, // 0.85-0.99 (Very dense)
-
-        // Building dimensions (relative to cell size)
-        cubeWidthMin: 0.5, // Occupy most of cell
-        cubeWidthMax: 0.9,
-        cubeHeightMin: 0.5,
-        cubeHeightMax: 1.5,
-
-        // Building types
-        skyscraperChance: 0.1 + rand() * 0.15, // 10-25% skyscrapers
-        towerChance: 0.15 + rand() * 0.1,      // 15-25% towers
-
-        // Details
-        windowDensity: Math.floor(rand() * 4) + 6, // 6-9
-        windowType: windowTypes[windowTypeIndex],
-        grainIntensity: 0.05 + rand() * 0.1, // Subtle grain
-        roofDetailChance: 0.6 + rand() * 0.3, // High chance of roof details
-
-        // Camera - Skyline View (low angle)
-        rotateX: 0.1 + rand() * 0.1,  // ~0.1 to 0.2 radians (mostly horizontal view)
-        rotateY: 0.785, // 45 degrees default
-
-        // Canvas
-        canvasWidth: isMobile ? 400 : 800, // Higher res default
-        canvasHeight: isMobile ? 500 : 1000,
-        token: token,
-        exportWidth: 1600,
-        exportHeight: 2000,
-    };
-};
 
