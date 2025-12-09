@@ -374,6 +374,57 @@ export const PARAM_SCHEMAS: Record<string, ParamSchema> = {
             canvasWidth: { type: 'range', label: 'Width', min: 400, max: 2000, step: 10, section: 'Canvas' },
             canvasHeight: { type: 'range', label: 'Height', min: 400, max: 2000, step: 10, section: 'Canvas' },
         }
+    },
+    isocube: {
+        keys: [
+            'color1', 'color2', 'color3', 'color4',
+            'gridSize', 'cubeWidthMin', 'cubeWidthMax', 'cubeHeightMin', 'cubeHeightMax',
+            'rotateX', 'rotateY', 'windowDensity', 'rectWindowChance',
+            'canvasWidth', 'canvasHeight', 'token', 'colorSeed', 'exportWidth', 'exportHeight'
+        ],
+        defaults: {
+            gridSize: 4,
+            cubeWidthMin: 0.4,
+            cubeWidthMax: 0.6,
+            cubeHeightMin: 0.5,
+            cubeHeightMax: 1.5,
+            rotateX: 0.314,  // PI/10
+            rotateY: 0.898,  // PI/3.5
+            windowDensity: 9,
+            rectWindowChance: 0.7,
+            canvasWidth: 630,
+            canvasHeight: 790,
+            exportWidth: 1600,
+            exportHeight: 2000,
+        },
+        controls: {
+            // Grid Settings
+            gridSize: { type: 'range', label: 'Grid Size', min: 2, max: 8, step: 1, section: 'Grid Settings' },
+
+            // Cube Dimensions
+            cubeWidthMin: { type: 'range', label: 'Width Min', min: 0.2, max: 0.5, step: 0.05, section: 'Cube Dimensions' },
+            cubeWidthMax: { type: 'range', label: 'Width Max', min: 0.4, max: 0.8, step: 0.05, section: 'Cube Dimensions' },
+            cubeHeightMin: { type: 'range', label: 'Height Min', min: 0.3, max: 1.0, step: 0.1, section: 'Cube Dimensions' },
+            cubeHeightMax: { type: 'range', label: 'Height Max', min: 0.8, max: 2.0, step: 0.1, section: 'Cube Dimensions' },
+
+            // Camera
+            rotateX: { type: 'range', label: 'Tilt X', min: 0, max: 1.57, step: 0.05, section: 'Camera' },
+            rotateY: { type: 'range', label: 'Tilt Y', min: 0, max: 1.57, step: 0.05, section: 'Camera' },
+
+            // Details
+            windowDensity: { type: 'range', label: 'Window Density', min: 3, max: 15, step: 1, section: 'Details' },
+            rectWindowChance: { type: 'range', label: 'Rect Windows', min: 0, max: 1, step: 0.1, section: 'Details' },
+
+            // Colors
+            color1: { type: 'color', label: 'Color 1', section: 'Colors' },
+            color2: { type: 'color', label: 'Color 2', section: 'Colors' },
+            color3: { type: 'color', label: 'Color 3', section: 'Colors' },
+            color4: { type: 'color', label: 'Color 4', section: 'Colors' },
+
+            // Canvas
+            canvasWidth: { type: 'range', label: 'Width', min: 400, max: 2000, step: 10, section: 'Canvas' },
+            canvasHeight: { type: 'range', label: 'Height', min: 400, max: 2000, step: 10, section: 'Canvas' },
+        }
     }
 };
 

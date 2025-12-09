@@ -1,5 +1,5 @@
 // fxhash-style token generation and seeding with artwork type
-export type ArtworkType = 'flow' | 'grid' | 'mosaic' | 'rotated' | 'tree' | 'text' | 'lamb';
+export type ArtworkType = 'flow' | 'grid' | 'mosaic' | 'rotated' | 'tree' | 'text' | 'lamb' | 'isocube';
 
 export function generateToken(artworkType?: ArtworkType): string {
     const chars = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";

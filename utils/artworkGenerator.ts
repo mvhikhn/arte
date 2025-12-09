@@ -5,6 +5,7 @@ import { RotatedGridArtworkParams } from "@/components/RotatedGridArtwork";
 import { TreeArtworkParams } from "@/components/TreeArtwork";
 import { TextDesignArtworkParams } from "@/components/TextDesignArtwork";
 import { LambArtworkParams } from "@/components/LambArtwork";
+import { IsoCubeArtworkParams } from "@/components/IsoCubeArtwork";
 import { createSeededRandom } from "@/utils/token";
 import { decodeParamsSync } from "@/utils/serialization";
 
@@ -427,5 +428,55 @@ export const generateLambParamsFromToken = (token: string): LambArtworkParams =>
         canvasHeight: isMobile ? 123 : 370,
         token: token,
         isAnimating: true,
+    };
+};
+
+// Curated color palettes for isocube
+const isoCubePalettes = [
+    ['#CACED1', '#B55D00', '#C48613', '#E8CA25'],
+    ['#FFF000', '#1FFa8c', '#FFBFC4', '#AA93C4'],
+    ['#38263F', '#593D66', '#CEA7D6', '#E4D0E8'],
+    ['#094074', '#1D7874', '#F18F01', '#FF0800'],
+    ['#2D3436', '#636E72', '#DFE6E9', '#74B9FF'],
+    ['#E17055', '#FDCB6E', '#00B894', '#6C5CE7'],
+];
+
+// Generate isocube params from token
+export const generateIsoCubeParamsFromToken = (token: string): IsoCubeArtworkParams => {
+    // Check for encoded params (v2 state tokens)
+    if (token.includes("-v2.")) {
+        const result = decodeParamsSync(token);
+        if (result) {
+            return result.params as IsoCubeArtworkParams;
+        }
+        throw new Error('Invalid state token');
+    }
+
+    const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+    const rand = createSeededRandom(token);
+
+    // Pick a random palette
+    const paletteIndex = Math.floor(rand() * isoCubePalettes.length);
+    const palette = isoCubePalettes[paletteIndex];
+
+    return {
+        color1: palette[0],
+        color2: palette[1],
+        color3: palette[2],
+        color4: palette[3],
+        gridSize: Math.floor(rand() * 4) + 3, // 3-6
+        cubeWidthMin: 0.3 + rand() * 0.2,
+        cubeWidthMax: 0.5 + rand() * 0.2,
+        cubeHeightMin: 0.4 + rand() * 0.3,
+        cubeHeightMax: 1.0 + rand() * 0.8,
+        rotateX: 0.2 + rand() * 0.3,  // ~PI/15 to PI/6
+        rotateY: 0.7 + rand() * 0.4,  // ~PI/4.5 to PI/2.8
+        windowDensity: Math.floor(rand() * 8) + 5, // 5-12
+        rectWindowChance: 0.5 + rand() * 0.4,
+        canvasWidth: isMobile ? 400 : 630,
+        canvasHeight: isMobile ? 500 : 790,
+        token: token,
+        exportWidth: 1600,
+        exportHeight: 2000,
     };
 };
