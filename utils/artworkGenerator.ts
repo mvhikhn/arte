@@ -496,9 +496,9 @@ export const generateIsoCubeParamsFromToken = (token: string): IsoCubeArtworkPar
         grainIntensity: 0.05 + rand() * 0.1, // Subtle grain
         roofDetailChance: 0.6 + rand() * 0.3, // High chance of roof details
 
-        // Camera - Classic Isometric
-        rotateX: 0.615, // asin(1/sqrt(3)) approx 35.26 degrees in radians
-        rotateY: 0.785, // 45 degrees
+        // Camera - Skyline View (low angle)
+        rotateX: 0.1 + rand() * 0.1,  // ~0.1 to 0.2 radians (mostly horizontal view)
+        rotateY: 0.785, // 45 degrees default
 
         // Canvas
         canvasWidth: isMobile ? 400 : 800, // Higher res default
