@@ -50,10 +50,17 @@
   body {
     font-family: 'ABC Diatype', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     font-size: 13px !important;
-    overscroll-behavior: none;
     height: 100%;
-    /* overflow: hidden; Removed to allow scrolling on blog pages */
-    /* Prevent root scroll for snugness */
+    /* Enable native elastic/rubber-band scrolling on iOS/macOS */
+    overscroll-behavior-y: auto;
+    /* Smooth scrolling with snappy feel */
+    scroll-behavior: smooth;
+  }
+
+  /* Elastic scroll container for main content areas */
+  .elastic-scroll {
+    overscroll-behavior-y: auto;
+    -webkit-overflow-scrolling: touch; /* Momentum scrolling on iOS */
   }
 
   /* Force hide cursor during resize */
