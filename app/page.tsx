@@ -30,13 +30,43 @@ export default function Home() {
         '#f0f8ff', // Lamb (added)
     ];
 
+    // Custom GSAP Scramble Hook
     useEffect(() => {
-        if (nameRef.current) {
-            gsap.fromTo(nameRef.current,
-                { y: 20, opacity: 0 },
-                { y: 0, opacity: 1, duration: 1.2, ease: "power3.out" }
-            );
-        }
+        const element = nameRef.current;
+        if (!element) return;
+
+        const targetText = "Mahi Khan";
+        const chars = "!<>-_\\/[]{}—=+*^?#________";
+        const duration = 1.5;
+
+        // Proxy object to tween
+        const scramble = { value: 0 };
+
+        gsap.to(scramble, {
+            value: 1,
+            duration: duration,
+            ease: "power4.out",
+            onUpdate: () => {
+                const progress = scramble.value;
+                const len = targetText.length;
+                const revealed = Math.floor(progress * len);
+
+                let output = "";
+                for (let i = 0; i < len; i++) {
+                    if (i < revealed) {
+                        output += targetText[i];
+                    } else {
+                        output += chars[Math.floor(Math.random() * chars.length)];
+                    }
+                }
+
+                element.innerText = output;
+            },
+            onComplete: () => {
+                element.innerText = targetText;
+            }
+        });
+
     }, []);
 
     useEffect(() => {
