@@ -7,6 +7,8 @@ import Footer from "@/components/Footer";
 import CleanLink from "@/components/CleanLink";
 import { ChevronDown, ChevronUp } from "lucide-react";
 
+import gsap from "gsap";
+
 export default function Home() {
     const [leftPanelWidth, setLeftPanelWidth] = useState(40);
     const [isDragging, setIsDragging] = useState(false);
@@ -27,6 +29,15 @@ export default function Home() {
         '#f8f0ff', // Text
         '#f0f8ff', // Lamb (added)
     ];
+
+    useEffect(() => {
+        if (nameRef.current) {
+            gsap.fromTo(nameRef.current,
+                { y: 20, opacity: 0 },
+                { y: 0, opacity: 1, duration: 1.2, ease: "power3.out" }
+            );
+        }
+    }, []);
 
     useEffect(() => {
         const handleMouseMove = (e: MouseEvent) => {
